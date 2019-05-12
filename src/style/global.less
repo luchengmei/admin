@@ -1,0 +1,104 @@
+.box-card {
+  .box-card-header{
+    min-height: 24px;
+  }
+  .name{
+    color: #367fa9;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  border-radius: 0;
+  .panel-heading {
+    display: flex;
+    text-align: left;
+    width: 100%;
+    border-bottom: 1px solid #eeeff1;
+    padding: 15px;
+    font-weight: bold;
+    img {
+      margin-right: 15px;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+    }
+    .title {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      .name {
+        color: #367fa9;
+        font-size: 18px;
+      }
+    }
+  }
+  .panel-body {
+    color: #3c8dbc;
+    ul {
+      li {
+        border-bottom: 1px solid #eeeff1;
+        padding: 0 15px;
+        max-height: 45px;
+        line-height: 45px;
+        list-style-type: none;
+        display: flex;
+        .left {
+         width: 30px;
+        }
+        .center {
+          overflow: hidden;
+          flex: 1;
+        }
+        .right {
+          overflow: hidden;
+          flex: 3;
+        }
+      }
+    }
+  }
+  .panel-footer {
+    text-align: center;
+    padding: 15px 15px 0 15px;
+  }
+}
+
+.cardContainer {
+  .el-card {
+    margin: 4px;
+    min-width: 24%;
+  }
+  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  .el-switch {
+    float: right;
+    padding-left: 4px;
+  }
+  .el-card__body {
+    color: #3c8dbc;
+  }
+  .body-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+    justify-content: space-between;
+  }
+}
+
+
+//------动画---------
+
+/* 可以设置不同的进入和离开动画 */
+/* 设置持续时间和动画函数 */
+.slide-fade-enter-active {
+  transition: all .5s ease;
+}
+
+.slide-fade-leave-active {
+  transition: all .5s ease;
+}
+
+.slide-fade-enter, .slide-fade-leave-to
+  /* .slide-fade-leave-active for below version 2.1.8 */ {
+  transform: translateX(30%);
+  opacity: 0;
+}
