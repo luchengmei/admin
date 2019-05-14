@@ -43,40 +43,40 @@
         </el-card>
         <br>
         <!--<el-card style="border-radius: 0">-->
-            <!--<div slot="header">-->
-                <!--<span>设备概括</span>-->
-            <!--</div>-->
-            <!--<div class="demo">-->
-                <!--<el-row :gutter="20">-->
-                    <!--<el-col :span="8">-->
-                        <!--<div class="grid-content " style="color: #009688;background:#ffffff;text-align: center">-->
-                            <!--<div style="padding: 10px">-->
-                                <!--<i class="el-icon-loading index-icon" style="color: #009688"></i>-->
-                                <!--正常运行-->
-                                <!--<span style="font-size: 64px;text-align: center">62</span>-->
-                            <!--</div>-->
-                        <!--</div>-->
-                    <!--</el-col>-->
-                    <!--<el-col :span="8">-->
-                        <!--<div class="grid-content " style="color: #d8690b;background:#ffffff;text-align: center">-->
-                            <!--<div style="padding: 10px">-->
-                                <!--<i class="fa fa-bell-o index-icon"    style="color: #d8690b"></i>-->
-                                <!--报警-->
-                                <!--<span style="font-size: 64px;text-align: center">3</span>-->
-                            <!--</div>-->
-                        <!--</div>-->
-                    <!--</el-col>-->
-                    <!--<el-col :span="8">-->
-                        <!--<div class="grid-content " style="color: #607D8B;background:#ffffff;text-align: center">-->
-                            <!--<div style="padding: 10px">-->
-                                <!--<i class="fa fa-chain-broken index-icon" style="color: #607D8B"></i>-->
-                                <!--离线-->
-                                <!--<span style="font-size: 64px;text-align: center">2</span>-->
-                            <!--</div>-->
-                        <!--</div>-->
-                    <!--</el-col>-->
-                <!--</el-row>-->
-            <!--</div>-->
+        <!--<div slot="header">-->
+        <!--<span>设备概括</span>-->
+        <!--</div>-->
+        <!--<div class="demo">-->
+        <!--<el-row :gutter="20">-->
+        <!--<el-col :span="8">-->
+        <!--<div class="grid-content " style="color: #009688;background:#ffffff;text-align: center">-->
+        <!--<div style="padding: 10px">-->
+        <!--<i class="el-icon-loading index-icon" style="color: #009688"></i>-->
+        <!--正常运行-->
+        <!--<span style="font-size: 64px;text-align: center">62</span>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--</el-col>-->
+        <!--<el-col :span="8">-->
+        <!--<div class="grid-content " style="color: #d8690b;background:#ffffff;text-align: center">-->
+        <!--<div style="padding: 10px">-->
+        <!--<i class="fa fa-bell-o index-icon"    style="color: #d8690b"></i>-->
+        <!--报警-->
+        <!--<span style="font-size: 64px;text-align: center">3</span>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--</el-col>-->
+        <!--<el-col :span="8">-->
+        <!--<div class="grid-content " style="color: #607D8B;background:#ffffff;text-align: center">-->
+        <!--<div style="padding: 10px">-->
+        <!--<i class="fa fa-chain-broken index-icon" style="color: #607D8B"></i>-->
+        <!--离线-->
+        <!--<span style="font-size: 64px;text-align: center">2</span>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--</el-col>-->
+        <!--</el-row>-->
+        <!--</div>-->
         <!--</el-card>-->
     </div>
 </template>
@@ -84,17 +84,34 @@
 <script>
     export default {
         data() {
-            return {}
+            return {
+                permissions: JSON.parse(localStorage.getItem('permissions')) || {},
+            }
         },
         methods: {
+            noPermission() {
+                this.$message.error('对不起，您没有访问权限。');
+            },
             toLiftManage() {
-                this.$router.push('/lift_list')
+                if (this.permissions.lift_access === "true") {
+                    this.$router.push('/lift_list')
+                } else {
+                    this.noPermission();
+                }
             },
             toUserCompany() {
-                this.$router.push('/userCompany_list')
+                if (this.permissions.company_access === "true") {
+                    this.$router.push('/userCompany_list')
+                } else {
+                    this.noPermission();
+                }
             },
             toUserManage() {
-                this.$router.push('/user_manage')
+                if (this.permissions.user_access === "true") {
+                    this.$router.push('/user_manage')
+                } else {
+                    this.noPermission();
+                }
             },
             toPersonal() {
                 this.$router.push('/personal')

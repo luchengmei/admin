@@ -3,7 +3,9 @@
         <el-card class="box-card">
             <div slot="header" class="box-card-header">
                 <span class="name">{{ user.name}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="save()">{{addUser?'新增':'提交'}}</el-button>
+                <el-button type="primary" icon="el-icon-check" style="float: right" @click="save()">
+                    {{addUser?'新增':'提交'}}
+                </el-button>
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
@@ -35,7 +37,7 @@
                                 <div class="left"><i class="fa fa-address-book-o"></i></div>
                                 <div class="center">用户类型</div>
                                 <div class="right" v-if="edit">
-                                    <el-select v-model="user.roles" multiple placeholder="请选择" value=""
+                                    <el-select v-model="roles" multiple placeholder="请选择" value=""
                                                style="height: 32px;width: 100%" size="small">
                                         <el-option
                                                 v-for="item in userOptions"
@@ -47,8 +49,8 @@
                                 </div>
                                 <div class="right" v-else="edit">
                                     <span style="margin-right: 15px"
-                                          v-for="(item,index2) in user.roles"
-                                          :key="index2">{{item.name|userTypeFrm}}
+                                          v-for="(item,index2) in roles"
+                                          :key="index2">{{item|userTypeFrm}}
                                     </span>
                                 </div>
                             </li>
@@ -102,12 +104,12 @@
                                 <div class="right" v-else="edit">{{user.username}}</div>
                             </li>
                             <!--<li>-->
-                                <!--<div class="left"><i class="fa fa-lock"></i></div>-->
-                                <!--<div class="center">密码</div>-->
-                                <!--<div class="right" v-if="edit">-->
-                                    <!--<el-input v-model="user.password"></el-input>-->
-                                <!--</div>-->
-                                <!--<div class="right" v-else="edit">{{user.password}}</div>-->
+                            <!--<div class="left"><i class="fa fa-lock"></i></div>-->
+                            <!--<div class="center">密码</div>-->
+                            <!--<div class="right" v-if="edit">-->
+                            <!--<el-input v-model="user.password"></el-input>-->
+                            <!--</div>-->
+                            <!--<div class="right" v-else="edit">{{user.password}}</div>-->
                             <!--</li>-->
                         </ul>
                         <transition name="slide-fade">
@@ -204,6 +206,7 @@
                     "company_id": null,
                     "roles": ['ROLE_CLIENT']
                 },
+                roles:[],
                 activeName: 'index',
                 userType: [],
                 userOptions: [{
@@ -380,7 +383,8 @@
             findUser() {
                 this.$req.post('/user/fetch', {"id": this.$route.query.id}).then((result) => {
                     console.log(result);
-                    this.user = result;
+                    this.user = result.user;
+                    this.roles = result.roles;
                     if (this.user.company_id === null) return;
                     this.$req.post('/dm/company/fetch', {"id": this.user.company_id}).then((result) => {
                         this.company_name = result.name
@@ -388,7 +392,11 @@
                 })
             },
             updateUser() {
-                this.$req.post('/user/update', this.user).then((result) => {
+                let params = {
+                    user: this.user,
+                    roles: this.roles,
+                };
+                this.$req.post('/user/update', params).then((result) => {
                     if (result.Code === 7000) {
                         this.hasSave = true;
                         this.$router.go(-1);

@@ -850,15 +850,6 @@
                                         </h4>
                                         <h4 v-else>年审结果：{{item.status|statusFrm}}</h4>
                                         <div style="display: flex">
-                                            <p v-if="item.edit">计划年审时间：{{typeof(item.date)}}
-                                                <el-date-picker
-                                                        value-format="yyyy-MM-dd HH:mm:ss"
-                                                        v-model="item.date"
-                                                        type="datetime"
-                                                        placeholder="计划年审时间">
-                                                </el-date-picker>
-                                            </p>
-                                            <p v-else>计划年审时间：{{item.date|dateFrm}}</p>
                                             <p v-if="item.edit">实际年审时间：{{typeof (item.arrival_time)}}
                                                 <el-date-picker
                                                         value-format="yyyy-MM-dd HH:mm:ss"
@@ -868,6 +859,15 @@
                                                 </el-date-picker>
                                             </p>
                                             <p v-else>实际年审时间：{{item.arrival_time|dateFrm}}</p>
+                                            <p v-if="item.edit">计划年审时间：{{typeof(item.date)}}
+                                                <el-date-picker
+                                                        value-format="yyyy-MM-dd"
+                                                        v-model="item.date"
+                                                        type="date"
+                                                        placeholder="计划年审时间">
+                                                </el-date-picker>
+                                            </p>
+                                            <p v-else>计划年审时间：{{item.date|dateFrm}}</p>
                                         </div>
                                     </el-card>
                                 </el-timeline-item>
@@ -877,17 +877,19 @@
                             <span>
                                 <el-date-picker
                                         value-format="yyyy-MM-dd HH:mm:ss"
-                                        v-model="plan.date"
+                                        v-model="plan.arrival_time"
                                         type="datetime"
+                                        placeholder="实际年审时间">
+                                </el-date-picker>
+                            </span>
+                            <span>
+                                <el-date-picker
+                                        value-format="yyyy-MM-dd"
+                                        v-model="plan.date"
+                                        type="date"
                                         placeholder="计划年审时间">
                                 </el-date-picker>
                             </span>
-                            <span><el-date-picker
-                                    value-format="yyyy-MM-dd HH:mm:ss"
-                                    v-model="plan.arrival_time"
-                                    type="datetime"
-                                    placeholder="实际年审时间">
-                                                </el-date-picker></span>
                             <span><el-select v-model="plan.status" placeholder="年审结果" value="">
                                                 <el-option
                                                         v-for="item in result"
@@ -1411,9 +1413,9 @@
                 this.companies_and_types[index1].company_id = item.id;
                 this.companies_and_types[index1].company_type_id = company_type_id;
             },
-            setCompanyName1(item,index2) {
-                this.lift.companies[index2].company_id=item.id;
-                this.lift.companies[index2].company_name=item.name;
+            setCompanyName1(item, index2) {
+                this.lift.companies[index2].company_id = item.id;
+                this.lift.companies[index2].company_name = item.name;
             },
             onchangeCity(p, c, s) {
                 console.log(p, c, s)

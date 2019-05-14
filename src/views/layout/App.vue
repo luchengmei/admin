@@ -11,10 +11,9 @@
         <i class="el-icon-menu"></i>
       </span>
             <div class="right">
-        <span class="header-btn" @click="screenfullToggle">
+                <span class="header-btn" @click="screenfullToggle">
             <i class="fa fa-arrows-alt"></i>
         </span>
-
                 <el-dropdown>
           <span class="header-btn">
                <i class="el-icon-setting"></i>

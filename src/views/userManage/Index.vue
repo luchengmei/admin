@@ -68,7 +68,7 @@
                     prop="roles"
                     label="用户类型">
                 <template slot-scope="scope">
-                    <span v-for="item in scope.row.roles" style="margin-right: 15px">{{item.name|userTypeFrm}}</span>
+                    <span v-for="item in scope.row.roles" style="margin-right: 10px">{{item|userTypeFrm}}</span>
                 </template>
             </el-table-column>
             <el-table-column
@@ -152,6 +152,7 @@
                 if (val === 'ROLE_MAINTAINER') return '维保';
                 if (val === 'ROLE_INSTALLER_ADMIN') return '安装人员管理员';
                 if (val === 'ROLE_INSTALLER') return '安装人员';
+                if (val === 'ROLE_SUPER_ADMIN') return '超级管理员';
                 return val;
             }
         },
