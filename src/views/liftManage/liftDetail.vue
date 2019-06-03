@@ -125,8 +125,10 @@
                                                 trigger="click">
                                             <el-card class="box-card" shadow="never">
                                                 <div slot="header" style="display: flex;align-items: center">
-                                                    <el-input placeholder="请输入名称">
-                                                        <el-button slot="append" icon="el-icon-search"></el-button>
+                                                    <el-input placeholder="请输入名称" clearable v-model="popover.param"
+                                                              @clear="cancelSearch">
+                                                        <el-button slot="append" icon="el-icon-search"
+                                                                   @click="searchCompany"></el-button>
                                                     </el-input>
                                                     <el-pagination
                                                             :page-size.sync="popover.pageSize"
@@ -832,9 +834,12 @@
                             <transition-group name="slide-fade">
                                 <el-timeline-item v-for="(item,index) in liftPlan" :key="index"
                                                   :type="item.status|typeFrm"
-                                                  :timestamp="item.date|dateFrm"
+                                                  :timestamp="item.arrival_time|dateFrm"
                                                   placement="top">
                                     <el-card style="color: #3C8DBC">
+                                        <i class="el-icon-delete"
+                                           style="float: right;font-size: 20px;cursor: pointer;margin-left: 10px"
+                                           @click="deletePlan(item,index)"></i>
                                         <i :class="item.edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"
                                            style="float: right;font-size: 20px;cursor: pointer;"
                                            @click="toggleEditPlan(item)"></i>
@@ -850,7 +855,7 @@
                                         </h4>
                                         <h4 v-else>年审结果：{{item.status|statusFrm}}</h4>
                                         <div style="display: flex">
-                                            <p v-if="item.edit">实际年审时间：{{typeof (item.arrival_time)}}
+                                            <p v-if="item.edit">实际年审时间：
                                                 <el-date-picker
                                                         value-format="yyyy-MM-dd HH:mm:ss"
                                                         v-model="item.arrival_time"
@@ -859,7 +864,7 @@
                                                 </el-date-picker>
                                             </p>
                                             <p v-else>实际年审时间：{{item.arrival_time|dateFrm}}</p>
-                                            <p v-if="item.edit">计划年审时间：{{typeof(item.date)}}
+                                            <p v-if="item.edit">计划年审时间：
                                                 <el-date-picker
                                                         value-format="yyyy-MM-dd"
                                                         v-model="item.date"
@@ -1030,10 +1035,12 @@
                     label: '一年（365天）'
                 }],
                 popover: {
+                    "url": '/dm/company/all',
                     "pageSize": 5,
                     "total": 25,
                     "currentPage": 1,
-                    "data": []
+                    "data": [],
+                    "param": ''
                 },
                 //about alarm push
                 APPpush: true,
@@ -1079,8 +1086,8 @@
             userTypeFrm(val) {
                 if (val === 'ROLE_ADMIN') return '管理员';
                 if (val === 'ROLE_DEVELOPER') return '开发人员';
-                if (val === 'ROLE_CLIENT_ADMIN') return '客户管理员';
-                if (val === 'ROLE_CLIENT') return '客户';
+                if (val === 'ROLE_CLIENT_ADMIN') return '物业管理员';
+                if (val === 'ROLE_CLIENT') return '物业';
                 if (val === 'ROLE_MAINTAINER_ADMIN') return '维保管理员';
                 if (val === 'ROLE_MAINTAINER') return '维保';
                 if (val === 'ROLE_INSTALLER_ADMIN') return '安装人员管理员';
@@ -1146,6 +1153,7 @@
         computed: {},
         methods: {
             goBack() {
+                this.hasSave = true;
                 this.$router.go(-1);
             },
             hello() {
@@ -1291,6 +1299,24 @@
             //___________________alarmNotice________________end
 
             //____________________liftPlan___________________start
+            deletePlan(item, index) {
+                //console.log(item);
+                this.$confirm('删除此条年审记录, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$req.post('/dm/lift_plan/delete', item.id).then((result) => {
+                        //console.log(result);
+                        this.liftPlan.splice(index, 1);
+                        this.$message({
+                            type: 'success',
+                            message: '删除成功'
+                        })
+                    });
+                }).catch(() => {
+                });
+            },
             updatePlan(item) {
                 let params = {};
                 params = item;
@@ -1343,7 +1369,7 @@
                         "page": 1,
                         "property": "id",
                         "size": 10,
-                        "sort": "DESC"
+                        "sort": "ASC"
                     }
                 };
                 this.$req.post('/dm/lift_plan/list/lift_id', params).then((result) => {
@@ -1385,7 +1411,16 @@
 
 
             //___________________baseInfo______________________start
-
+            searchCompany() {
+                this.popover.url = '/dm/company/fuzzy/search';
+                this.popover.currentPage = 1;
+                this.changePage();
+            },
+            cancelSearch() {
+                this.popover.url = '/dm/company/fuzzy/search';
+                this.popover.currentPage = 1;
+                this.changePage();
+            },
             getCompanyType() {
                 this.$req.post('/dm/company_type/all/enabled').then((result) => {
                     console.log(result);
@@ -1421,17 +1456,34 @@
                 console.log(p, c, s)
             },
             changePage() {
-                let params = {
-                    "page": this.popover.currentPage,
-                    "property": "id",
-                    "size": this.popover.pageSize,
-                    "sort": "DESC"
-                };
-                this.$req.post('/dm/company/all', params).then((result) => {
-                    console.log(result);
-                    this.popover.total = result.total_elements;
-                    this.popover.data = [...result.content]
-                })
+                if (this.popover.url === '/dm/company/all') {
+                    let params = {
+                        "page": this.popover.currentPage,
+                        "property": "id",
+                        "size": this.popover.pageSize,
+                        "sort": "DESC"
+                    };
+                    this.$req.post(this.popover.url, params).then((result) => {
+                        console.log(result);
+                        this.popover.total = result.total_elements;
+                        this.popover.data = [...result.content]
+                    })
+                } else if (this.popover.url === '/dm/company/fuzzy/search') {
+                    let params = {
+                        "page_proto": {
+                            "page": this.popover.currentPage,
+                            "property": "id",
+                            "size": this.popover.pageSize,
+                            "sort": "DESC"
+                        },
+                        "value": this.popover.param
+                    };
+                    this.$req.post(this.popover.url, params).then((result) => {
+                        console.log(result);
+                        this.popover.total = result.total_elements;
+                        this.popover.data = [...result.content]
+                    })
+                }
             },
             addLift() {
                 let params = {
@@ -1474,6 +1526,12 @@
                     'id': id
                 }).then((result) => {
                     console.log(result);
+                    result.companies.forEach((company) => {
+                        if (!company.id) {
+                            company.company_id = '';
+                            company.company_name = '';
+                        }
+                    });
                     this.lift = {...result};
                 }).then(() => {
                     if (cb) {

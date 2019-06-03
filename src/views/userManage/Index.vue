@@ -146,8 +146,8 @@
             userTypeFrm(val) {
                 if (val === 'ROLE_ADMIN') return '管理员';
                 if (val === 'ROLE_DEVELOPER') return '开发人员';
-                if (val === 'ROLE_CLIENT_ADMIN') return '客户管理员';
-                if (val === 'ROLE_CLIENT') return '客户';
+                if (val === 'ROLE_CLIENT_ADMIN') return '物业管理员';
+                if (val === 'ROLE_CLIENT') return '物业';
                 if (val === 'ROLE_MAINTAINER_ADMIN') return '维保管理员';
                 if (val === 'ROLE_MAINTAINER') return '维保';
                 if (val === 'ROLE_INSTALLER_ADMIN') return '安装人员管理员';

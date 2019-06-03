@@ -9,11 +9,11 @@
             <div class="companyType-list">
                 <span :class="current ==i.id?'active':''" v-for="i in roles"
                       @click="changeCurrent(i.id)">{{i.name|rolesFormat}}
-                <!--<span style="padding-left: 20px" v-if="current ==i.id">-->
+                    <!--<span style="padding-left: 20px" v-if="current ==i.id">-->
                     <!--<i class="el-icon-edit"></i>-->
                     <!--<i class="el-icon-remove-outline"></i>-->
                     <!--<i class="fa fa-files-o"></i>-->
-                <!--</span>-->
+                    <!--</span>-->
                 </span>
             </div>
         </div>
@@ -27,11 +27,15 @@
                     <div class="platform">
                         <div class="platform-title">
                             <span>设备管理平台</span>
-                            <el-checkbox v-if="privilege[0]" v-model="privilege[0].access_value">允许访问</el-checkbox>
+                            <el-checkbox v-if="privilege[0]" v-model="privilege[0].access_value"
+                                         @change="onchange(privilege[0].access_value,[1,28])">允许访问
+                            </el-checkbox>
                         </div>
                         <div class="platform-content">
                             <span>单位管理板块</span>
-                            <el-checkbox v-if="privilege[1]" v-model="privilege[1].access_value">允许访问</el-checkbox>
+                            <el-checkbox v-if="privilege[1]" v-model="privilege[1].access_value"
+                                         @change="onchange(privilege[1].access_value,[2,8])">允许访问
+                            </el-checkbox>
                         </div>
                         <div class="content-list">
                             <el-checkbox v-if="privilege[2]" v-model="privilege[2].access_value">查看单位</el-checkbox>
@@ -44,7 +48,9 @@
                         </div>
                         <div class="platform-content">
                             <span>用户管理板块</span>
-                            <el-checkbox v-if="privilege[9]" v-model="privilege[9].access_value">允许访问</el-checkbox>
+                            <el-checkbox v-if="privilege[9]" v-model="privilege[9].access_value"
+                                         @change="onchange(privilege[9].access_value,[10,16])">允许访问
+                            </el-checkbox>
                         </div>
                         <div class="content-list">
                             <el-checkbox v-if="privilege[10]" v-model="privilege[10].access_value">查看用户</el-checkbox>
@@ -57,7 +63,9 @@
                         </div>
                         <div class="platform-content">
                             <span>电梯管理板块</span>
-                            <el-checkbox v-if="privilege[17]" v-model="privilege[17].access_value">允许访问</el-checkbox>
+                            <el-checkbox v-if="privilege[17]" v-model="privilege[17].access_value"
+                                         @change="onchange(privilege[17].access_value,[18,25])">允许访问
+                            </el-checkbox>
                         </div>
                         <div class="content-list">
                             <el-checkbox v-if="privilege[18]" v-model="privilege[18].access_value">查看电梯</el-checkbox>
@@ -71,7 +79,9 @@
                         </div>
                         <div class="platform-content">
                             <span>采集仪管理板块</span>
-                            <el-checkbox v-if="privilege[26]" v-model="privilege[26].access_value">允许访问</el-checkbox>
+                            <el-checkbox v-if="privilege[26]" v-model="privilege[26].access_value"
+                                         @change="onchange(privilege[26].access_value,[27,28])">允许访问
+                            </el-checkbox>
                         </div>
                         <div class="content-list">
                             <el-checkbox v-if="privilege[27]" v-model="privilege[27].access_value">禁用采集仪</el-checkbox>
@@ -81,7 +91,9 @@
                     <div class="platform">
                         <div class="platform-title">
                             <span>安装APP</span>
-                            <el-checkbox v-if="privilege[29]" v-model="privilege[29].access_value">允许访问</el-checkbox>
+                            <el-checkbox v-if="privilege[29]" v-model="privilege[29].access_value"
+                                         @change="onchange(privilege[29].access_value,[30,35])">允许访问
+                            </el-checkbox>
                         </div>
                         <div class="content-list">
                             <el-checkbox v-if="privilege[30]" v-model="privilege[30].access_value">绑定电梯</el-checkbox>
@@ -101,7 +113,9 @@
                     <div class="platform">
                         <div class="platform-title">
                             <span>客户APP和PC</span>
-                            <el-checkbox v-if="privilege[37]" v-model="privilege[37].access_value">允许访问</el-checkbox>
+                            <el-checkbox v-if="privilege[37]" v-model="privilege[37].access_value"
+                                         @change="onchange(privilege[37].access_value,[38,40])">允许访问
+                            </el-checkbox>
                         </div>
                         <div class="content-list">
                             <el-checkbox v-if="privilege[38]" v-model="privilege[38].access_value">打开视频</el-checkbox>
@@ -244,8 +258,8 @@
             rolesFormat(el) {
                 if (el === "ROLE_ADMIN") return "管理员";
                 if (el === "ROLE_DEVELOPER") return "开发者";
-                if (el === "ROLE_CLIENT_ADMIN") return "客户管理员";
-                if (el === "ROLE_CLIENT") return "客户";
+                if (el === "ROLE_CLIENT_ADMIN") return "物业管理员";
+                if (el === "ROLE_CLIENT") return "物业";
                 if (el === "ROLE_MAINTAINER_ADMIN") return "维保管理员";
                 if (el === "ROLE_MAINTAINER") return "维保人员";
                 if (el === "ROLE_INSTALLER_ADMIN") return "安装管理员";
@@ -256,6 +270,16 @@
         },
         watch: {},
         methods: {
+            onchange(val, arr) {
+                //console.log(val,arr);
+                let Arr = [];
+                for (let i = arr[0]; i <= arr[1]; i++) {
+                    Arr.push(i)
+                }
+                Arr.forEach((item) => {
+                    this.privilege[item].access_value = val;
+                });
+            },
             router_user(id) {
                 this.$router.push({path: '/user_detail', query: {id: id}})
             },

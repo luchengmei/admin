@@ -36,6 +36,11 @@
                 ref="table"
                 style="width: 100%">
             <el-table-column
+                    width=""
+                    prop="id"
+                    label="电梯ID">
+            </el-table-column>
+            <el-table-column
                     width="200"
                     prop="name"
                     label="电梯名称">
@@ -49,6 +54,22 @@
                     width="400px"
                     prop="address"
                     label="地址">
+            </el-table-column>
+            <el-table-column
+                    width="200px"
+                    prop="companies"
+                    label="物业单位">
+                <template slot-scope="scope">
+                    {{scope.row.companies[0]?scope.row.companies[0].company_name:''}}
+                </template>
+            </el-table-column>
+            <el-table-column
+                    width="200px"
+                    prop="companies"
+                    label="维保单位">
+                <template slot-scope="scope">
+                    {{scope.row.companies[1]?scope.row.companies[1].company_name:''}}
+                </template>
             </el-table-column>
             <el-table-column
                     width="100"
@@ -82,6 +103,7 @@
             <el-table-column
                     width="100"
                     prop="manufacture_date"
+                    sortable
                     label="出厂时间">
             </el-table-column>
             <el-table-column
@@ -204,6 +226,7 @@
                 }
             }
         },
+        computed: {},
         methods: {
             onValChange(data) {
                 //console.log(data);

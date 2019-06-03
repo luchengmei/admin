@@ -162,7 +162,7 @@
                                background>
                 </el-pagination>
                 <el-button @click="dialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+                <el-button type="primary" @click="dialog_confirm">确 定</el-button>
             </span>
         </el-dialog>
     </div>
@@ -206,7 +206,7 @@
                     "company_id": null,
                     "roles": ['ROLE_CLIENT']
                 },
-                roles:[],
+                roles: [],
                 activeName: 'index',
                 userType: [],
                 userOptions: [{
@@ -253,8 +253,8 @@
             userTypeFrm(val) {
                 if (val === 'ROLE_ADMIN') return '管理员';
                 if (val === 'ROLE_DEVELOPER') return '开发人员';
-                if (val === 'ROLE_CLIENT_ADMIN') return '客户管理员';
-                if (val === 'ROLE_CLIENT') return '客户';
+                if (val === 'ROLE_CLIENT_ADMIN') return '物业管理员';
+                if (val === 'ROLE_CLIENT') return '物业';
                 if (val === 'ROLE_MAINTAINER_ADMIN') return '维保管理员';
                 if (val === 'ROLE_MAINTAINER') return '维保';
                 if (val === 'ROLE_INSTALLER_ADMIN') return '安装人员管理员';
@@ -295,7 +295,27 @@
             },
             showDialog() {
                 this.dialogVisible = true;
+                this.data_select = [];
                 this.changePage();
+            },
+            dialog_confirm() {
+                this.dialogVisible = false;
+                this.addLiftsToUser();
+            },
+            addLiftsToUser() {
+                let params = {
+                    "lifts_ids": this.data_select,
+                    "user_id": Number(this.$route.query.id)
+                };
+                console.log(params);
+                this.$req.post('/dm/lifts_users/lifts/add', params).then((result) => {
+                    if (result.Code === 7000) {
+                        this.$message({
+                            type: 'success',
+                            message: '添加成功'
+                        });
+                    }
+                })
             },
             setCompanyName(item) {
                 this.company_name = item.name;

@@ -56,11 +56,11 @@
                     params.page = _this.current;
                 }
                 _this.$req.post(_this.api, params).then((result) => {
-                    //console.log('data', result);
-                    _this.total = result.total_elements;
+                    console.log('data', result);
+                    _this.total = result.total_elements || result.totalElements;
                     _this.currentDataLength = result.content.length;
                     _this.$emit('val-change', result.content);
-                }).finally(()=>{
+                }).finally(() => {
                 })
             },
             change: function (page) {
@@ -87,7 +87,7 @@
         mounted() {
             console.log('mounted');
             //this.isMounted = true;
-                this.paginate();
+            this.paginate();
         },
         activated() {
             console.log('activated');

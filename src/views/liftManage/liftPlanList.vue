@@ -1,7 +1,7 @@
 <template>
     <div class="user-list">
         <ToolBar>
-            <el-button type="primary" icon="el-icon-plus" size="small">添加</el-button>
+            <!--<el-button type="primary" icon="el-icon-plus" size="small">添加</el-button>-->
             <div style="float: right">
                 <el-select @change="listByStatus" @clear="initList" style="width: 140px" v-model="params.status"
                            placeholder="结果" size="small"
@@ -36,6 +36,7 @@
                     label="电梯名称">
             </el-table-column>
             <el-table-column
+                    sortable
                     prop="date"
                     label="预计时间">
                 <template slot-scope="scope">
@@ -44,6 +45,7 @@
                 </template>
             </el-table-column>
             <el-table-column
+                    sortable
                     prop="arrival_time"
                     label="实际时间">
             </el-table-column>
