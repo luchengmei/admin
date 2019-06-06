@@ -1,7 +1,7 @@
 <template>
     <div class="user-list">
         <ToolBar>
-            <el-button type="primary" icon="el-icon-plus" size="small" @click="editUser()" v-show="!treeModel">添加
+            <el-button type="primary" icon="el-icon-plus" size="small" @click="addUser()" v-show="!treeModel">添加
             </el-button>
             <el-button type="primary" size="small" @click="changeModel">{{treeModel?'列表':'树形结构'}}</el-button>
             <div v-show="!treeModel" style="float: right">
@@ -106,6 +106,7 @@
 
     export default {
         data() {
+            const permissions = JSON.parse(localStorage.getItem('permissions'));
             const data = [{
                 id: 1,
                 label: '管理单位',
@@ -152,6 +153,7 @@
                 }]
             }];
             return {
+                permissions: permissions,
                 data: JSON.parse(JSON.stringify(data)),
                 treeModel: false,
                 paginate_api: '/dm/company/all',
@@ -208,7 +210,24 @@
                     }
                 }, '操作');
             },
-            editUser(id = null) {
+            editUser(id) {
+                if(this.permissions.company_fetch!=='true'){
+                    this.$message({
+                        type:'error',
+                        message:'对不起，您没有权限进行此操作。'
+                    });
+                    return false;
+                }
+                this.$router.push({path: '/userCompany_detail', query: {id: id}})
+            },
+            addUser(id = null) {
+                if(this.permissions.company_add!=='true'){
+                    this.$message({
+                        type:'error',
+                        message:'对不起，您没有权限进行此操作。'
+                    });
+                    return false;
+                }
                 this.$router.push({path: '/userCompany_detail', query: {id: id}})
             },
             deleteUser(id) {

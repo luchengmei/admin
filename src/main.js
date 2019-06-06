@@ -28,10 +28,10 @@ router.beforeEach((to, from, next) => {
         let isOvertime = (new Date - new Date(localStorage.getItem("tokenSetTime"))) >= 259200000;//判断token是否过期
         if (isOvertime) {
             localStorage.removeItem(Config.tokenKey);//移除过期token
-            Message({
-                message: '身份验证失败，请重新登录',
-                type: 'error'
-            });
+            // Message({
+            //     message: '身份验证失败，请重新登录',
+            //     type: 'error'
+            // });
             next({path: '/login'});
         } else if (new Date - new Date(localStorage.getItem("tokenSetTime")) > 216000000) {//判断token是否即将过期
             req.post('/authentication/refresh').then((result) => {//重置token有效时间

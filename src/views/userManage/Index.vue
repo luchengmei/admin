@@ -1,7 +1,7 @@
 <template>
     <div class="user-list">
         <ToolBar>
-            <el-button type="primary" icon="el-icon-plus" size="small" @click="editUser()">添加</el-button>
+            <el-button type="primary" icon="el-icon-plus" size="small" @click="addUser()">添加</el-button>
             <el-button type="primary" @click="multipleHandle">批量禁用/允许</el-button>
             <el-button type="danger" icon="el-icon-delete" @click="multipleDelete">批量删除</el-button>
             <div style="float: right">
@@ -113,7 +113,9 @@
 
     export default {
         data() {
+            const permissions = JSON.parse(localStorage.getItem('permissions'));
             return {
+                permissions: permissions,
                 paginate_api: '/user/list/is_alive',
                 paginate_params: {
                     "is_alive": true,
@@ -185,7 +187,7 @@
                     return false;
                 } else {
                     let arr = [];
-                    this.selectData.forEach((item)=>{
+                    this.selectData.forEach((item) => {
                         arr.push(item.cellphone)
                     });
                     this.deleteUser(arr);
@@ -207,6 +209,13 @@
                 }
             },
             deleteUser(arr) {
+                if (this.permissions.user_delete !== 'true') {
+                    this.$message({
+                        type: 'error',
+                        message: '对不起，您没有权限进行此操作。'
+                    });
+                    return false;
+                }
                 this.$confirm("此操作将删除所选用户，是否继续？", "提示", {
                     type: "warning",
                     confirmButtonText: '确定',
@@ -215,10 +224,10 @@
                     this.$req.post('/authentication/batch_remove', arr).then((result) => {
                         if (result.Code === 7000) {
                             arr.forEach((item) => {//Find the item in userData and also in arr, then delete it
-                                let index = this.usersData.findIndex((val)=>{
+                                let index = this.usersData.findIndex((val) => {
                                     return val.cellphone == item;
                                 });
-                                this.usersData.splice(index,1)
+                                this.usersData.splice(index, 1)
                             });
                             this.$message({
                                 message: '删除成功',
@@ -230,6 +239,13 @@
                 })
             },
             toggleEnabled(data) {
+                if (this.permissions.user_disabled !== 'true') {
+                    this.$message({
+                        type: 'error',
+                        message: '对不起，您没有权限进行此操作。'
+                    });
+                    return false;
+                }
                 if (data.cellphone === null) {
                     this.$message({
                         message: '此用户没有录入手机号',
@@ -270,10 +286,34 @@
                     }
                 }, '操作');
             },
-            editUser(id = null) {
+            addUser(id = null) {
+                if (this.permissions.user_add !== 'true') {
+                    this.$message({
+                        type: 'error',
+                        message: '对不起，您没有权限进行此操作。'
+                    });
+                    return false;
+                }
+                this.$router.push({path: '/user_detail', query: {id: id}})
+            },
+            editUser(id) {
+                if (this.permissions.user_fetch !== 'true') {
+                    this.$message({
+                        type: 'error',
+                        message: '对不起，您没有权限进行此操作。'
+                    });
+                    return false;
+                }
                 this.$router.push({path: '/user_detail', query: {id: id}})
             },
             resetting(row) {
+                if (this.permissions.user_reset_password !== 'true') {
+                    this.$message({
+                        type: 'error',
+                        message: '对不起，您没有权限进行此操作。'
+                    });
+                    return false;
+                }
                 this.$confirm('此操作将重置密码, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',

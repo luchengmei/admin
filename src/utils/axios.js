@@ -72,10 +72,10 @@ export default {
             }).catch(err => {
                 reject(err);
                 console.log('request_error',err);
-                Message({
-                    message: '请求出错',
-                    type: 'error'
-                });
+                // Message({
+                //     message: '请求出错',
+                //     type: 'error'
+                // });
             }).finally()
         })
     }

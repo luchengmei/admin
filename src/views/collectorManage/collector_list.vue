@@ -1,7 +1,7 @@
 <template>
     <div class="user-list">
         <ToolBar>
-            <el-button type="primary" icon="el-icon-plus" size="small" @click="editUser()">添加</el-button>
+            <el-button type="primary" icon="el-icon-plus" size="small" @click="addUser()">添加</el-button>
             <div style="float: right">
                 <el-select style="width: 140px" v-model="params.status" placeholder="是否绑定电梯" size="small" clearable>
                     <el-option
@@ -109,7 +109,10 @@
                     }
                 }, '操作');
             },
-            editUser(id=null) {
+            editUser(id) {
+                this.$router.push({path: '/collector_detail', query: {id: id}})
+            },
+            addUser(id=null) {
                 this.$router.push({path: '/collector_detail', query: {id: id}})
             },
             changeUser(data) {

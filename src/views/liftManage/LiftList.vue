@@ -1,7 +1,7 @@
 <template>
     <div class="user-list">
         <ToolBar>
-            <el-button type="primary" icon="el-icon-plus" size="small" @click="editLift()">添加</el-button>
+            <el-button type="primary" icon="el-icon-plus" size="small" @click="addLift()">添加</el-button>
             <div style="float: right">
                 <el-select v-model="params.singleField" placeholder="功能" size="small" @change="onSingleFieldChange"
                            @clear="initList"
@@ -140,7 +140,9 @@
         activated() {
         },
         data() {
+            const permissions = JSON.parse(localStorage.getItem('permissions'));
             return {
+                permissions: permissions,
                 companyType: [],
                 usersData: [],
                 list_url: '/dm/lift/list/is_existed',
@@ -296,6 +298,13 @@
                 }
             },
             removeLiftById(row) {
+                if (this.permissions.lift_delete !== 'true') {
+                    this.$message({
+                        type: 'error',
+                        message: '对不起，您没有权限进行此操作。'
+                    });
+                    return false;
+                }
                 this.$req.post('/dm/lift/remove', {"id": row.id}).then((result) => {
                     if (result.Code === 7000) {
                         let index = this.usersData.findIndex((val) => {
@@ -345,14 +354,25 @@
             setting(id) {
                 this.$router.push('/alarm_setting')
             },
-            editLift(id = null) {
+            editLift(id) {
+                if (this.permissions.lift_fetch !== 'true') {
+                    this.$message({
+                        type: 'error',
+                        message: '对不起，您没有权限进行此操作。'
+                    });
+                    return false;
+                }
                 this.$router.push({path: '/lift_detail', query: {lift_id: id}})
             },
-            deleteUser(id) {
-                this.$message({
-                    message: '这里请求api删除或者恢复用户之后刷新分页组件，列表自动更新',
-                    type: 'success'
-                });
+            addLift(id = null) {
+                if (this.permissions.lift_add !== 'true') {
+                    this.$message({
+                        type: 'error',
+                        message: '对不起，您没有权限进行此操作。'
+                    });
+                    return false;
+                }
+                this.$router.push({path: '/lift_detail', query: {lift_id: id}})
             }
         },
         components: {

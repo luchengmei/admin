@@ -109,7 +109,7 @@
                     'password': APP.password,
                     'username': APP.username
                 }).then((result) => {
-                    localStorage.setItem(APP.$Config.tokenKey, result);
+                        localStorage.setItem(APP.$Config.tokenKey, result);
                     localStorage.setItem('tokenSetTime', new Date);
                     this.$req.post('/authentication/me').then((result) => {//find current user
                         console.log(result);
