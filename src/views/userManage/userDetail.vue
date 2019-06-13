@@ -132,6 +132,11 @@
                             :data="tableData"
                             style="width: 100%;margin-top: 15px;color: #3C8DBC;font-size: 14px">
                         <el-table-column
+                                width="80"
+                                prop="lift.id"
+                                label="ID">
+                        </el-table-column>
+                        <el-table-column
                                 prop="lift.name"
                                 label="电梯名称">
                         </el-table-column>
