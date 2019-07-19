@@ -6,7 +6,7 @@ import Config from '../config/'
 
 let service = axios.create({
     // baseURL: 'http://47.75.5.104:8080',
-    baseURL: process.env.NODE_ENV == 'development' ? 'http://47.75.5.104:8080' : 'https://admin.msddtsw.com',
+    baseURL: process.env.NODE_ENV == 'development' ? 'http://47.75.5.104:8080' : 'https://47.107.109.211',
     timeout: 20000,
 });
 //添加请求拦截器
