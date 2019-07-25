@@ -3,7 +3,7 @@
         <el-card class="box-card">
             <div slot="header" class="box-card-header">
                 <span class="name">{{ device.name}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="save()">
+                <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateDevice()">
                     {{this.addNew?'新增':'提交'}}
                 </el-button>
             </div>
@@ -227,27 +227,6 @@
                 //     })
                 // })
             },
-            addDevice() {
-                let params = this.device;
-                this.$req.post('/dm/device/add', params).then((result) => {
-                    this.hasSave = true;
-                    this.$router.go(-1);
-                    this.$message({
-                        "type": "success",
-                        "message": '新增成功'
-                    })
-                })
-            },
-            updateDevice(){
-                    this.$req.post('/dm/device/update',this.device).then((result)=>{
-                        this.hasSave = true;
-                        this.$router.go(-1);
-                        this.$message({
-                            "type":'success',
-                            "message":'更新成功'
-                        })
-                    })
-            },
             deviceBindLift() {
                 if (!this.this.device.name) return false;
                 let params = {
@@ -262,41 +241,47 @@
                     })
                 })
             },
-            gteDeviceById() {
-                this.$req.post('/dm/device/fetch', this.$route.query.id).then((result) => {
-                    console.log(result);
-                    this.device = result;
+            gteDeviceById(id) {
+                this.$api_v3.post('/Devices/read',{"id":id}).then((res)=>{
+                    console.log(res);
+                    if(res.code===0){
+                        this.device = res.data;
+                    }
+                })
+            },
+            addOrUpdateDevice(){
+                let params = this.device;
+                this.$api_v3.post('Devices/save',params).then((res)=>{
+                    console.log(res);
+                    if(res.code===0){
+                        this.$message.success('操作成功')
+                    }else {
+                        this.$message.error('操作失败')
+                    }
                 })
             },
             toggleEdit() {
                 this.edit = !this.edit;
-            },
-            save() {
-                if (this.addNew === true) {
-                    this.addDevice()
-                } else {
-                    this.updateDevice()
-                }
-            },
-        },
-        beforeRouteLeave(to, from, next) {
-            if (this.hasSave === false) {
-                next(false);
-                this.$confirm('内容未保存, 是否继续退出?', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    next();
-                }).catch(() => {
-                });
-            } else {
-                next()
             }
         },
+        // beforeRouteLeave(to, from, next) {
+        //     if (this.hasSave === false) {
+        //         next(false);
+        //         this.$confirm('内容未保存, 是否继续退出?', '提示', {
+        //             confirmButtonText: '确定',
+        //             cancelButtonText: '取消',
+        //             type: 'warning'
+        //         }).then(() => {
+        //             next();
+        //         }).catch(() => {
+        //         });
+        //     } else {
+        //         next()
+        //     }
+        // },
         mounted() {
             if (this.$route.query.id !== null) {
-                this.gteDeviceById();
+                this.gteDeviceById(this.$route.query.id);
             } else {
                 this.edit = true;
                 this.addNew = true;

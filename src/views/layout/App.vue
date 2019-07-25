@@ -77,7 +77,7 @@
                         <el-dropdown-item @click.native="$router.push('/personal')"><i style="padding-right: 8px"
                                                                                        class="fa fa-cog"></i>个人中心
                         </el-dropdown-item>
-                        <el-dropdown-item @click.native="logout"><i style="padding-right: 8px" class="fa fa-key"></i>退出系统
+                        <el-dropdown-item @click.native="logout"><i style="padding-right: 8px" class="fa fa-key"></i>注销登录
                         </el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -155,28 +155,28 @@
         },
         computed: {
             name() {
-                return JSON.parse(localStorage.getItem("MSDManagement_me")).name || 'Admin';
+                return JSON.parse(sessionStorage.getItem("user")).name || 'Admin';
             },
             menu() {
                 let data = JSON.parse(JSON.stringify(Menu));
                 //console.log('data', data);
-                let permissions = JSON.parse(localStorage.getItem('permissions')) || {};
-                //console.log(permissions.user_access !== 'true');
-                if (permissions.user_access !== 'true') {
-                    delete data.user_manage;
-                }
-
-                if (permissions.company_access !== 'true') {
-                    delete data.companyManage
-                }
-
-                if (permissions.device_access !== 'true') {
-                    delete  data.collectorManage
-                }
-
-                if (permissions.lift_access !== 'true') {
-                    delete  data.lift_manage
-                }
+                // let permissions = JSON.parse(localStorage.getItem('permissions')) || {};
+                // //console.log(permissions.user_access !== 'true');
+                // if (permissions.user_access !== 'true') {
+                //     delete data.user_manage;
+                // }
+                //
+                // if (permissions.company_access !== 'true') {
+                //     delete data.companyManage
+                // }
+                //
+                // if (permissions.device_access !== 'true') {
+                //     delete  data.collectorManage
+                // }
+                //
+                // if (permissions.lift_access !== 'true') {
+                //     delete  data.lift_manage
+                // }
                 return data;
             }
         },
@@ -239,8 +239,13 @@
                 this.NavBarWidth();
             },
             logout() {
-                localStorage.removeItem(this.$Config.tokenKey);
-                this.$router.push({path: '/login'});
+                this.$api_v3.post('/Identify/logout', localStorage.getItem(this.$Config.tokenKey)).then((result) => {
+                    console.log(result);
+                    if (result.code === 0) {
+                        localStorage.removeItem(this.$Config.tokenKey);
+                        this.$router.push({path: '/'});
+                    }
+                })
             },
             handleOpen(key, keyPath) {
                 //console.log(key, keyPath);

@@ -3,7 +3,7 @@
         <el-card class="box-card">
             <div slot="header" class="box-card-header">
                 <span class="name">{{ user.name}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="save()">
+                <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateUser()">
                     {{addUser?'新增':'提交'}}
                 </el-button>
             </div>
@@ -29,9 +29,9 @@
                                 <div class="left"><i class="fa fa-phone"></i></div>
                                 <div class="center">手机</div>
                                 <div class="right" v-if="edit">
-                                    <el-input v-model="user.cellphone"></el-input>
+                                    <el-input v-model="user.phone"></el-input>
                                 </div>
-                                <div class="right" v-else="edit">{{user.cellphone}}</div>
+                                <div class="right" v-else="edit">{{user.phone}}</div>
                             </li>
                             <li>
                                 <div class="left"><i class="fa fa-address-book-o"></i></div>
@@ -95,22 +95,6 @@
                                 <div class="right" v-else="edit">{{company_name===''?user.company_id:company_name}}
                                 </div>
                             </li>
-                            <li>
-                                <div class="left"><i class="fa fa-user-circle-o"></i></div>
-                                <div class="center">账号</div>
-                                <div class="right" v-if="edit">
-                                    <el-input v-model="user.username" placeholder="请输入手机号"></el-input>
-                                </div>
-                                <div class="right" v-else="edit">{{user.username}}</div>
-                            </li>
-                            <!--<li>-->
-                            <!--<div class="left"><i class="fa fa-lock"></i></div>-->
-                            <!--<div class="center">密码</div>-->
-                            <!--<div class="right" v-if="edit">-->
-                            <!--<el-input v-model="user.password"></el-input>-->
-                            <!--</div>-->
-                            <!--<div class="right" v-else="edit">{{user.password}}</div>-->
-                            <!--</li>-->
                         </ul>
                         <transition name="slide-fade">
                             <div v-if="userType==='安装人员'" style="margin-top: 15px">
@@ -125,7 +109,7 @@
                         <el-button type="primary" @click="showDialog">添加电梯</el-button>
                         <div>
                             <span style="margin-right: 15px;color: #3C8DBC">是否允许登录</span>
-                            <el-switch v-model="user.is_enabled" @change="toggleEnabled(user)"></el-switch>
+                            <el-switch v-model="user.status" :active-value="1" :inactive-value="0"></el-switch>
                         </div>
                     </div>
                     <el-table
@@ -379,58 +363,24 @@
                 //console.log(data)
                 this.tableData = data
             },
-            disableUser(cellphone) {
-                this.$req.post('/authentication', cellphone).then((result) => {
-                    console.log(result)
+            findUser(id) {
+                this.$api_v3.post('/AuUser/read', {"id": id}).then((res) => {
+                    console.log("/AuUser/read", res);
+                    if (res.code === 0) {
+                        this.user = res.data;
+                    }
                 })
             },
-            createUser() {
-                if (this.user.username === undefined) {
-                    this.$message({
-                        type: 'error',
-                        message: '用户名不能为空'
-                    });
-                    return false;
-                }
+            addOrUpdateUser(){
                 let params = this.user;
-                this.$req.post('/authentication/signup', params).then((result) => {
-                    if (result.Code === 7000) {
-                        this.hasSave = true;
-                        this.list_params.user_id = result.id;
-                        this.$router.go(-1);
-                        this.$message({
-                            type: 'success',
-                            message: '创建用户成功'
-                        })
-                    }
-                })
-            },
-            findUser() {
-                this.$req.post('/user/fetch', {"id": this.$route.query.id}).then((result) => {
-                    console.log(result);
-                    this.user = result.user;
-                    this.roles = result.roles;
-                    if (this.user.company_id === null) return;
-                    this.$req.post('/dm/company/fetch', {"id": this.user.company_id}).then((result) => {
-                        this.company_name = result.name
-                    })
-                })
-            },
-            updateUser() {
-                let params = {
-                    user: this.user,
-                    roles: this.roles,
-                };
-                this.$req.post('/user/update', params).then((result) => {
-                    if (result.Code === 7000) {
-                        this.hasSave = true;
-                        this.$router.go(-1);
-                        this.$message({
-                            message: '更新成功',
-                            type: 'success'
-                        })
-                    }
-                })
+              this.$api_v3.post('/AuUser/save',params).then((res)=>{
+                  console.log('/AuUser/save',res);
+                  if(res.code===0){
+                      this.$message.success('操作成功');
+                  }else {
+                      this.$message.error('操作失败');
+                  }
+              })
             },
             toggleEdit() {
                 this.edit = !this.edit;
@@ -441,34 +391,27 @@
             handleClose(done) {
                 done();
             },
-            save() {
-                if (this.addUser === false) {
-                    this.updateUser();
-                } else if (this.addUser === true) {
-                    this.createUser();
-                }
-            }
         },
-        beforeRouteLeave(to, from, next) {
-            if (this.hasSave === false) {
-                next(false);
-                this.$confirm('内容未保存, 是否继续退出?', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    next();
-                }).catch(() => {
-                });
-            } else {
-                next()
-            }
-        },
+        // beforeRouteLeave(to, from, next) {
+        //     if (this.hasSave === false) {
+        //         next(false);
+        //         this.$confirm('内容未保存, 是否继续退出?', '提示', {
+        //             confirmButtonText: '确定',
+        //             cancelButtonText: '取消',
+        //             type: 'warning'
+        //         }).then(() => {
+        //             next();
+        //         }).catch(() => {
+        //         });
+        //     } else {
+        //         next()
+        //     }
+        // },
         mounted() {
             if (this.$route.query.id !== null) {
                 this.edit = false;
                 this.userId = this.$route.query.id;
-                this.findUser();
+                this.findUser(this.$route.query.id);
             } else {
                 this.edit = true;
                 this.addUser = true;

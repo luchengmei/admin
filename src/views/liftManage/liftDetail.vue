@@ -7,16 +7,12 @@
                            @click="goBack">返回
                 </el-button>
                 <el-button v-show="activeName==='index'||activeName==='second'" type="primary" icon="el-icon-check"
-                           style="float: right" @click="save()">{{addNew?'新增':'提交'}}
+                           style="float: right" @click="addOrUpdateLift()">{{addNew?'新增':'提交'}}
                 </el-button>
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
                     <div class="panel-heading">
-                        <!--<span class="title">-->
-                        <!--<el-input v-if="edit" v-model="lift.name" placeholder="请输入电梯名称"></el-input>-->
-                        <!--<span v-else="edit" class="name">{{lift.name}}</span>-->
-                        <!--</span>-->
                         <i :class="edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"
                            @click="toggleEdit"
                            style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>
@@ -226,34 +222,39 @@
                         <el-card>
                             <div slot="header">
                                 <span>机房</span>
-                                <el-switch v-model="lift.has_machine_room"></el-switch>
+                                <el-switch v-model="lift.has_machine_room" :active-value="1"
+                                           :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">环境温度和温度
-                                <el-switch v-model="lift.temperature_humidity_in_machine_room"></el-switch>
+                                <el-switch v-model="lift.temperature_humidity_in_machine_room" :active-value="1"
+                                           :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">环境噪声
-                                <el-switch v-model="lift.noise_in_machine_room"></el-switch>
+                                <el-switch v-model="lift.noise_in_machine_room" :active-value="1"
+                                           :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">安全回路
-                                <el-switch v-model="lift.circuit"></el-switch>
+                                <el-switch v-model="lift.circuit" :active-value="1" :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">电机温度
-                                <el-switch v-model="lift.machine_temperature"></el-switch>
+                                <el-switch v-model="lift.machine_temperature" :active-value="1"
+                                           :inactive-value="0"></el-switch>
                             </div>
                             <!--&lt;!&ndash;<div class="body-item">电柜温度&ndash;&gt;-->
-                            <!--<el-switch v-model="lift.cabinet_temperature"></el-switch>-->
+                            <!--<el-switch v-model="lift.cabinet_temperature" :active-value="1" :inactive-value="0"></el-switch>-->
                             <!--</div>-->
                             <div class="body-item">电流
-                                <el-switch v-model="lift.electricity"></el-switch>
+                                <el-switch v-model="lift.electricity" :active-value="1" :inactive-value="0"></el-switch>
                             </div>
                             <!--<div class="body-item">电压-->
-                            <!--<el-switch v-model="lift.voltage"></el-switch>-->
+                            <!--<el-switch v-model="lift.voltage" :active-value="1" :inactive-value="0"></el-switch>-->
                             <!--</div>-->
                             <div class="body-item">抱闸温度
-                                <el-switch v-model="lift.brake_temperature"></el-switch>
+                                <el-switch v-model="lift.brake_temperature" :active-value="1"
+                                           :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">曳引绳断股
-                                <el-switch v-model="lift.hoist_rope"></el-switch>
+                                <el-switch v-model="lift.hoist_rope" :active-value="1" :inactive-value="0"></el-switch>
                             </div>
                         </el-card>
                         <el-card>
@@ -261,25 +262,26 @@
                                 <span>轿厢</span>
                             </div>
                             <div class="body-item">单独麦克风
-                                <el-switch v-model="lift.microphone"></el-switch>
+                                <el-switch v-model="lift.microphone" :active-value="1" :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">摄像头
-                                <el-switch v-model="lift.camera"></el-switch>
+                                <el-switch v-model="lift.camera" :active-value="1" :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">红外人体感应
-                                <el-switch v-model="lift.motion"></el-switch>
+                                <el-switch v-model="lift.motion" :active-value="1" :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">紧急按钮
-                                <el-switch v-model="lift.emergency_button"></el-switch>
+                                <el-switch v-model="lift.emergency_button" :active-value="1"
+                                           :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">应急电源
-                                <el-switch v-model="lift._e_p_s"></el-switch>
+                                <el-switch v-model="lift._e_p_s" :active-value="1" :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">扬声器
-                                <el-switch v-model="lift.loudspeaker"></el-switch>
+                                <el-switch v-model="lift.loudspeaker" :active-value="1" :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">广告屏
-                                <el-switch v-model="lift.ad_screen"></el-switch>
+                                <el-switch v-model="lift.ad_screen" :active-value="1" :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">电话卡ICCID
                                 <el-input placeholder="" v-model="lift.device_phone"
@@ -291,19 +293,22 @@
                                 <span>底坑</span>
                             </div>
                             <div class="body-item">环境温度和湿度
-                                <el-switch v-model="lift.temperature_humidity_in_pit"></el-switch>
+                                <el-switch v-model="lift.temperature_humidity_in_pit" :active-value="1"
+                                           :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">环境噪声
-                                <el-switch v-model="lift.noise_in_pit"></el-switch>
+                                <el-switch v-model="lift.noise_in_pit" :active-value="1"
+                                           :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">钢丝绳
-                                <el-switch v-model="lift.wire_rope"></el-switch>
+                                <el-switch v-model="lift.wire_rope" :active-value="1" :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">保护装置
-                                <el-switch v-model="lift.protector"></el-switch>
+                                <el-switch v-model="lift.protector" :active-value="1" :inactive-value="0"></el-switch>
                             </div>
                             <div class="body-item">底坑积水
-                                <el-switch v-model="lift.ponding_in_pit"></el-switch>
+                                <el-switch v-model="lift.ponding_in_pit" :active-value="1"
+                                           :inactive-value="0"></el-switch>
                             </div>
                         </el-card>
                     </div>
@@ -1021,19 +1026,20 @@
                 addNew: false,
                 activeName: 'index',
                 userType: '',
-                userOptions: [{
-                    value: 7,
-                    label: '七天'
-                }, {
-                    value: 31,
-                    label: '一个月（31天）'
-                }, {
-                    value: 63,
-                    label: '三个月（63天）'
-                }, {
-                    value: 365,
-                    label: '一年（365天）'
-                }],
+                userOptions: [
+                    {
+                        value: 7,
+                        label: '七天'
+                    }, {
+                        value: 31,
+                        label: '一个月（31天）'
+                    }, {
+                        value: 63,
+                        label: '三个月（63天）'
+                    }, {
+                        value: 365,
+                        label: '一年（365天）'
+                    }],
                 popover: {
                     "url": '/dm/company/all',
                     "pageSize": 5,
@@ -1051,7 +1057,7 @@
                 //about alarm setting
                 alarms: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
                 hasSave: true,
-                value4: '',
+                value4: '1',
                 value5: '',
                 checkList: [],
                 dynamicTags: [],
@@ -1485,57 +1491,14 @@
                     })
                 }
             },
-            addLift() {
-                let params = {
-                    "building_id": 0,
-                    "companies_and_types": this.companies_and_types,
-                    "lift": this.lift
-                };
-                this.$req.post('/dm/lift/add', params).then((result) => {
-                    console.log(result);
-                    if (result.Code === 7000) {
-                        this.addNew = false;
-                        this.hasSave = true;
-                        this.$message({
-                            message: '添加成功',
-                            type: 'success'
-                        });
-                    }
-                }).then(() => {
-                    this.$router.go(-1);
-                })
-            },
-            updateLiftById() {
-                let params = {
-                    "lift": this.lift,
-                    "lifts_companies": this.lift.companies
-                };
-                this.$req.post('/dm/lift/update', params).then((result) => {
-                    if (result.Code === 7000) {
-                        this.hasSave = true;
-                        this.$message({
-                            message: '更新成功',
-                            type: 'success'
-                        });
-                        this.$router.go(-1);
-                    }
-                })
-            },
-            findLiftById(id, cb) {
-                this.$req.post('/dm/lift/fetch', {
-                    'id': id
-                }).then((result) => {
-                    console.log(result);
-                    result.companies.forEach((company) => {
-                        if (!company.id) {
-                            company.company_id = '';
-                            company.company_name = '';
-                        }
-                    });
-                    this.lift = {...result};
-                }).then(() => {
-                    if (cb) {
-                        cb()
+            findLiftById(id) {
+                this.$api_v3.post('/Lifts/read', {'id': id}).then((res) => {
+                    console.log('lift', res);
+                    if (res.code === 0) {
+                        // Object.keys(res.data).forEach(function (key) {
+                        //     res.data[key] = res.data[key] + '';
+                        // });
+                        this.lift = res.data;
                     }
                 })
             },
@@ -1590,45 +1553,48 @@
                 this.inputVisible = false;
                 this.inputValue = '';
             },
-
             delete_time(index, arr) {
                 arr.splice(index, 1)
             },
             add_time(arr) {
                 arr.push('')
             },
-            save() {
-                if (this.addNew === true) {
-                    this.addLift();
-                } else {
-                    this.updateLiftById();
-                }
+            addOrUpdateLift() {
+                let params = this.lift;
+                this.$api_v3.post('/Lifts/save', params).then((res) => {
+                    console.log(res);
+                    if (res.code === 0) {
+                        this.$message.success(res.msg);
+                    } else {
+                        this.$message.error(res.data);
+                    }
+                })
             }
             //_____________________baseInfo_______________end
         },
-        beforeRouteLeave(to, from, next) {
-            if (this.hasSave === false) {
-                next(false);
-                this.$confirm('内容未保存, 是否继续退出?', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    next();
-                }).catch(() => {
-                });
-            } else {
-                next()
-            }
-        },
+        // beforeRouteLeave(to, from, next) {
+        //     if (this.hasSave === false) {
+        //         next(false);
+        //         this.$confirm('内容未保存, 是否继续退出?', '提示', {
+        //             confirmButtonText: '确定',
+        //             cancelButtonText: '取消',
+        //             type: 'warning'
+        //         }).then(() => {
+        //             next();
+        //         }).catch(() => {
+        //         });
+        //     } else {
+        //         next()
+        //     }
+        // },
         mounted: function () {
             //console.log(this.$route.query);
             if (this.$route.query.lift_id !== null) {
                 this.edit = false;
                 this.findLiftById(this.$route.query.lift_id, this.setFloors);
-                this.getLiftPlan(this.$route.query.lift_id);
-                this.getAlarmSetting();
-                this.getNoticeList();
+                //this.getLiftPlan(this.$route.query.lift_id);
+                //this.getAlarmSetting();
+                //this.getNoticeList();
             } else {
                 this.edit = true;
                 this.addNew = true;

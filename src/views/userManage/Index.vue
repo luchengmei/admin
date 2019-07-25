@@ -2,36 +2,27 @@
     <div class="user-list">
         <ToolBar>
             <el-button type="primary" icon="el-icon-plus" size="small" @click="addUser()">添加</el-button>
-            <el-button type="primary" @click="multipleHandle">批量禁用/允许</el-button>
-            <el-button type="danger" icon="el-icon-delete" @click="multipleDelete">批量删除</el-button>
+            <!--<el-button type="primary" @click="multipleHandle">批量禁用/允许</el-button>-->
+            <!--<el-button type="danger" icon="el-icon-delete" @click="multipleDelete">批量删除</el-button>-->
             <div style="float: right">
-                <!--<el-select style="width: 100px" v-model="params.status" placeholder="所属单位" size="small" clearable-->
-                <!--value="">-->
-                <!--<el-option-->
-                <!--v-for="item in statusOption"-->
-                <!--:key="item.value"-->
-                <!--:label="item.label"-->
-                <!--:value="item.value">-->
-                <!--</el-option>-->
-                <!--</el-select>-->
-                <!--<el-select style="width: 100px" v-model="params.status" placeholder="用户类型" size="small" clearable-->
-                <!--value="">-->
-                <!--<el-option-->
-                <!--v-for="item in statusOption"-->
-                <!--:key="item.value"-->
-                <!--:label="item.label"-->
-                <!--:value="item.value">-->
-                <!--</el-option>-->
-                <!--</el-select>-->
-                <!--<el-select style="width: 100px" v-model="params.status" placeholder="用户状态" size="small" clearable-->
-                <!--value="">-->
-                <!--<el-option-->
-                <!--v-for="item in statusOption"-->
-                <!--:key="item.value"-->
-                <!--:label="item.label"-->
-                <!--:value="item.value">-->
-                <!--</el-option>-->
-                <!--</el-select>-->
+                <el-select style="width: 100px" v-model="params.type" placeholder="用户类型" size="small" clearable
+                           value="">
+                    <el-option
+                            v-for="item in typeOption"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+                <el-select style="width: 100px" v-model="params.status" placeholder="用户状态" size="small" clearable
+                           value="">
+                    <el-option
+                            v-for="item in statusOption"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
                 <el-input
                         placeholder="请输入姓名/手机号/所属单位"
                         size="small"
@@ -57,7 +48,7 @@
                     width="40">
             </el-table-column>
             <el-table-column
-                    prop="cellphone"
+                    prop="phone"
                     label="手机号">
             </el-table-column>
             <el-table-column
@@ -68,7 +59,9 @@
                     prop="roles"
                     label="用户类型">
                 <template slot-scope="scope">
-                    <span v-for="item in scope.row.roles" style="margin-right: 10px">{{item|userTypeFrm}}</span>
+                    <el-tag v-for="i in scope.row.roles" style="margin: 0 2px" type="info">
+                        {{i|userTypeFrm}}
+                    </el-tag>
                 </template>
             </el-table-column>
             <el-table-column
@@ -76,11 +69,11 @@
                     label="所属单位">
             </el-table-column>
             <el-table-column
-                    prop="is_enabled"
+                    prop="status"
                     width="150"
                     label="禁用/允许登录">
                 <div slot-scope="scope" style="width: 100%;">
-                    <el-tag v-if="scope.row.is_enabled">允许</el-tag>
+                    <el-tag v-if="scope.row.status">允许</el-tag>
                     <el-tag v-else type="danger">禁用</el-tag>
                 </div>
             </el-table-column>
@@ -89,15 +82,18 @@
                     :render-header="tableAction"
                     width="180">
                 <template slot-scope="scope">
-                    <el-button @click="resetting(scope.row)" type="warning" style="transition: .4s;"
-                               :ref="scope.row.id" icon="el-icon-refresh" size="small" circle></el-button>
+                    <el-tooltip class="item" effect="dark" content="重置密码为'123456'" placement="top">
+                        <el-button @click="resetPassword(scope.row)" type="warning" style="transition: .4s;"
+                                   :ref="scope.row.id" icon="el-icon-refresh" size="small" circle></el-button>
+                    </el-tooltip>
                     <el-button @click="editUser(scope.row.id)" type="primary" icon="el-icon-edit" size="small"
                                circle></el-button>
-                    <el-button @click="toggleEnabled(scope.row)" v-if="scope.row.is_enabled" type="warning"
-                               icon="el-icon-close" circle size="small"></el-button>
-                    <el-button @click="toggleEnabled(scope.row)" v-else icon="el-icon-check" circle
-                               size="small"></el-button>
-                    <el-button type="danger" @click="deleteUser([scope.row.cellphone])"
+                    <el-tooltip class="item" effect="dark" content="是否允许登录" placement="top">
+                        <el-button @click="changeStatus(scope.row)" type="primary" icon="fa fa-hand-pointer-o"
+                                   size="small"
+                                   circle></el-button>
+                    </el-tooltip>
+                    <el-button type="danger" @click="deleteUser(scope.row.id)"
                                icon="el-icon-delete" circle size="small"></el-button>
                 </template>
             </el-table-column>
@@ -116,20 +112,17 @@
             const permissions = JSON.parse(localStorage.getItem('permissions'));
             return {
                 permissions: permissions,
-                paginate_api: '/user/list/is_alive',
+                paginate_api: '/AuUser/listPage',
                 paginate_params: {
-                    "is_alive": true,
-                    "page_proto": {
-                        "page": 1,
-                        "property": "id",
-                        "size": 10,
-                        "sort": "DESC"
-                    }
+                    "list_rows": 1,
+                    "size": 10,
+                    "sort": {id: 1}
                 },
                 refresh: false,
                 params: {
                     name: '',
-                    status: ''
+                    status: '',
+                    type: ''
                 },
                 selectData: [],
                 statusOption: [
@@ -139,6 +132,15 @@
                     }, {
                         value: 0,
                         label: '禁用'
+                    }
+                ],
+                typeOption: [
+                    {
+                        value: 1,
+                        label: '维保'
+                    }, {
+                        value: 2,
+                        label: '物业'
                     }
                 ],
                 usersData: []
@@ -160,20 +162,17 @@
         },
         methods: {
             initList() {
-                this.paginate_api = '/user/list/is_alive';
-                this.paginate_params = {
-                    "is_alive": true,
-                    "page_proto": {
-                        "page": 1,
-                        "property": "id",
-                        "size": 10,
-                        "sort": "DESC"
-                    }
-                };
+                this.paginate_params.search_content = '';
                 this.refresh = !this.refresh
             },
             onValChange(data) {
-                console.log(data);
+                data.forEach((i) => {
+                    if (i.roles === null) {
+                        i.roles = [];
+                    } else {
+                        i.roles = i.roles.split(',');
+                    }
+                });
                 this.usersData = data;
             },
             onSelectionChange(selection, row) {
@@ -208,75 +207,27 @@
                     });
                 }
             },
-            deleteUser(arr) {
-                if (this.permissions.user_delete !== 'true') {
-                    this.$message({
-                        type: 'error',
-                        message: '对不起，您没有权限进行此操作。'
-                    });
-                    return false;
-                }
-                this.$confirm("此操作将删除所选用户，是否继续？", "提示", {
+            deleteUser(id) {
+                this.$confirm("此操作将删除用户，是否继续？", "提示", {
                     type: "warning",
                     confirmButtonText: '确定',
                     cancelButtonClass: '取消'
                 }).then(() => {
-                    this.$req.post('/authentication/batch_remove', arr).then((result) => {
-                        if (result.Code === 7000) {
-                            arr.forEach((item) => {//Find the item in userData and also in arr, then delete it
-                                let index = this.usersData.findIndex((val) => {
-                                    return val.cellphone == item;
-                                });
-                                this.usersData.splice(index, 1)
-                            });
-                            this.$message({
-                                message: '删除成功',
-                                type: 'success'
-                            })
+                    this.$api_v3.post('/AuUser/remove', {"id": id}).then((res) => {
+                        console.log('/AuUser/remove', res);
+                        if (res.code === 0) {
+                            this.$message.success('操作成功');
+                        } else {
+                            this.$message.error('操作失败');
                         }
                     })
                 }).catch(() => {
                 })
             },
-            toggleEnabled(data) {
-                if (this.permissions.user_disabled !== 'true') {
-                    this.$message({
-                        type: 'error',
-                        message: '对不起，您没有权限进行此操作。'
-                    });
-                    return false;
-                }
-                if (data.cellphone === null) {
-                    this.$message({
-                        message: '此用户没有录入手机号',
-                        type: 'error'
-                    });
-                    return false;
-                }
-                this.$req.post('/authentication/set_enabled', {
-                    "cellphone": data.cellphone,
-                    "is_enabled": !data.is_enabled
-                }).then(() => {
-                    data.is_enabled = data.is_enabled !== true;
-                    this.$message({
-                        message: '更改用户状态成功!',
-                        type: 'success'
-                    });
-                });
-            },
-            findAllUsers() {
-            },
             searchUser(value) {
-                this.paginate_api = '/user/fuzzy/search';
-                this.paginate_params = {
-                    "page_proto": {
-                        "page": 1,
-                        "property": "id",
-                        "size": 10,
-                        "sort": "DESC"
-                    },
-                    "value": value
-                };
+                this.paginate_params.user_status = this.params.status;
+                this.paginate_params.company_type = this.params.type;
+                this.paginate_params.search_content = value;
                 this.refresh = !this.refresh;
             },
             tableAction() {
@@ -287,33 +238,31 @@
                 }, '操作');
             },
             addUser(id = null) {
-                if (this.permissions.user_add !== 'true') {
-                    this.$message({
-                        type: 'error',
-                        message: '对不起，您没有权限进行此操作。'
-                    });
-                    return false;
-                }
                 this.$router.push({path: '/user_detail', query: {id: id}})
             },
             editUser(id) {
-                if (this.permissions.user_fetch !== 'true') {
-                    this.$message({
-                        type: 'error',
-                        message: '对不起，您没有权限进行此操作。'
-                    });
-                    return false;
-                }
                 this.$router.push({path: '/user_detail', query: {id: id}})
             },
-            resetting(row) {
-                if (this.permissions.user_reset_password !== 'true') {
-                    this.$message({
-                        type: 'error',
-                        message: '对不起，您没有权限进行此操作。'
-                    });
-                    return false;
-                }
+            changeStatus(row) {
+                let params = {
+                    "id": row.id,
+                    "status": row.status === 1 ? 0 : 1
+                };
+                this.$api_v3.post('/AuUser/save', params).then((res) => {
+                    console.log(res);
+                    if (res.code === 0) {
+                        row.status = row.status === 1 ? 0 : 1;
+                        this.$message.success('操作成功')
+                    } else {
+                        this.$message.error(res.data)
+                    }
+                })
+            },
+            resetPassword(row) {
+                let params ={
+                    "id":row.id,
+                    "password":'12345678'
+                };
                 this.$confirm('此操作将重置密码, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
@@ -321,25 +270,19 @@
                 }).then(() => {
                     let dom = this.$refs[row.id].$el;
                     dom.style.transform = 'rotate(180deg)';
-                    if (row.cellphone == null) {
-                        this.$message({
-                            message: '重置密码失败，此用户没有手机号',
-                            type: 'error'
-                        });
-                        return false;
-                    }
-                    this.$req.post('/authentication/password/reset', row.cellphone).then((result) => {
-                        //console.log(result);
-                        this.$message({
-                            message: '重置密码成功，密码为888888',
-                            type: 'success'
-                        });
+                    this.$api_v3.post('/AuUser/save',params).then((result) => {
+                        console.log(result);
+                        if(result.code===0){
+                            this.$message.success('操作成功');
+                        }else {
+                            this.$message.error(result.data);
+                        }
                     }).finally(() => {
                         dom.style.transform = 'rotate(0deg)'
                     })
                 }).catch(() => {
                 });
-            },
+            }
         },
         mounted() {
         },

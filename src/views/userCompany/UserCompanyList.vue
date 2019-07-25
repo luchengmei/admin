@@ -3,19 +3,19 @@
         <ToolBar>
             <el-button type="primary" icon="el-icon-plus" size="small" @click="addUser()" v-show="!treeModel">添加
             </el-button>
-            <el-button type="primary" size="small" @click="changeModel">{{treeModel?'列表':'树形结构'}}</el-button>
-            <div v-show="!treeModel" style="float: right">
-                <el-input
-                        placeholder="请输入单位名称！"
-                        size="small"
-                        style="width: 140px"
-                        v-model="params.name"
-                        @clear="initList"
-                        @keyup.native.enter="searchUser"
-                        clearable>
-                </el-input>
-                <el-button @click="searchUser" type="success" icon="el-icon-search" size="small"></el-button>
-            </div>
+            <!--<el-button type="primary" size="small" @click="changeModel">{{treeModel?'列表':'树形结构'}}</el-button>-->
+            <!--<div v-show="!treeModel" style="float: right">-->
+                <!--<el-input-->
+                        <!--placeholder="请输入单位名称！"-->
+                        <!--size="small"-->
+                        <!--style="width: 140px"-->
+                        <!--v-model="params.name"-->
+                        <!--@clear="initList"-->
+                        <!--@keyup.native.enter="searchUser"-->
+                        <!--clearable>-->
+                <!--</el-input>-->
+                <!--<el-button @click="searchUser" type="success" icon="el-icon-search" size="small"></el-button>-->
+            <!--</div>-->
         </ToolBar>
         <el-table
                 v-show="!treeModel"
@@ -37,7 +37,8 @@
                     label="地址">
             </el-table-column>
             <el-table-column
-                    prop="lifts_count"
+                    width="120"
+                    prop="lift_count"
                     sortable
                     label="电梯总数">
             </el-table-column>
@@ -49,8 +50,8 @@
                 <template slot-scope="scope">
                     <el-button @click="editUser(scope.row.id)" type="primary" icon="el-icon-edit" size="small"
                                circle></el-button>
-                    <!--<el-button @click="deleteUser(scope.row.id)" v-if="scope.row.active != '0'" type="danger"-->
-                    <!--icon="el-icon-delete" circle size="small"></el-button>-->
+                    <el-button @click="deleteUser(scope.row.id)" type="danger"
+                    icon="el-icon-delete" circle size="small"></el-button>
                     <!--<el-button @click="deleteUser(scope.row.id)" v-else icon="el-icon-check" circle-->
                     <!--size="small"></el-button>-->
                 </template>
@@ -107,7 +108,8 @@
     export default {
         data() {
             const permissions = JSON.parse(localStorage.getItem('permissions'));
-            const data = [{
+            const data = [
+                {
                 id: 1,
                 label: '管理单位',
                 children: [{
@@ -156,12 +158,11 @@
                 permissions: permissions,
                 data: JSON.parse(JSON.stringify(data)),
                 treeModel: false,
-                paginate_api: '/dm/company/all',
+                paginate_api: '/Group/listPage',
                 paginate_params: {
-                    "page": 1,
-                    "property": "id",
+                    "list_rows": 1,
                     "size": 10,
-                    "sort": "DESC"
+                    "sort":{id:1}
                 },
                 refresh: false,
                 params: {
@@ -177,7 +178,6 @@
                 this.treeModel = !this.treeModel;
             },
             onValChange(data) {
-                //console.log(data);
                 this.companies = data;
             },
             initList() {
@@ -206,36 +206,26 @@
             tableAction() {
                 return this.$createElement('HelpHint', {
                     props: {
-                        content: '编辑用户 / 删除或恢复用户'
+                        content: '编辑单位 / 删除单位'
                     }
                 }, '操作');
             },
             editUser(id) {
-                if(this.permissions.company_fetch!=='true'){
-                    this.$message({
-                        type:'error',
-                        message:'对不起，您没有权限进行此操作。'
-                    });
-                    return false;
-                }
                 this.$router.push({path: '/userCompany_detail', query: {id: id}})
             },
             addUser(id = null) {
-                if(this.permissions.company_add!=='true'){
-                    this.$message({
-                        type:'error',
-                        message:'对不起，您没有权限进行此操作。'
-                    });
-                    return false;
-                }
                 this.$router.push({path: '/userCompany_detail', query: {id: id}})
             },
             deleteUser(id) {
-                this.$message({
-                    message: '这里请求api删除或者恢复用户之后刷新分页组件，列表自动更新',
-                    type: 'success'
-                });
+                this.$api_v3.post('/Group/remove',{"id":id}).then((result)=>{
+                    console.log(result);
+                    if(result.code===0){
+                        this.$message.success('操作成功')
+                    }
+                    this.refresh = !this.refresh;
+                })
             },
+            //------------------------------------分割线------------------------------//
             appendChild(data) {
                 this.$prompt('请输入单位名称', '提示', {
                     confirmButtonText: '确定',

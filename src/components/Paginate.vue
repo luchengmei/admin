@@ -15,12 +15,12 @@
 
 <template>
     <div class="pagination">
-        <div class="total">共有{{total}}条数据，当页有{{currentDataLength}}条数据。</div>
+        <div class="total">共有{{total}}条数据</div>
         <el-pagination
                 background
                 layout="sizes, prev, pager, next"
                 :current-page.sync="current"
-                :page-sizes="[10, 25, 50, 100,200]"
+                :page-sizes="[10,25, 50, 100,200]"
                 :page-size.sync="size"
                 @current-change="change"
                 :total="total">
@@ -37,7 +37,6 @@
         },
         data() {
             return {
-                isMounted: false,
                 size: 10,
                 total: null,
                 current: 1,
@@ -48,20 +47,15 @@
             paginate: function () {
                 let _this = this;
                 let params = _this.params;
-                if (params.page_proto !== undefined) {//has page_proto in params
-                    params.page_proto.size = _this.size;
-                    params.page_proto.page = _this.current;
-                } else {//there is no page_proto in params
-                    params.size = _this.size;
-                    params.page = _this.current;
-                }
-                _this.$req.post(_this.api, params).then((result) => {
-                    console.log('data', result);
-                    _this.total = result.total_elements || result.totalElements;
-                    _this.currentDataLength = result.content.length;
-                    _this.$emit('val-change', result.content);
-                }).finally(() => {
-                })
+                params.list_rows = _this.size;//一页数据条数
+                params.page = _this.current;//页码
+                _this.$api_v3.post(_this.api, params).then((result) => {
+                    console.log(_this.api, result);
+                    if (result.code === 0) {
+                        _this.total = result.data.total;//数据总条数
+                        _this.$emit('val-change', result.data.data);//将数据返回父组件
+                    }
+                });
             },
             change: function (page) {
                 this.current = page;
@@ -85,9 +79,8 @@
             }
         },
         mounted() {
-            console.log('mounted');
-            //this.isMounted = true;
-            this.paginate();
+            // console.log('mounted');
+            // this.paginate();
         },
         activated() {
             console.log('activated');

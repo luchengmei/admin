@@ -3,7 +3,7 @@
         <el-card class="box-card">
             <div slot="header" class="box-card-header">
                 <span class="name">{{ company.name}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="save()">{{addNew?'新增':'提交'}}</el-button>
+                <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateCompany()">{{addNew?'新增':'提交'}}</el-button>
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
@@ -290,86 +290,26 @@
             handleClose(done) {
                 done();
             },
-            addCompany() {
-                let params = this.company;
-                this.$req.post('/dm/company/add', params).then((result) => {
-                    console.log(result);
-                    if (result.Code === 7000) {
-                        this.hasSave = true;
-                        this.addNew = false;
-                        this.companyId = result.id;
-                        this.list_params.company_id = result.id;
-                        this.list_params_u.company_id = result.id;
-                        this.$router.go(-1);
-                        this.$message({
-                            message: '添加成功',
-                            type: 'success'
-                        })
-                    }
-                })
-            },
-            addCompanyWithLiftAndUser() {
-                let params = {
-                    "company": this.company,
-                    "lifts": this.lifts,
-                    "userCellPhones": this.userCellPhones
-                };
-                this.$req.post('/dm/company/add/with_lifts', params).then((result) => {
-                    console.log(result);
-                    if (result.Code === 7000) {
-                        this.hasSave = true;
-                        this.addNew = false;
-                        this.companyId = result.id;
-                        this.list_params.company_id = result.id;
-                        this.list_params_u.company_id = result.id;
-                        this.$router.go(-1);
-                        this.$message({
-                            message: '添加成功',
-                            type: 'success'
-                        })
-                    }
-                })
-            },
-            updateCompany() {
-                let params = {
-                    "company": this.company,
-                    "lifts": this.lifts,
-                    "user_cellphones": this.userCellPhones
-                };
-                this.$req.post('/dm/company/update', params).then((result) => {
-                    console.log(result);
-                    if (result.Code === 7000) {
-                        this.hasSave  = true;
-                        this.$router.go(-1);
-                        this.$message({
-                            message: '更新成功',
-                            type: 'success'
-                        })
-                    }
-                })
-            },
             findCompanyById(id) {
-                this.$req.post('/dm/company/fetch', {
-                    'id': id
-                }).then((result) => {
+                this.$api_v3.post('/Group/read',{"id":id}).then((result)=>{
                     console.log(result);
-                    this.company = result;
-                })
+                    if(result.code===0){
+                        this.company = result.data;
+                    }
+                });
             },
             toggleEdit() {
                 this.edit = !this.edit;
             },
-            save() {
-                if (this.addNew === true) {
-                    if (this.lifts.length === 0 && this.userCellphones.length === 0) {
-                        this.addCompany()
-                    } else {
-                        this.addCompanyWithLiftAndUser()
+            addOrUpdateCompany(){
+                let params = this.company;
+                if(params.name ==='') return;
+                this.$api_v3.post('/Group/save',params).then((result)=>{
+                    console.log(result);
+                    if(result.code===0){
+                        this.$message.success('操作成功')
                     }
-                } else {
-                    this.updateCompany()
-                }
-                this.edit = false;
+                })
             }
         },
         watch:{
@@ -383,21 +323,21 @@
               deep: true
           }
         },
-        beforeRouteLeave(to, from, next) {
-            if (this.hasSave === false) {
-                next(false);
-                this.$confirm('内容未保存, 是否继续退出?', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    next();
-                }).catch(() => {
-                });
-            } else {
-                next()
-            }
-        },
+        // beforeRouteLeave(to, from, next) {
+        //     if (this.hasSave === false) {
+        //         next(false);
+        //         this.$confirm('内容未保存, 是否继续退出?', '提示', {
+        //             confirmButtonText: '确定',
+        //             cancelButtonText: '取消',
+        //             type: 'warning'
+        //         }).then(() => {
+        //             next();
+        //         }).catch(() => {
+        //         });
+        //     } else {
+        //         next()
+        //     }
+        // },
         mounted() {
             if (this.$route.query.id !== null) {
                 this.companyId = Number(this.$route.query.id);

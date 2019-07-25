@@ -7,7 +7,7 @@ Vue.use(Router)
 
 let RouteList = [
     {
-        path: '/',
+        path: '/home',
         component: resolve => require(['@/views/layout/App.vue'], resolve),
         meta: {
             title: '首页',
@@ -15,7 +15,7 @@ let RouteList = [
         },
         children: [
             {
-                path: '/',
+                path: '/home',
                 name: 'Dashboard',
                 meta: {
                     title: '首页',
@@ -226,7 +226,7 @@ let RouteList = [
         ]
     },
     {
-        path: '/login',
+        path: '/',
         name: 'Login',
         meta: {
             title: '后台登录',

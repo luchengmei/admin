@@ -8,8 +8,6 @@
             </div>
             <div style="float: right;display: flex">
                 <el-select style="" v-model="params.alarm_type" placeholder="报警类型" size="small"
-                           @change="searchByType"
-                           @clear="initList"
                            clearable>
                     <el-option
                             v-for="item in alarmTypeOption"
@@ -18,8 +16,7 @@
                             :value="item.value">
                     </el-option>
                 </el-select>
-                <el-select style="width: 140px;" v-model="params.status" placeholder="状态" size="small"
-                           @change="searchByStatus" @clear="initList" clearable>
+                <el-select style="width: 140px;" v-model="params.status" placeholder="状态" size="small" clearable>
                     <el-option
                             v-for="item in statusOption"
                             :key="item.value"
@@ -28,7 +25,7 @@
                     </el-option>
                 </el-select>
                 <el-input
-                        placeholder="请输入电梯名称"
+                        placeholder="请输入故障描述/电梯名称"
                         size="small"
                         style="width: 200px"
                         v-model="params.name"
@@ -52,15 +49,20 @@
             </el-table-column>
             <el-table-column
                     width="100px"
-                    prop="loginname"
+                    prop="img_urls"
                     label="报警截图">
                 <template slot-scope="scope">
                     <el-dropdown>
-                        <img style="width: 100%;height: 100%;border-radius: 4px;cursor: pointer"
-                             src="https://goss1.vcg.com/creative/vcg/400/new/VCG211188440749.jpg"/>
+                        <!--<img style="width: 100%;height: 100%;border-radius: 4px;cursor: pointer"-->
+                             <!--:src="scope.row.img_urls"/>-->
+                        <el-image>
+                            <div slot="error" class="image-slot">
+                                <i class="el-icon-picture-outline"></i>
+                            </div>
+                        </el-image>
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item>
-                                <img src="https://goss1.vcg.com/creative/vcg/400/new/VCG211188440749.jpg"/>
+                                <img :src="scope.row.img_urls"/>
                             </el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
@@ -100,16 +102,8 @@
                     :render-header="tableAction"
                     width="180">
                 <template slot-scope="scope">
-                    <!--<el-button @click="resetting(scope.row.id)" type="warning" style="transition: .4s;"-->
-                    <!--:ref="scope.row.id" icon="el-icon-refresh" size="small" circle></el-button>-->
-                    <el-button @click="editUser(scope.row)" type="primary" icon="el-icon-edit" size="small"
-                               circle></el-button>
-                    <el-button @click="updateStatus(scope.row)" v-if="scope.row.status != '0'" type="success"
-                               icon="el-icon-check" circle size="small"></el-button>
-                    <el-button @click="updateStatus(scope.row)" v-else icon="fa fa-hand-pointer-o" circle
-                               size="small"></el-button>
-                    <el-button type="danger"
-                               icon="el-icon-delete" circle size="small"></el-button>
+                    <el-button @click="editUser(scope.row)" type="primary" icon="el-icon-edit" size="small" circle></el-button>
+                    <!--<el-button @click="" type="danger" icon="el-icon-delete" circle size="small"></el-button>-->
                 </template>
             </el-table-column>
         </el-table>
@@ -126,12 +120,11 @@
         data() {
             return {
                 refresh: false,
-                list_url: '/dm/alarm_log/all',
+                list_url: '/LiftsFault/listPage',
                 list_params: {
-                    "page": 1,
-                    "property": "id",
+                    "list_rows": 1,
                     "size": 10,
-                    "sort": "DESC"
+                    "sort": {id: 1}
                 },
                 params: {
                     name: '',
@@ -223,58 +216,15 @@
         },
         methods: {
             onValChange(data) {
-                console.log(data);
                 this.usersData = data;
             },
             initList() {
-                this.list_url = '/dm/alarm_log/all';
-                this.list_params = {
-                    "page": 1,
-                    "property": "id",
-                    "size": 10,
-                    "sort": "DESC"
-                };
-                this.refresh = !this.refresh
-            },
-            searchByStatus() {
-                if (this.params.status === '') return;
-                this.list_url = '/dm/alarm_log/list/status';
-                this.list_params = {
-                    "page_proto": {
-                        "page": 1,
-                        "property": "id",
-                        "size": 10,
-                        "sort": "DESC"
-                    },
-                    "status": this.params.status.toString()
-                };
-                this.refresh = !this.refresh;
-            },
-            searchByType() {
-                if (this.params.alarm_type === '') return;
-                this.list_url = '/dm/alarm_log/list/type';
-                this.list_params = {
-                    "alarm_type": this.params.alarm_type,
-                    "page_proto": {
-                        "page": 0,
-                        "property": "string",
-                        "size": 0,
-                        "sort": "DESC"
-                    }
-                };
+                this.list_params.search_content = '';
                 this.refresh = !this.refresh
             },
             searchUser() {
-                this.list_url = '/dm/alarm_log/list/lift_name';
-                this.list_params = {
-                    "lift_name": this.params.name,
-                    "page_proto": {
-                        "page": 1,
-                        "property": "id",
-                        "size": 10,
-                        "sort": "DESC"
-                    }
-                };
+                this.list_params.search_content = this.params.name;
+                this.status = this.params.status;
                 this.refresh = !this.refresh;
             },
             tableAction() {
@@ -284,29 +234,7 @@
                     }
                 }, '操作');
             },
-            editUser(data) {
-            },
-            updateStatus(data) {
-                let status = '';
-                if (data.status === '1') {
-                    status = '0';
-                } else {
-                    status = '1'
-                }
-                let params = {
-                    "id": data.id,
-                    "status": status
-                };
-                this.$req.post('/dm/alarm_log/update/status', params).then((result) => {
-                    if (result.Code === 7000) {
-                        data.status = status;
-                        this.$message({
-                            type: 'success',
-                            message: '更改报警状态成功'
-                        })
-                    }
-                })
-            },
+            editUser(data) {},
             updateStatus_multiple() {
                 if (this.selectData.length === 0) {
                     this.$message({type: 'info', message: '请先选中需要处理的报警'}
@@ -334,17 +262,6 @@
                         //console.log('完成')
                     })
                 }
-            },
-            resetting(id) {
-                let dom = this.$refs[id].$el;
-                dom.style.transform = 'rotate(180deg)';
-                setTimeout(() => {
-                    dom.style.transform = 'rotate(0deg)'
-                }, 600);
-                this.$message({
-                    message: '已经成功重置密码',
-                    type: 'success'
-                });
             },
             onSelectionChange(selection) {
                 console.log(selection);
