@@ -1,14 +1,12 @@
 <template>
     <div class="container">
-        <!--<el-input v-model="hhhh"></el-input>-->
-        <!--<el-button @click="initRolePrivilege(Number(hhhh))">execute</el-button>-->
         <div class="container_left">
             <div style="text-align: center;padding: 20px">
                 <el-button type="primary" style="width: 150px" @click="createRole">新建角色</el-button>
             </div>
             <div class="companyType-list">
                 <span :class="current ==i.id?'active':''" v-for="i in roles"
-                      @click="changeCurrent(i.id)">{{i.name|rolesFormat}}
+                      @click="changeCurrent(i.id)">{{i.name}}
                     <!--<span style="padding-left: 20px" v-if="current ==i.id">-->
                     <!--<i class="el-icon-edit"></i>-->
                     <!--<i class="el-icon-remove-outline"></i>-->
@@ -19,7 +17,33 @@
         </div>
         <div class="container_right">
             <el-tabs v-model="activeName">
-                <el-tab-pane label="角色权限" name="first">
+                <el-tab-pane label="角色配置" name="first">
+                    <div>
+                        <el-form ref="form" :model="role" label-width="150px" label-position="left">
+                            <el-form-item label="角色名称">
+                                <el-input v-model="role.name"></el-input>
+                            </el-form-item>
+                            <el-form-item label="电梯查看级别">
+                                <el-select v-model="role.lifts_limit_level" placeholder="请选择级别">
+                                    <el-option value="0"></el-option>
+                                    <el-option value="1"></el-option>
+                                    <el-option value="2"></el-option>
+                                </el-select>
+                                <el-tooltip content="0:xxxxxx 1:xxxxxx 2:xxxxxx" placement="top">
+                                    <i class="el-icon-question" style="color: #666666"></i>
+                                </el-tooltip>
+                            </el-form-item>
+                            <el-form-item label="可访问平台">
+                                <el-checkbox v-for="platform in platforms" v-model="platform.value"
+                                             :label="platform.name" border></el-checkbox>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="save()">保存</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="角色权限" name="second">
                     <div>
                         <el-checkbox @change="selectAll">全部</el-checkbox>
                         <el-button type="primary" style="float: right;" @click="updateMultiplePrivilege">保存</el-button>
@@ -124,7 +148,7 @@
                         </div>
                     </div>
                 </el-tab-pane>
-                <el-tab-pane label="角色用户" name="second">
+                <el-tab-pane label="角色用户" name="third">
                     <el-table
                             v-loading="loading"
                             :data="tableData"
@@ -151,45 +175,6 @@
                             </template>
                         </el-table-column>
                     </el-table>
-                    <!--<div class="el-tree-node__content tree-content-title">-->
-                    <!--<span>用户</span>-->
-                    <!--<span>账号</span>-->
-                    <!--<span>创建用户</span>-->
-                    <!--<span>创建时间</span>-->
-                    <!--<span>操作</span>-->
-                    <!--</div>-->
-                    <!--<el-tree-->
-                    <!--:data="data"-->
-                    <!--node-key="id"-->
-                    <!--default-expand-all-->
-                    <!--@node-drag-start="handleDragStart"-->
-                    <!--@node-drag-enter="handleDragEnter"-->
-                    <!--@node-drag-leave="handleDragLeave"-->
-                    <!--@node-drag-over="handleDragOver"-->
-                    <!--@node-drag-end="handleDragEnd"-->
-                    <!--@node-drop="handleDrop"-->
-                    <!--draggable-->
-                    <!--:allow-drop="allowDrop"-->
-                    <!--:allow-drag="allowDrag">-->
-                    <!--<span class="custom-tree-node" slot-scope="{ node, data }">-->
-                    <!--<span class="custom-tree-node-label">{{ node.label}}</span>-->
-                    <!--<span>-->
-                    <!--<span @click="() => append(data)">{{data.name||''}}</span>-->
-                    <!--</span>-->
-                    <!--<span>-->
-                    <!--<span @click="() => append(data)">{{data.creator||''}}</span>-->
-                    <!--</span>-->
-                    <!--<span>-->
-                    <!--<span @click="() => remove(node, data)">{{data.createTime||''}}-->
-                    <!--</span>-->
-                    <!--</span>-->
-                    <!--<span>-->
-                    <!--<i style="color: #3C8DBC;font-size: 16px" class="el-icon-edit" v-if="data.account"-->
-                    <!--@click="() => remove(node, data)">-->
-                    <!--</i>-->
-                    <!--</span>-->
-                    <!--</span>-->
-                    <!--</el-tree>-->
                 </el-tab-pane>
             </el-tabs>
         </div>
@@ -205,54 +190,57 @@
             ToolBar
         },
         data() {
-            const data = [{
-                id: 1,
-                label: '马上到科技',
-                children: [{
-                    id: 2,
-                    label: '一级管理员',
+            const data = [
+                {
+                    id: 1,
+                    label: '马上到科技',
                     children: [{
-                        id: 88,
-                        label: 'user1',
-                        creator: 'admin',
-                        account: '123456789',
-                        createTime: '2018-09-21 08:50:08',
-                        operation: true
+                        id: 2,
+                        label: '一级管理员',
+                        children: [{
+                            id: 88,
+                            label: 'user1',
+                            creator: 'admin',
+                            account: '123456789',
+                            createTime: '2018-09-21 08:50:08',
+                            operation: true
+                        }, {
+                            id: 89,
+                            label: 'user2',
+                            creator: 'admin',
+                            account: '123456789',
+                            createTime: '2018-09-21 08:50:08',
+                            operation: true
+                        }, {
+                            id: 87,
+                            label: 'user3',
+                            creator: 'admin',
+                            account: '123456789',
+                            createTime: '2018-09-21 08:50:08',
+                            operation: true
+                        }]
                     }, {
-                        id: 89,
-                        label: 'user2',
-                        creator: 'admin',
-                        account: '123456789',
-                        createTime: '2018-09-21 08:50:08',
-                        operation: true
-                    }, {
-                        id: 87,
-                        label: 'user3',
-                        creator: 'admin',
-                        account: '123456789',
-                        createTime: '2018-09-21 08:50:08',
-                        operation: true
+                        id: 5,
+                        label: '游客'
                     }]
-                }, {
-                    id: 5,
-                    label: '游客'
-                }]
-            }];
+                }];
             return {
-                hhhh: null,
                 data: JSON.parse(JSON.stringify(data)),
                 tableData: [],
                 loading: false,
                 roles: [],
+                role: {},
+                platforms: [],
                 current: null,
                 activeName: 'first',
                 searchName: '',
                 privilege: [],
-                all: false
+                all: false,
             }
         },
         mounted() {
             this.getRolesList();
+            this.getAllPlatforms();
         },
         filters: {
             rolesFormat(el) {
@@ -270,6 +258,80 @@
         },
         watch: {},
         methods: {
+            getAllPlatforms() {
+                this.$api_v3.post('/Platform/listPage', {}).then((res) => {
+                    console.log(res);
+                    if (res.code === 0) {
+                        this.platforms = res.data.data;
+                    }
+                })
+            },
+            createRole() {
+                this.$prompt('请输入角色名称', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                }).then(({value}) => {
+                    this.$api_v3.post('/AuRole/save', {"name": value}).then((res) => {
+                        console.log(res);
+                        if (res.code === 0) {
+                            this.$message.success('操作成功');
+                            this.getRolesList();
+                        } else {
+                            this.$message.error(res.data)
+                        }
+                    })
+                }).catch(() => {
+                });
+            },
+            onCheckBoxChange(platform) {
+                if (platform.value) {
+                    this.role.platforms.push({"id": platform.id, "name": platform.name})
+                } else {
+                    let index = this.role.platforms.findIndex((i) => {
+                        return i.id = platform.id;
+                    });
+                    if (index !== -1) {
+                        this.role.platforms.splice(index, 1)
+                    }
+                }
+            },
+            save() {
+
+            },
+            readRole(id) {
+                this.$api_v3.post('/AuRole/read', {"id": id}).then((res) => {
+                    console.log(res);
+                    if (res.code === 0) {
+                        this.role = res.data;
+                        this.platforms.forEach((platform) => {
+                            platform.value = false;
+                        });
+                        this.role.platforms.forEach((item) => {
+                            let index = this.platforms.findIndex((i) => {
+                                return i.id === item.id;
+                            });
+                            this.platforms[index].value = index !== -1;
+                        })
+                    }
+                })
+            },
+            getRolesList() {
+                this.$api_v3.post('/AuRole/listPage').then((res) => {
+                    console.log(res);
+                    if (res.code === 0) {
+                        this.roles = res.data.data;
+                        this.current = res.data.data[0].id;
+                        this.readRole(res.data.data[0].id);
+                    }
+                });
+            },
+            changeCurrent(role_id) {
+                if (role_id !== this.current) {
+                    this.current = role_id;
+                    this.readRole(role_id);
+                }
+            },
+
             onchange(val, arr) {
                 //console.log(val,arr);
                 let Arr = [];
@@ -677,23 +739,6 @@
                     console.log(result);
                 })
             },
-            createRole() {
-                this.$prompt('请输入角色名称', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                }).then(({value}) => {
-                    this.$req.post('/role/add', value).then((result) => {
-                        //console.log(result)
-                        this.$message({
-                            type: 'success',
-                            message: '新建成功'
-                        });
-                        this.initRolePrivilege(result.id);
-                        this.getRolesList();
-                    })
-                }).catch(() => {
-                });
-            },
             userListByRolesId(role_id) {
                 this.loading = true;
                 this.$req.post('/user/list/role_id', role_id).then((result) => {
@@ -702,22 +747,6 @@
                 }).finally(() => {
                     this.loading = false;
                 })
-            },
-            getRolesList() {
-                this.$req.post('/role/all').then((result) => {
-                    //console.log(result);
-                    this.roles = result;
-                    this.current = result[0].id;
-                    this.userListByRolesId(this.current);
-                    this.getPrivilegeByRoleId(this.current);
-                })
-            },
-            changeCurrent(role_id) {
-                if (role_id !== this.current) {
-                    this.current = role_id;
-                    this.userListByRolesId(role_id);
-                    this.getPrivilegeByRoleId(role_id);
-                }
             },
             updateSinglePrivilege() {
                 let params = {};
@@ -758,6 +787,8 @@
                     cursor: pointer;
                     padding: 2px 40px;
                     margin: 5px 0;
+                    border-bottom-right-radius: 50px;
+                    border-top-right-radius: 50px;
                 }
                 > span:hover {
                     background: #eeeeee;
@@ -768,6 +799,7 @@
                 }
                 .active {
                     background: rgba(60, 141, 188, 0.3);
+                    color: #3C8DBC;
                 }
             }
         }

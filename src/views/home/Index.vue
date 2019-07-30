@@ -89,29 +89,14 @@
             }
         },
         methods: {
-            noPermission() {
-                this.$message.error('对不起，您没有访问权限。');
-            },
             toLiftManage() {
-                if (this.permissions.lift_access === "true") {
-                    this.$router.push('/lift_list')
-                } else {
-                    this.noPermission();
-                }
+                this.$router.push('/lift_list')
             },
             toUserCompany() {
-                if (this.permissions.company_access === "true") {
-                    this.$router.push('/userCompany_list')
-                } else {
-                    this.noPermission();
-                }
+                this.$router.push('/userCompany_list')
             },
             toUserManage() {
-                if (this.permissions.user_access === "true") {
-                    this.$router.push('/user_manage')
-                } else {
-                    this.noPermission();
-                }
+                this.$router.push('/user_manage')
             },
             toPersonal() {
                 this.$router.push('/personal')

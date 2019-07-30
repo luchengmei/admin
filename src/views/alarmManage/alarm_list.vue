@@ -53,13 +53,8 @@
                     label="报警截图">
                 <template slot-scope="scope">
                     <el-dropdown>
-                        <!--<img style="width: 100%;height: 100%;border-radius: 4px;cursor: pointer"-->
-                             <!--:src="scope.row.img_urls"/>-->
-                        <el-image>
-                            <div slot="error" class="image-slot">
-                                <i class="el-icon-picture-outline"></i>
-                            </div>
-                        </el-image>
+                        <img style="width: 100%;height: 100%;border-radius: 4px;cursor: pointer"
+                             :src="scope.row.img_urls"/>
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item>
                                 <img :src="scope.row.img_urls"/>
