@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <el-card class="container">
         <div class="container_left">
             <div style="text-align: center;padding: 20px">
                 <el-button type="primary" style="width: 150px" @click="createType">新建单位类型</el-button>
@@ -53,7 +53,7 @@
                 <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
             </span>
         </el-dialog>
-    </div>
+    </el-card>
 </template>
 
 <script>
@@ -167,61 +167,5 @@
 </script>
 
 <style lang="less" scoped>
-    .container {
-        display: flex;
-
-        .container_left {
-            width: 300px;
-            background: #ffffff;
-            .companyType-list {
-                color: #333333;
-                display: flex;
-                flex-direction: column;
-                > span {
-                    cursor: pointer;
-                    padding: 2px 40px;
-                    margin: 5px 0;
-                }
-                > span:hover {
-                    background: #eeeeee;
-                }
-                i {
-                    color: #666666;
-                    padding: 0 4px;
-                }
-                .active {
-                    background: rgba(60, 141, 188, 0.3);
-                }
-            }
-        }
-        .container_right {
-            padding: 20px;
-            margin-left: 10px;
-            flex: 1;
-            background: #ffffff;
-        }
-    }
-
-    .platform {
-        span {
-            display: inline-block;
-            width: 140px;
-        }
-        margin: 25px 0;
-        .platform-title {
-            color: #333333;
-            font-size: 18px;
-            font-weight: 600;
-        }
-        .platform-content {
-            padding-top: 20px;
-            padding-left: 10px;
-            color: #888888;
-            font-size: 16px;
-        }
-        .content-list {
-            padding-left: 10px;
-            padding-top: 10px;
-        }
-    }
+    @import "systemStting";
 </style>

@@ -21,7 +21,7 @@
                                 <div class="left"><i class="fa fa-id-card"></i></div>
                                 <div class="center">姓名</div>
                                 <div class="right" v-if="edit">
-                                    <el-input v-model="user.name"></el-input>
+                                    <el-input v-model="user.name" clearable></el-input>
                                 </div>
                                 <div class="right" v-else="edit">{{user.name}}</div>
                             </li>
@@ -29,7 +29,7 @@
                                 <div class="left"><i class="fa fa-phone"></i></div>
                                 <div class="center">手机</div>
                                 <div class="right" v-if="edit">
-                                    <el-input v-model="user.phone"></el-input>
+                                    <el-input v-model="user.phone" clearable></el-input>
                                 </div>
                                 <div class="right" v-else="edit">{{user.phone}}</div>
                             </li>
@@ -37,10 +37,11 @@
                                 <div class="left"><i class="fa fa-address-book-o"></i></div>
                                 <div class="center">用户类型</div>
                                 <div class="right" v-if="edit">
-                                    <el-select v-model="roles" multiple placeholder="请选择" value=""
-                                               style="height: 32px;width: 100%" size="small">
+                                    <el-select class="multiple-select" v-model="roles" multiple placeholder="请选择"
+                                               value=""
+                                               style="height: 32px;width: 100%" size="small" clearable collapse-tags>
                                         <el-option
-                                                v-for="item in userOptions"
+                                                v-for="item in roleOptions"
                                                 :key="item.value"
                                                 :label="item.label"
                                                 :value="item.value">
@@ -49,8 +50,8 @@
                                 </div>
                                 <div class="right" v-else="edit">
                                     <span style="margin-right: 15px"
-                                          v-for="(item,index2) in roles"
-                                          :key="index2">{{item|userTypeFrm}}
+                                          v-for="(item,index2) in user.roles"
+                                          :key="index2">{{item.name}}
                                     </span>
                                 </div>
                             </li>
@@ -66,17 +67,17 @@
                                                 trigger="click">
                                             <el-card class="box-card" shadow="never">
                                                 <div slot="header" style="display: flex;align-items: center">
-                                                    <el-input placeholder="请输入名称" v-model="popoverInputVal"
-                                                              @clear="changePage1" clearable
-                                                              @keyup.native.enter="popoverSearch">
-                                                        <el-button slot="append" icon="el-icon-search"
-                                                                   @click="popoverSearch"></el-button>
-                                                    </el-input>
+                                                    <!--<el-input placeholder="请输入名称" v-model="popoverInputVal"-->
+                                                              <!--@clear="changePage1" clearable-->
+                                                              <!--@keyup.native.enter="popoverSearch">-->
+                                                        <!--<el-button slot="append" icon="el-icon-search"-->
+                                                                   <!--@click="popoverSearch"></el-button>-->
+                                                    <!--</el-input>-->
                                                     <el-pagination
                                                             :page-size.sync="popover.pageSize"
                                                             :current-page.sync="popover.currentPage"
                                                             @current-change="changePage1"
-                                                            small
+                                                            normal
                                                             layout="prev, pager, next"
                                                             :total="popover.total">
                                                     </el-pagination>
@@ -90,52 +91,46 @@
                                             <el-button slot="reference" type="primary">点击选择</el-button>
                                         </el-popover>
                                     </div>
-                                    <el-input style="flex: 1" v-model="company_name" disabled=""></el-input>
+                                    <el-input style="flex: 1" v-model="user.group.name" disabled></el-input>
                                 </div>
-                                <div class="right" v-else="edit">{{company_name===''?user.company_id:company_name}}
+                                <div class="right" v-else>{{user.group?user.group.name:''}}
+                                </div>
+                            </li>
+                            <li>
+                                <div>
+                                    <span style="margin-right: 15px;color: #3C8DBC">是否允许登录</span>
+                                    <el-switch v-model="user.status" :active-value="1" :inactive-value="0"></el-switch>
                                 </div>
                             </li>
                         </ul>
-                        <transition name="slide-fade">
-                            <div v-if="userType==='安装人员'" style="margin-top: 15px">
-                                <el-button type="primary" @click="showTransfer()">选择电梯</el-button>
-                                <el-button type="primary" @click="showTransfer()">选择采集仪</el-button>
-                            </div>
-                        </transition>
                     </div>
                 </el-tab-pane>
-                <el-tab-pane label="权限管理" name="second">
+                <el-tab-pane label="电梯列表" name="second">
                     <div style="display: flex;align-items: center;margin-top: 15px;justify-content: space-between">
                         <el-button type="primary" @click="showDialog">添加电梯</el-button>
-                        <div>
-                            <span style="margin-right: 15px;color: #3C8DBC">是否允许登录</span>
-                            <el-switch v-model="user.status" :active-value="1" :inactive-value="0"></el-switch>
-                        </div>
                     </div>
                     <el-table
-                            :data="tableData"
+                            :data="user.lifts"
                             style="width: 100%;margin-top: 15px;color: #3C8DBC;font-size: 14px">
                         <el-table-column
-                                width="80"
-                                prop="lift.id"
-                                label="ID">
+                                prop="id"
+                                label="电梯ID">
                         </el-table-column>
                         <el-table-column
-                                prop="lift.name"
+                                prop="name"
                                 label="电梯名称">
                         </el-table-column>
-                        <el-table-column
-                                prop="lift.address"
-                                label="地址">
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <el-button @click="removeLift(scope.row)" size="mini">移除</el-button>
+                            </template>
                         </el-table-column>
                     </el-table>
-                    <paginate style="border: none" :api="list_url" :params="list_params" :refresh="refresh"
-                              @val-change="onValChange"></paginate>
                 </el-tab-pane>
             </el-tabs>
         </el-card>
-        <el-dialog title="" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
-            <el-transfer style="display: flex;align-items: center;justify-content: center" filterable
+        <el-dialog title="" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
+            <el-transfer style="display: flex;align-items: center;justify-content: center"
                          v-model="data_select"
                          :titles="['待选', '已选']"
                          :data="transfer.data">
@@ -145,13 +140,20 @@
                                :page-size.sync="transfer.pageSize"
                                :current-page.sync="transfer.currentPage"
                                @current-change="changePage"
-                               small
+                               normal
                                layout="prev, pager, next"
                                :total="transfer.total"
                                background>
                 </el-pagination>
                 <el-button @click="dialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialog_confirm">确 定</el-button>
+                <el-button :loading="loading" type="primary" @click="dialog_confirm">确 定</el-button>
+            </span>
+            <span slot="title">
+                <el-input placeholder="搜索内容，电梯名称/物业单位名称/维保单位名称" style="width: 50%;font-size: 12px" @clear="search()"
+                          @keyup.native.enter="search()" clearable
+                          v-model="transfer.search_content">
+                     <el-button slot="append" icon="el-icon-search" @click="search()"></el-button>
+                </el-input>
             </span>
         </el-dialog>
     </div>
@@ -167,90 +169,41 @@
         },
         data() {
             return {
-                value3: true,
-                value4: true,
+                //--------------transfer--------------
                 dialogVisible: false,
+                loading: false,
                 data_select: [],
                 transfer: {
                     "pageSize": 10,
                     "total": null,
                     "currentPage": 1,
                     "data": [],
+                    "search_content": ''
                 },
+                allLift_url: '/Lifts/listPage',
+
+                //--------------
                 popoverInputVal: '',
                 popover: {
-                    "pageSize": 5,
-                    "total": 25,
+                    "pageSize": 10,
+                    "total": 0,
                     "currentPage": 1,
                     "data": []
                 },
-                //--------------
                 userChangeCount: 0,
                 hasSave: true,
                 userId: null,
                 edit: false,
                 addUser: false,
                 company_name: '',
-                user: {
-                    "company_id": null,
-                    "roles": ['ROLE_CLIENT']
-                },
+                user: {},
                 roles: [],
                 activeName: 'index',
                 userType: [],
-                userOptions: [{
-                    value: 'ROLE_ADMIN',
-                    label: '管理员'
-                }, {
-                    value: 'ROLE_DEVELOPER',
-                    label: '开发人员'
-                }, {
-                    value: 'ROLE_CLIENT_ADMIN',
-                    label: '物业管理员'
-                }, {
-                    value: 'ROLE_CLIENT',
-                    label: '物业'
-                }, {
-                    value: 'ROLE_MAINTAINER_ADMIN',
-                    label: '维保管理员'
-                }, {
-                    value: 'ROLE_MAINTAINER',
-                    label: '维保'
-                }, {
-                    value: 'ROLE_INSTALLER_ADMIN',
-                    label: '安装人员管理员'
-                }, {
-                    value: 'ROLE_INSTALLER',
-                    label: '安装人员'
-                }],
-
-                list_url: '/dm/lift/list/user_id',
-                list_params: {
-                    "user_id": this.$route.query.id,
-                    "page_proto": {
-                        "page": 1,
-                        "property": "id",
-                        "size": 10,
-                        "sort": "DESC"
-                    }
-                },
-                refresh: false,
-                tableData: [],
+                roleOptions: []
             }
         },
-        filters: {
-            userTypeFrm(val) {
-                if (val === 'ROLE_ADMIN') return '管理员';
-                if (val === 'ROLE_DEVELOPER') return '开发人员';
-                if (val === 'ROLE_CLIENT_ADMIN') return '物业管理员';
-                if (val === 'ROLE_CLIENT') return '物业';
-                if (val === 'ROLE_MAINTAINER_ADMIN') return '维保管理员';
-                if (val === 'ROLE_MAINTAINER') return '维保';
-                if (val === 'ROLE_INSTALLER_ADMIN') return '安装人员管理员';
-                if (val === 'ROLE_INSTALLER') return '安装人员';
-                return val;
-            }
-        },
+        filters: {},
         watch: {
             'user': {
                 handler: function () {
@@ -263,133 +216,142 @@
             }
         },
         methods: {
-            toggleEnabled(data) {
-                if (data.cellphone === null) {
-                    this.$message({
-                        message: '此用户没有录入手机号',
-                        type: 'error'
-                    });
-                    data.is_enabled = !data.is_enabled;
-                    return false;
-                }
-                this.$req.post('/authentication/set_enabled', {
-                    "cellphone": data.cellphone,
-                    "is_enable": data.is_enabled
-                }).then(() => {
-                    this.$message({
-                        message: '更改用户状态成功!',
-                        type: 'success'
-                    });
-                });
-            },
             showDialog() {
                 this.dialogVisible = true;
                 this.data_select = [];
+                this.transfer = {
+                    "pageSize": 10,
+                    "total": null,
+                    "currentPage": 1,
+                    "data": [],
+                    "search_content": ''
+                };
                 this.changePage();
             },
             dialog_confirm() {
-                this.dialogVisible = false;
-                this.addLiftsToUser();
-            },
-            addLiftsToUser() {
+                this.loading = true;
                 let params = {
-                    "lifts_ids": this.data_select,
-                    "user_id": Number(this.$route.query.id)
+                    "user_id": this.user.id,
+                    "lift_ids": this.data_select
                 };
-                console.log(params);
-                this.$req.post('/dm/lifts_users/lifts/add', params).then((result) => {
-                    if (result.Code === 7000) {
-                        this.$message({
-                            type: 'success',
-                            message: '添加成功'
-                        });
+                this.$api_v3.post('/AuUser/addLifts', params).then((res) => {
+                    console.log(res);
+                    if (res.code === 0) {
+                        if (res.code === 0) {
+                            this.$message.success('操作成功');
+                            this.findUser(this.user.id);
+                        } else {
+                            this.$message.error(res.data)
+                        }
                     }
-                })
-            },
-            setCompanyName(item) {
-                this.company_name = item.name;
-                this.user.company_id = item.id
-            },
-            changePage1() {
-                let params = {
-                    "page": this.popover.currentPage,
-                    "property": "id",
-                    "size": this.popover.pageSize,
-                    "sort": "DESC"
-                };
-                this.$req.post('/dm/company/all', params).then((result) => {
-                    console.log(result);
-                    this.popover.total = result.total_elements;
-                    this.popover.data = [...result.content]
-                })
-            },
-            popoverSearch() {
-                let params = {
-                    "page_proto": {
-                        "page": 1,
-                        "property": "id",
-                        "size": 10,
-                        "sort": "DESC"
-                    },
-                    "value": this.popoverInputVal
-                };
-                this.$req.post('/dm/company/fuzzy/search', params).then((result) => {
-                    console.log(result);
-                    this.popover.total = result.total_elements;
-                    this.popover.data = [...result.content]
-                })
+                }).finally(() => {
+                    this.loading = false;
+                    this.dialogVisible = false;
+                });
             },
             changePage() {
-                let params = {
-                    "company_id": this.user.company_id,
-                    "page_proto": {
-                        "page": this.transfer.currentPage,
-                        "property": "id",
-                        "size": this.transfer.pageSize,
-                        "sort": "DESC"
-                    }
+                let params = {};
+                params = {
+                    "page": this.transfer.currentPage,
+                    "list_rows": this.transfer.pageSize,
+                    "search_content": this.transfer.search_content,
+                    "sort": {"id": 1}
                 };
-                let url = '/dm/lift/list/company_id';
-                this.$req.post(url, params).then((result) => {
-                    console.log(result);
-                    this.transfer.total = result.total_elements;
+                this.$api_v3.post(this.allLift_url, params).then((res) => {
+                    console.log(res);
+                    this.transfer.total = res.data.total;
                     this.transfer.data = [];
-                    result.content.forEach((item) => {
+                    res.data.data.forEach((item) => {
                         this.transfer.data.push({"key": item.id, "label": item.name})
                     })
                 })
             },
-            onValChange(data) {
-                //console.log(data)
-                this.tableData = data
+            search() {
+                this.transfer.currentPage = 1;
+                this.changePage();
+            },
+            removeLift(row) {
+                let params = {
+                    "user_id": this.user.id,
+                    "lift_ids": [row.id]
+                };
+                this.$confirm('移除该电梯', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$api_v3.post('/AuUser/deleteLifts', params).then((res) => {
+                        console.log(res);
+                        if (res.code === 0) {
+                            let index = this.user.lifts.findIndex((i) => {
+                                return i.id === row.id;
+                            });
+                            if (index !== -1) {
+                                this.user.lifts.splice(index, 1);
+                            }
+                        } else {
+                            this.$message.error('移除失败   ')
+                        }
+                    })
+                }).catch(() => {
+                });
             },
             findUser(id) {
                 this.$api_v3.post('/AuUser/read', {"id": id}).then((res) => {
                     console.log("/AuUser/read", res);
                     if (res.code === 0) {
                         this.user = res.data;
+                        this.user.roles.forEach((i) => {
+                            this.roles.push(i.id)
+                        })
                     }
                 })
             },
-            addOrUpdateUser(){
+            addOrUpdateUser() {
                 let params = this.user;
-              this.$api_v3.post('/AuUser/save',params).then((res)=>{
-                  console.log('/AuUser/save',res);
-                  if(res.code===0){
-                      this.$message.success('操作成功');
-                  }else {
-                      this.$message.error('操作失败');
-                  }
-              })
+                params.role_ids = this.roles;
+                this.$api_v3.post('/AuUser/save', params).then((res) => {
+                    console.log('/AuUser/save', res);
+                    if (res.code === 0) {
+                        this.$message.success('操作成功');
+                    } else {
+                        this.$message.error('操作失败');
+                    }
+                })
             },
             toggleEdit() {
                 this.edit = !this.edit;
             },
-            showTransfer(params) {
-                this.dialogVisible = true;
-            },
             handleClose(done) {
                 done();
+            },
+            setCompanyName(item) {
+                this.user.group.name = item.name;
+                this.user.group.id = item.id;
+            },
+            changePage1() {
+                let params = {
+                    "page": this.popover.currentPage,
+                    "list_rows": this.popover.pageSize,
+                    "sort": [{"id": 1}]
+                };
+                this.$api_v3.post('/Group/listPage', params).then((result) => {
+                    console.log(result);
+                    if (result.code === 0) {
+                        this.popover.total = result.data.total;
+                        this.popover.data = result.data.data;
+                    }
+                })
+            },
+            getAllRoles() {
+                this.$api_v3.post('/AuRole/listPage', {}).then((res) => {
+                    console.log(res);
+                    if (res.code === 0) {
+                        res.data.data.forEach((i) => {
+                            this.roleOptions.push({"value": i.id, "label": i.name})
+                        })
+                    }
+                })
             },
         },
         // beforeRouteLeave(to, from, next) {
@@ -408,6 +370,7 @@
         //     }
         // },
         mounted() {
+            this.getAllRoles();
             if (this.$route.query.id !== null) {
                 this.edit = false;
                 this.userId = this.$route.query.id;
@@ -419,5 +382,14 @@
         }
     }
 </script>
-<style scoped lang="less">
+<style lang="less">
+    .el-input.el-input--small.el-input--suffix {
+        input {
+            height: 32px !important;
+        }
+    }
+
+    .multiple-select > .el-select__tags {
+        top: 70%;
+    }
 </style>

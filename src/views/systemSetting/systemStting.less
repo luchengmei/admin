@@ -1,0 +1,34 @@
+.container {
+  .container_left {
+    float: left;
+    width: 250px;
+    background: #ffffff;
+    .companyType-list {
+      color: #666666;
+      display: flex;
+      flex-direction: column;
+      > span {
+        cursor: pointer;
+        padding: 2px 40px;
+        margin: 5px 0;
+        border-radius: 50px;
+      }
+      > span:hover {
+        background: #eeeeee;
+      }
+      i {
+        color: #666666;
+        padding: 0 4px;
+      }
+      .active {
+        background: rgba(60, 141, 188, 0.3);
+        color: #3C8DBC;
+      }
+    }
+  }
+  .container_right {
+    margin-left: 300px;
+    flex: 1;
+    background: #ffffff;
+  }
+}

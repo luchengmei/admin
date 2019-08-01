@@ -3,7 +3,9 @@
         <el-card class="box-card">
             <div slot="header" class="box-card-header">
                 <span class="name">{{ company.name}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateCompany()">{{addNew?'新增':'提交'}}</el-button>
+                <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateCompany()">
+                    {{addNew?'新增':'提交'}}
+                </el-button>
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
@@ -19,7 +21,7 @@
                                 <div class="left"><i class="fa fa-id-card"></i></div>
                                 <div class="center">单位名称</div>
                                 <div class="right" v-if="edit">
-                                    <el-input v-model="company.name"></el-input>
+                                    <el-input v-model="company.name" clearable></el-input>
                                 </div>
                                 <div class="right" v-else="edit">{{company.name}}</div>
                             </li>
@@ -27,7 +29,7 @@
                                 <div class="left"><i class="el-icon-location"></i></div>
                                 <div class="center">地址</div>
                                 <div class="right" v-if="edit">
-                                    <el-input v-model="company.address"></el-input>
+                                    <el-input v-model="company.address" clearable></el-input>
                                 </div>
                                 <div class="right" v-else="edit">{{company.address}}</div>
                             </li>
@@ -35,7 +37,7 @@
                                 <div class="left"><i class="fa fa-phone"></i></div>
                                 <div class="center">联系电话</div>
                                 <div class="right" v-if="edit">
-                                    <el-input v-model="company.telephone"></el-input>
+                                    <el-input v-model="company.telephone" clearable></el-input>
                                 </div>
                                 <div class="right" v-else>{{company.telephone}}</div>
                             </li>
@@ -62,43 +64,53 @@
                         <el-button type="primary" @click="showDialog()">添加电梯</el-button>
                     </div>
                     <el-table
-                            :data="tableData"
+                            :data="company.lifts"
                             style="width: 100%;margin-top: 15px;color: #3C8DBC;font-size: 14px">
+                        <el-table-column
+                                prop="id"
+                                label="电梯ID">
+                        </el-table-column>
                         <el-table-column
                                 prop="name"
                                 label="电梯名称">
                         </el-table-column>
-                        <el-table-column
-                                prop="address"
-                                label="地址">
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <el-button @click="removeLifts(scope.row)" size="mini">移除</el-button>
+                            </template>
                         </el-table-column>
                     </el-table>
-                    <paginate style="border: none" :api="list_url" :params="list_params" :refresh="refresh"
-                              @val-change="onValChange"></paginate>
                 </el-tab-pane>
                 <el-tab-pane label="用户列表" name="third">
                     <div style="margin-top:15px">
                         <el-button type="primary" @click="showDialog()">添加用户</el-button>
                     </div>
                     <el-table
-                            :data="tableData_u"
+                            :data="company.users"
                             style="width: 100%;margin-top: 15px;color: #3C8DBC;font-size: 14px">
+                        <el-table-column
+                                prop="id"
+                                label="用户ID">
+                        </el-table-column>
                         <el-table-column
                                 prop="name"
                                 label="姓名">
                         </el-table-column>
                         <el-table-column
-                                prop="cellphone"
+                                prop="phone"
                                 label="联系电话">
                         </el-table-column>
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <el-button @click="removeUsers(scope.row)" size="mini">移除</el-button>
+                            </template>
+                        </el-table-column>
                     </el-table>
-                    <paginate style="border: none" :api="list_url_u" :params="list_params_u" :refresh="refresh_u"
-                              @val-change="onValChange_u"></paginate>
                 </el-tab-pane>
             </el-tabs>
         </el-card>
-        <el-dialog title="" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
-            <el-transfer style="display: flex;align-items: center;justify-content: center" filterable
+        <el-dialog title="" :visible.sync="dialogVisible" width="50%" :before-close="handleClose">
+            <el-transfer style="display: flex;align-items: center;justify-content: center"
                          :titles="['待选', '已选']"
                          :data="transfer.data"
                          v-model="data_select">
@@ -108,13 +120,20 @@
                                :page-size.sync="transfer.pageSize"
                                :current-page.sync="transfer.currentPage"
                                @current-change="changePage"
-                               small
+                               mornal
                                layout="prev, pager, next"
                                :total="transfer.total"
                                background>
                 </el-pagination>
                 <el-button @click="dialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialog_confirm">确 定</el-button>
+                <el-button :loading="loading" type="primary" @click="dialogConfirm">确 定</el-button>
+            </span>
+            <span slot="title">
+                <el-input :placeholder="placeholder" style="width: 50%;font-size: 12px" @clear="search()"
+                          @keyup.native.enter="search()" clearable
+                          v-model="transfer.search_content">
+                     <el-button slot="append" icon="el-icon-search" @click="search()"></el-button>
+                </el-input>
             </span>
         </el-dialog>
     </div>
@@ -129,10 +148,8 @@
         },
         data() {
             return {
-                hasSave:true,
+                hasSave: true,
                 companyChangeCount: 0,
-                collapseNames: [],
-                companyId: null,
                 dialogVisible: false,
                 typeOptions: [
                     {
@@ -147,46 +164,20 @@
                 addNew: false,
                 activeName: 'index',
                 company: {},
-                lifts: [],//对象数组
-                userCellphones: [],//字符串数组
-
                 //--------------transfer--------------
+                placeholder: '',
+                loading: false,
                 data_select: [],
                 transfer: {
                     "pageSize": 10,
                     "total": null,
                     "currentPage": 1,
                     "data": [],
+                    "search_content": ''
                 },
-                allUser_url: '/user/fetch/company',
-                allLift_url: '/dm/lift/list/company_id',
-
-                //--------------电梯列表---------------
-                list_url: '/dm/lift/list/company_id',
-                list_params: {
-                    "company_id": this.$route.query.id,
-                    "page_proto": {
-                        "page": 1,
-                        "property": "id",
-                        "size": 10,
-                        "sort": "DESC"
-                    }
-                },
-                refresh: false,
-                tableData: [],
-                //--------------用户列表------------------
-                list_url_u: '/user/fetch/company',
-                list_params_u: {
-                    "company_id": this.$route.query.id,
-                    "page_proto": {
-                        "page": 1,
-                        "property": "id",
-                        "size": 10,
-                        "sort": "DESC"
-                    }
-                },
-                refresh_u: false,
-                tableData_u: [],
+                current_url: '',
+                allUser_url: '/AuUser/listPage',
+                allLift_url: '/Lifts/listPage',
             }
         },
         filters: {
@@ -197,103 +188,91 @@
             }
         },
         methods: {
-            addUsersToCompany(id, data) {
-                let params = {
-                    "company_id": id,
-                    "user_cellphones": data
-                };
-                this.$req.post('/user/add/company', params).then((result) => {
-                    this.$message({
-                        type: 'success',
-                        message: '添加成功'
-                    });
-                    this.refresh_u = !this.refresh_u;
-                })
-            },
-            addLiftsToCompany(id, data) {
-                let params = {
-                    "company_id": id,
-                    "lift_ids": data
-                };
-                this.$req.post('/dm/lift/add/company', params).then(() => {
-                    this.$message({
-                        type: 'success',
-                        message: '添加成功'
-                    });
-                    this.refresh = !this.refresh;
-                })
-            },
-            dialog_confirm() {
-                this.dialogVisible = false;
-                if (this.data_select.length === 0) return false;
-                if (this.activeName === 'third') {
-                    this.addUsersToCompany(this.companyId, this.data_select);
-                } else if (this.activeName === 'second') {
-                    this.addLiftsToCompany(this.companyId, this.data_select);
-                }
-            },
             showDialog() {
                 this.dialogVisible = true;
                 this.data_select = [];
+                this.transfer = {
+                    "pageSize": 10,
+                    "total": null,
+                    "currentPage": 1,
+                    "data": [],
+                    "search_content": ''
+                };
+                if (this.activeName === 'second') {
+                    this.placeholder = '搜索内容，电梯名称/物业单位名称/维保单位名称';
+                    this.current_url = this.allLift_url;
+                } else if (this.activeName === 'third') {
+                    this.placeholder = '搜索内容,用户手机/用户姓名/单位名称';
+                    this.current_url = this.allUser_url;
+                }
                 this.changePage();
             },
             changePage() {
                 let params = {};
-                let url = '';
-                if (this.activeName === 'second') {
-                    url = this.allLift_url;
-                    params = {
-                        "company_id": 0,
-                        "page_proto": {
-                            "page": this.transfer.currentPage,
-                            "property": "id",
-                            "size": this.transfer.pageSize,
-                            "sort": "DESC"
-                        }
-                    }
-                }
-                if (this.activeName === 'third') {
-                    url = this.allUser_url;
-                    params = {
-                        "company_id": null,
-                        "page_proto": {
-                            "page": this.transfer.currentPage,
-                            "property": "id",
-                            "size": this.transfer.pageSize,
-                            "sort": "DESC"
-                        }
-                    };
-                }
-                this.$req.post(url, params).then((result) => {
-                    console.log(result);
-                    this.transfer.total = result.total_elements;
+                params = {
+                    "page": this.transfer.currentPage,
+                    "list_rows": this.transfer.pageSize,
+                    "search_content": this.transfer.search_content,
+                    "sort": {"id": 1}
+                };
+                this.$api_v3.post(this.current_url, params).then((res) => {
+                    console.log(res);
+                    this.transfer.total = res.data.total;
                     this.transfer.data = [];
-                    if (this.activeName === 'second') {
-                        result.content.forEach((item) => {
-                            this.transfer.data.push({"key": item.id, "label": item.name})
-                        })
-                    } else if (this.activeName === 'third') {
-                        result.content.forEach((item) => {
-                            this.transfer.data.push({"key": item.cellphone, "label": item.name})
-                        })
-                    }
+                    res.data.data.forEach((item) => {
+                        this.transfer.data.push({"key": item.id, "label": item.name})
+                    })
                 })
             },
-            onValChange(data) {
-                //console.log(data)
-                this.tableData = data;
-            },
-            onValChange_u(data) {
-                console.log(data);
-                this.tableData_u = data;
+            search() {
+                this.transfer.currentPage = 1;
+                this.changePage();
             },
             handleClose(done) {
                 done();
             },
+            dialogConfirm() {
+                this.loading = true;
+                if (this.activeName === 'second') {
+                    let params = {
+                        "group_id": this.company.id,
+                        "lift_ids": this.data_select
+                    };
+                    this.$api_v3.post('/Group/addLifts', params).then((res) => {
+                        console.log(res);
+                        if (res.code === 0) {
+                            this.$message.success('操作成功');
+                            this.findCompanyById(this.company.id);
+                        } else {
+                            this.$message.error(res.data)
+                        }
+                    }).finally(() => {
+                        this.loading = false;
+                        this.dialogVisible = false;
+                    })
+                } else if (this.activeName === 'third') {
+                    let params = {
+                        "group_id": this.company.id,
+                        "user_ids": this.data_select
+                    };
+                    this.$api_v3.post('/Group/addUsers', params).then((res) => {
+                        console.log(res);
+                        if (res.code === 0) {
+                            this.$message.success('操作成功')
+                        } else {
+                            this.$message.error(res.data)
+                        }
+                    }).finally(() => {
+                        this.loading = false;
+                        this.dialogVisible = false;
+                        this.findCompanyById(this.company.id);
+                    })
+                }
+            },
             findCompanyById(id) {
-                this.$api_v3.post('/Group/read',{"id":id}).then((result)=>{
+                this.$api_v3.post('/Group/read', {"id": id}).then((result) => {
                     console.log(result);
-                    if(result.code===0){
+                    if (result.code === 0) {
                         this.company = result.data;
                     }
                 });
@@ -301,27 +280,81 @@
             toggleEdit() {
                 this.edit = !this.edit;
             },
-            addOrUpdateCompany(){
+            addOrUpdateCompany() {
                 let params = this.company;
-                if(params.name ==='') return;
-                this.$api_v3.post('/Group/save',params).then((result)=>{
+                if (params.name === '') return;
+                this.$api_v3.post('/Group/save', params).then((result) => {
                     console.log(result);
-                    if(result.code===0){
+                    if (result.code === 0) {
                         this.$message.success('操作成功')
+                    }else {
+                        this.$message.error(result.data)
                     }
                 })
+            },
+            removeUsers(row) {
+                let params = {
+                    "group_id": this.company.id,
+                    "user_ids": [row.id]
+                };
+                this.$confirm('移除该电梯', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$api_v3.post('/Group/deleteUsers', params).then((res) => {
+                        console.log(res);
+                        if (res.code === 0) {
+                            let index = this.company.users.findIndex((i) => {
+                                return i.id === row.id;
+                            });
+                            if (index !== -1) {
+                                this.company.users.splice(index, 1);
+                            }
+                        } else {
+                            this.$message.error('移除失败')
+                        }
+                    })
+                }).catch(() => {
+                });
+            },
+            removeLifts(row) {
+                let params = {
+                    "group_id": this.company.id,
+                    "lift_ids": [row.id]
+                };
+                this.$confirm('移除该电梯', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$api_v3.post('/Group/deleteLifts', params).then((res) => {
+                        console.log(res);
+                        if (res.code === 0) {
+                            let index = this.company.lifts.findIndex((i) => {
+                                return i.id === row.id;
+                            });
+                            if (index !== -1) {
+                                this.company.lifts.splice(index, 1);
+                            }
+                        } else {
+                            this.$message.error('移除失败   ')
+                        }
+                    })
+                }).catch(() => {
+                });
             }
         },
-        watch:{
-          'company': {
-              handler: function () {
-                  this.companyChangeCount += 1;
-                  if (this.companyChangeCount >1) {
-                      this.hasSave = false;
-                  }
-              },
-              deep: true
-          }
+        watch: {
+            'company': {
+                handler: function () {
+                    this.companyChangeCount += 1;
+                    if (this.companyChangeCount > 1) {
+                        this.hasSave = false;
+                    }
+                },
+                deep: true
+            }
         },
         // beforeRouteLeave(to, from, next) {
         //     if (this.hasSave === false) {
@@ -340,7 +373,6 @@
         // },
         mounted() {
             if (this.$route.query.id !== null) {
-                this.companyId = Number(this.$route.query.id);
                 this.findCompanyById(this.$route.query.id);
             } else {
                 this.edit = true;

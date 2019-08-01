@@ -7,9 +7,9 @@
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
                     <div class="panel-heading">
-                        <span class="title"><p class="role">{{me.name}}</p><span class="name">{{me.roles?me.roles[0]:''}}</span> </span>
-                        <i class="el-icon-edit-outline"
-                           style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>
+                        <span class="title"><p class="role">{{me.name}}</p> </span>
+                        <!--<i class="el-icon-edit-outline"-->
+                           <!--style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>-->
                     </div>
                     <div class="panel-body">
                         <ul>
@@ -26,12 +26,12 @@
                             <li>
                                 <div class="left"><i class="fa fa-phone"></i></div>
                                 <div class="center">手机</div>
-                                <div class="right">{{me.cellphone}}</div>
+                                <div class="right">{{me.phone}}</div>
                             </li>
                             <li>
                                 <div class="left"><i class="fa fa-calendar"></i></div>
                                 <div class="center">注册时间</div>
-                                <div class="right">{{me.created_at}}</div>
+                                <div class="right">{{me.ctime}}</div>
                             </li>
                         </ul>
                     </div>
@@ -65,7 +65,6 @@
                     </div>
                     <div class="panel-footer">
                         <div>
-                            <!--<el-button icon="fa fa-reply"> 重置</el-button>-->
                             <el-button icon="fa fa-check" type="primary"> 保存修改</el-button>
                         </div>
                     </div>
@@ -79,20 +78,15 @@
 
     export default {
         data() {
+            const user = JSON.parse(sessionStorage.getItem('user'));
             return {
                 activeName: 'index',
-                me:{}
+                me:user,
             }
         },
         methods: {
-            fetchMe() {
-                this.$req.post('/authentication/me').then((result) => {
-                    this.me = result;
-                })
-            }
         },
         mounted: function () {
-            this.fetchMe();
         }
     }
 </script>

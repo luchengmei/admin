@@ -181,7 +181,7 @@ let RouteList = [
                 name: 'CompanySetting',
                 meta: {
                     title: '单位类型设置',
-                    keepAlive: false
+                    keepAlive: true
                 },
                 component: resolve => require(['@/views/systemSetting/CompanySetting.vue'], resolve),
             },
@@ -190,7 +190,7 @@ let RouteList = [
                 name: 'RoleSetting',
                 meta: {
                     title: '角色权限设置',
-                    keepAlive: false
+                    keepAlive: true
                 },
                 component: resolve => require(['@/views/systemSetting/RoleSetting.vue'], resolve),
             },

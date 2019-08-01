@@ -14,8 +14,7 @@
                             :value="item.value">
                     </el-option>
                 </el-select>
-                <el-select style="width: 100px" v-model="params.status" placeholder="用户状态" size="small" clearable
-                           value="">
+                <el-select style="width: 100px" v-model="params.status" placeholder="用户状态" size="small" clearable value="">
                     <el-option
                             v-for="item in statusOption"
                             :key="item.value"
@@ -48,6 +47,11 @@
                     width="40">
             </el-table-column>
             <el-table-column
+                    width="80"
+                    prop="id"
+                    label="用户ID">
+            </el-table-column>
+            <el-table-column
                     prop="phone"
                     label="手机号">
             </el-table-column>
@@ -60,7 +64,7 @@
                     label="用户类型">
                 <template slot-scope="scope">
                     <el-tag v-for="i in scope.row.roles" style="margin: 0 2px" type="info">
-                        {{i|userTypeFrm}}
+                        {{i}}
                     </el-tag>
                 </template>
             </el-table-column>
@@ -78,6 +82,7 @@
                 </div>
             </el-table-column>
             <el-table-column
+                    fixed="right"
                     label="操作"
                     :render-header="tableAction"
                     width="180">
@@ -147,18 +152,6 @@
             }
         },
         filters: {
-            userTypeFrm(val) {
-                if (val === 'ROLE_ADMIN') return '管理员';
-                if (val === 'ROLE_DEVELOPER') return '开发人员';
-                if (val === 'ROLE_CLIENT_ADMIN') return '物业管理员';
-                if (val === 'ROLE_CLIENT') return '物业';
-                if (val === 'ROLE_MAINTAINER_ADMIN') return '维保管理员';
-                if (val === 'ROLE_MAINTAINER') return '维保';
-                if (val === 'ROLE_INSTALLER_ADMIN') return '安装人员管理员';
-                if (val === 'ROLE_INSTALLER') return '安装人员';
-                if (val === 'ROLE_SUPER_ADMIN') return '超级管理员';
-                return val;
-            }
         },
         methods: {
             initList() {

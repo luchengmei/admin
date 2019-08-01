@@ -215,32 +215,6 @@
                 if (this.data_select.length === 0) return false;
                 this.deviceBindLift();
             },
-            changePage() {
-                let params = {};
-                let url = this.list_url;
-                // this.$req.post(url, params).then((result) => {
-                //     console.log(result);
-                //     this.transfer.total = result.total_elements;
-                //     this.transfer.data = [];
-                //     result.content.forEach((item) => {
-                //         this.transfer.data.push({"key": item.id, "label": item.name})
-                //     })
-                // })
-            },
-            deviceBindLift() {
-                if (!this.this.device.name) return false;
-                let params = {
-                    "device_name": this.device.name,
-                    "lift_id": this.device.lift_id
-                };
-                this.$req.post('/dm/device/bind_lift', params).then((result) => {
-                    this.device.binding_time = new Date();
-                    this.$message({
-                        "type": 'success',
-                        "message": '绑定成功'
-                    })
-                })
-            },
             gteDeviceById(id) {
                 this.$api_v3.post('/Devices/read',{"id":id}).then((res)=>{
                     console.log(res);
