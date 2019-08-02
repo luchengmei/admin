@@ -68,10 +68,10 @@
                                             <el-card class="box-card" shadow="never">
                                                 <div slot="header" style="display: flex;align-items: center">
                                                     <!--<el-input placeholder="请输入名称" v-model="popoverInputVal"-->
-                                                              <!--@clear="changePage1" clearable-->
-                                                              <!--@keyup.native.enter="popoverSearch">-->
-                                                        <!--<el-button slot="append" icon="el-icon-search"-->
-                                                                   <!--@click="popoverSearch"></el-button>-->
+                                                    <!--@clear="changePage1" clearable-->
+                                                    <!--@keyup.native.enter="popoverSearch">-->
+                                                    <!--<el-button slot="append" icon="el-icon-search"-->
+                                                    <!--@click="popoverSearch"></el-button>-->
                                                     <!--</el-input>-->
                                                     <el-pagination
                                                             :page-size.sync="popover.pageSize"
@@ -91,7 +91,8 @@
                                             <el-button slot="reference" type="primary">点击选择</el-button>
                                         </el-popover>
                                     </div>
-                                    <el-input style="flex: 1" v-model="user.group.name" disabled></el-input>
+                                    <el-input style="flex: 1" v-model="group_name"
+                                              disabled></el-input>
                                 </div>
                                 <div class="right" v-else>{{user.group?user.group.name:''}}
                                 </div>
@@ -197,6 +198,7 @@
                 addUser: false,
                 company_name: '',
                 user: {},
+                group_name:'',
                 roles: [],
                 activeName: 'index',
                 userType: [],
@@ -303,7 +305,8 @@
                         this.user = res.data;
                         this.user.roles.forEach((i) => {
                             this.roles.push(i.id)
-                        })
+                        });
+                        this.group_name = this.user.group?this.user.group.name:'';
                     }
                 })
             },
@@ -326,6 +329,9 @@
                 done();
             },
             setCompanyName(item) {
+                this.group_name = item.name;
+                this.user.group_id = item.id;
+                this.user.group={};
                 this.user.group.name = item.name;
                 this.user.group.id = item.id;
             },

@@ -4,18 +4,18 @@
             <el-button type="primary" icon="el-icon-plus" size="small" @click="addUser()" v-show="!treeModel">添加
             </el-button>
             <!--<el-button type="primary" size="small" @click="changeModel">{{treeModel?'列表':'树形结构'}}</el-button>-->
-            <!--<div v-show="!treeModel" style="float: right">-->
-                <!--<el-input-->
-                        <!--placeholder="请输入单位名称！"-->
-                        <!--size="small"-->
-                        <!--style="width: 140px"-->
-                        <!--v-model="params.name"-->
-                        <!--@clear="initList"-->
-                        <!--@keyup.native.enter="searchUser"-->
-                        <!--clearable>-->
-                <!--</el-input>-->
-                <!--<el-button @click="searchUser" type="success" icon="el-icon-search" size="small"></el-button>-->
-            <!--</div>-->
+            <div v-show="!treeModel" style="float: right">
+                <el-input
+                        placeholder="请输入单位名称"
+                        size="small"
+                        style="width: 140px"
+                        v-model="params.name"
+                        @clear="searchUser"
+                        @keyup.native.enter="searchUser"
+                        clearable>
+                </el-input>
+                <el-button @click="searchUser" type="success" icon="el-icon-search" size="small"></el-button>
+            </div>
         </ToolBar>
         <el-table
                 v-show="!treeModel"
@@ -107,7 +107,6 @@
 
     export default {
         data() {
-            const permissions = JSON.parse(localStorage.getItem('permissions'));
             const data = [
                 {
                 id: 1,
@@ -155,14 +154,14 @@
                 }]
             }];
             return {
-                permissions: permissions,
                 data: JSON.parse(JSON.stringify(data)),
                 treeModel: false,
                 paginate_api: '/Group/listPage',
                 paginate_params: {
                     "list_rows": 1,
                     "size": 10,
-                    "sort":{id:1}
+                    "sort":{id:1},
+                    "name":''
                 },
                 refresh: false,
                 params: {
@@ -177,31 +176,13 @@
             changeModel() {
                 this.treeModel = !this.treeModel;
             },
-            onValChange(data) {
-                this.companies = data;
-            },
-            initList() {
-                this.paginate_api = '/dm/company/all';
-                this.paginate_params = {
-                    "page": 1,
-                    "property": "id",
-                    "size": 10,
-                    "sort": "DESC"
-                };
+            searchUser(){
+                this.paginate_params.list_rows = 1;
+                this.paginate_params.name = this.params.name;
                 this.refresh = !this.refresh;
             },
-            searchUser() {
-                this.paginate_api = '/dm/company/fuzzy/search';
-                this.paginate_params = {
-                    "page_proto": {
-                        "page": 1,
-                        "property": "id",
-                        "size": 10,
-                        "sort": "DESC"
-                    },
-                    "value": this.params.name
-                };
-                this.refresh = !this.refresh
+            onValChange(data) {
+                this.companies = data;
             },
             tableAction() {
                 return this.$createElement('HelpHint', {

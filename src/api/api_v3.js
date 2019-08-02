@@ -1,6 +1,7 @@
 import axios from 'axios'
 import router from '../router/'
 import Config from '../config/'
+import {Message} from 'element-ui'
 
 let service = axios.create({
     baseURL: process.env.NODE_ENV === 'development' ? 'https://api.msddtsw.com/v3' : 'https://api.msddtsw.com/v3',
@@ -28,9 +29,12 @@ service.interceptors.response.use(function (response) {
          * 当code返回如下情况则说明权限有问题，登出并返回到登录页
          * 如想通过xmlhttprequest来状态码标识 逻辑可写在下面error中
          */
-        // console.log('api',response);
-        // const res = response.data;
-        // if(res.code!==0&&)
+        //console.log('api',response);
+        const res = response.data;
+        if(res.code==-1&&res.msg=='无效token'){
+            Message.error('身份验证过期，请重新登录');
+            router.push('/');
+        }
         return response
     }, function (error) {
         console.log('err' + error);

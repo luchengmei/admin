@@ -68,9 +68,9 @@
                     label="电梯名称">
             </el-table-column>
             <el-table-column
-                    prop="type"
+                    prop="fault_code"
                     label="报警类型">
-                <template slot-scope="scope">{{scope.row.type|typeFrm}}</template>
+                <template slot-scope="scope">{{scope.row.fault_code}}</template>
             </el-table-column>
             <el-table-column
                     prop="description"
@@ -80,8 +80,9 @@
                     prop="status"
                     label="报警处理状态">
                 <template slot-scope="scope">
-                    <el-tag v-if="scope.row.status==='1'" type="success" size="small">已处理</el-tag>
-                    <el-tag v-else type="danger" size="small">未处理</el-tag>
+                    <el-tag v-show="scope.row.status=='0'" type="danger" size="small">未处理</el-tag>
+                    <el-tag v-show="scope.row.status=='2'" type="success" size="small">已处理</el-tag>
+                    <el-tag v-show="scope.row.status=='3'" type="default" size="small">误报</el-tag>
                 </template>
             </el-table-column>
             <el-table-column

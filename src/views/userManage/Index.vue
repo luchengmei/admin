@@ -5,8 +5,7 @@
             <!--<el-button type="primary" @click="multipleHandle">批量禁用/允许</el-button>-->
             <!--<el-button type="danger" icon="el-icon-delete" @click="multipleDelete">批量删除</el-button>-->
             <div style="float: right">
-                <el-select style="width: 100px" v-model="params.type" placeholder="用户类型" size="small" clearable
-                           value="">
+                <el-select style="width: 100px" v-model="params.type" placeholder="用户类型" size="small" clearable value="">
                     <el-option
                             v-for="item in typeOption"
                             :key="item.value"
