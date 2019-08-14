@@ -26,11 +26,11 @@
                         size="small"
                         style="width: 220px"
                         v-model="params.name"
-                        @clear="initList"
-                        @keyup.native.enter="searchUser(params.name)"
+                        @clear="searchUser()"
+                        @keyup.native.enter="searchUser()"
                         clearable>
                 </el-input>
-                <el-button @click="searchUser(params.name)" type="success" icon="el-icon-search"
+                <el-button @click="searchUser()" type="success" icon="el-icon-search"
                            size="small"></el-button>
             </div>
         </ToolBar>
@@ -46,17 +46,32 @@
                     width="40">
             </el-table-column>
             <el-table-column
-                    width="80"
+                    width="100"
                     prop="id"
                     label="用户ID">
+                <template slot="header" slot-scope="scope">
+                    用户ID
+                    <table-sort @ascending="onAscOrDesc('id',0)"
+                                @descending="onAscOrDesc('id',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     prop="phone"
                     label="手机号">
+                <template slot="header" slot-scope="scope">
+                    手机号
+                    <table-sort @ascending="onAscOrDesc('phone',0)"
+                                @descending="onAscOrDesc('phone',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     prop="name"
                     label="姓名">
+                <template slot="header" slot-scope="scope">
+                    姓名
+                    <table-sort @ascending="onAscOrDesc('name',0)"
+                                @descending="onAscOrDesc('name',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     prop="roles"
@@ -70,6 +85,11 @@
             <el-table-column
                     prop="company_name"
                     label="所属单位">
+                <template slot="header" slot-scope="scope">
+                    所属单位
+                    <table-sort @ascending="onAscOrDesc('company_name',0)"
+                                @descending="onAscOrDesc('company_name',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     prop="status"
@@ -110,15 +130,14 @@
     import ToolBar from '@/components/ToolBar.vue';
     import HelpHint from '@/components/HelpHint.vue';
     import Paginate from "../../components/Paginate";
+    import TableSort from  "../../components/TableSort"
 
     export default {
         data() {
-            const permissions = JSON.parse(localStorage.getItem('permissions'));
             return {
-                permissions: permissions,
                 paginate_api: '/AuUser/listPage',
                 paginate_params: {
-                    "list_rows": 1,
+                    "page": 1,
                     "size": 10,
                     "sort": {id: 1}
                 },
@@ -153,10 +172,6 @@
         filters: {
         },
         methods: {
-            initList() {
-                this.paginate_params.search_content = '';
-                this.refresh = !this.refresh
-            },
             onValChange(data) {
                 data.forEach((i) => {
                     if (i.roles === null) {
@@ -216,10 +231,11 @@
                 }).catch(() => {
                 })
             },
-            searchUser(value) {
+            searchUser() {
+                this.paginate_params.page = 1;
                 this.paginate_params.user_status = this.params.status;
                 this.paginate_params.company_type = this.params.type;
-                this.paginate_params.search_content = value;
+                this.paginate_params.search_content = this.params.name;
                 this.refresh = !this.refresh;
             },
             tableAction() {
@@ -228,6 +244,11 @@
                         content: ' 重置密码 / 编辑用户 / 禁用或允许登录 / 删除用户'
                     }
                 }, '操作');
+            },
+            onAscOrDesc(str, num) {
+                console.log(str, num);
+                this.paginate_params.sort[str] = num;
+                this.refresh = !this.refresh;
             },
             addUser(id = null) {
                 this.$router.push({path: '/user_detail', query: {id: id}})
@@ -279,7 +300,7 @@
         mounted() {
         },
         components: {
-            ToolBar, HelpHint, Paginate
+            ToolBar, HelpHint, Paginate,TableSort
         }
     }
 </script>

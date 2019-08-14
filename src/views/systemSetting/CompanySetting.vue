@@ -120,7 +120,7 @@
                 }
             },
             router_company(id) {
-                this.$router.push({path: '/userCompany_detail', query: {id: id}})
+                this.$router.push({path: '/user_company_detail', query: {id: id}})
             },
             changeCurrent(id) {
                 if (id !== this.current) {

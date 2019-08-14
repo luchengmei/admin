@@ -3,77 +3,57 @@
         <el-card class="box-card">
             <div slot="header">
                 <span>{{ $route.meta.title}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="save()">
-                    {{this.addNew?'新增':'提交'}}
-                </el-button>
+                <el-button type="primary" icon="el-icon-check" style="float: right" @click="save()">提交</el-button>
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
-                    <div class="panel-heading">
-                        <span class="title"><span class="name">{{device.name}}</span></span>
-                        <i :class="edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"
-                           @click="toggleEdit"
-                           style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>
-                    </div>
+                    <!--<div class="panel-heading">-->
+                        <!--<span class="title"><span class="name"></span></span>-->
+                        <!--<i :class="edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"-->
+                           <!--@click="toggleEdit"-->
+                           <!--style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>-->
+                    <!--</div>-->
                     <div class="panel-body">
                         <ul>
                             <li>
                                 <div class="left"><i class="fa fa-id-card"></i></div>
-                                <div class="center">采集仪名称</div>
+                                <div class="center">电梯名称</div>
                                 <div class="right" v-if="edit">
-                                    <el-input v-model="device.name"></el-input>
+                                    <el-input></el-input>
                                 </div>
-                                <div class="right" v-else="edit">{{device.name}}</div>
+                                <div class="right" v-else="edit">{{liftFault.lift?liftFault.lift.name:''}}</div>
                             </li>
                             <li>
                                 <div class="left"><i class="el-icon-info"></i></div>
-                                <div class="center">ip</div>
+                                <div class="center">报警描述</div>
                                 <div class="right" v-if="edit">
-                                    <el-input v-model="device.ip"></el-input>
+                                    <el-input></el-input>
                                 </div>
-                                <div class="right" v-else="edit">{{device.ip}}</div>
+                                <div class="right" v-else="edit">
+                                    {{liftFault.description}}
+                                </div>
                             </li>
                             <li>
                                 <div class="left"><i class="el-icon-info"></i></div>
-                                <div class="center">mac</div>
+                                <div class="center">报警时间</div>
                                 <div class="right" v-if="edit">
-                                    <el-input v-model="device.mac"></el-input>
+                                    <el-input></el-input>
                                 </div>
-                                <div class="right" v-else="edit">{{device.mac}}</div>
+                                <div class="right" v-else="edit">{{liftFault.ctime}}</div>
                             </li>
                             <li>
-                                <div class="left"><i class="fa fa-window-restore"></i></div>
-                                <div class="center">绑定电梯</div>
+                                <div class="left"><i class="el-icon-info"></i></div>
+                                <div class="center">报警状态</div>
                                 <div class="right" v-if="edit">
-                                    <el-button type="primary" @click="showDialog">绑定电梯</el-button>
+                                    <el-input></el-input>
                                 </div>
-                                <div class="right" v-else="edit">{{device.lift_id}}</div>
+                                <div class="right" v-else="edit">{{liftFault.status|statusFilter}}</div>
                             </li>
                         </ul>
                     </div>
                 </el-tab-pane>
             </el-tabs>
         </el-card>
-        <el-dialog title="" :visible.sync="dialogVisible" width="40%" :before-close="handleClose">
-            <el-transfer style="display: flex;align-items: center;justify-content: center" filterable
-                         :titles="['待选', '已选']"
-                         :data="transfer.data"
-                         v-model="data_select">
-            </el-transfer>
-            <span slot="footer" class="dialog-footer">
-                <el-pagination style="float: left"
-                               :page-size.sync="transfer.pageSize"
-                               :current-page.sync="transfer.currentPage"
-                               @current-change="changePage"
-                               small
-                               layout="prev, pager, next"
-                               :total="transfer.total"
-                               background>
-                </el-pagination>
-                <el-button @click="dialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialog_confirm">确 定</el-button>
-            </span>
-        </el-dialog>
     </div>
 </template>
 
@@ -82,104 +62,44 @@
     export default {
         data() {
             return {
-                typeOptions: [
-                    {
-                        label: '物业',
-                        value: 1,
-                    },
-                    {
-                        label: '维保单位',
-                        value: 2
-                    }],
-                edit: false,
-                addNew: false,
-                activeName: 'index',
-                device: {},
-                //transfer-------------
-                dialogVisible: false,
-                data_select: [],
-                transfer: {
-                    "pageSize": 10,
-                    "total": null,
-                    "currentPage": 1,
-                    "data": [],
-                },
-                list_url: '',
+                activeName:'index',
+                edit:false,
+                liftFault:{}
             }
         },
-        filters: {},
+        filters: {
+            statusFilter(value){
+               // 0未处理，1已查看，2已处理，3误报
+                if(value==0){
+                    return '未处理'
+                }
+                if(value==1){
+                    return '已查看'
+                }
+                if(value==2){
+                    return '已处理'
+                }
+                if(value==3){
+                    return '误报'
+                }
+                return value;
+            }
+        },
         methods: {
-            showDialog() {
-                this.dialogVisible = true;
-                this.data_select = [];
-                this.changePage();
-            },
-            handleClose(done) {
-                done()
-            },
-            dialog_confirm() {
-                this.dialogVisible = false;
-                if (this.data_select.length === 0) return false;
-                this.deviceBindLift();
-            },
-            changePage() {
-                let params = {};
-                let url = this.list_url;
-                // this.$req.post(url, params).then((result) => {
-                //     console.log(result);
-                //     this.transfer.total = result.total_elements;
-                //     this.transfer.data = [];
-                //     result.content.forEach((item) => {
-                //         this.transfer.data.push({"key": item.id, "label": item.name})
-                //     })
-                // })
-            },
-            addDevice() {
-                let params = this.device;
-                this.$req.post('/dm/device/add', params).then((result) => {
-                    this.$message({
-                        "type": "success",
-                        "message": '新增成功'
-                    })
-                })
-            },
-            deviceBindLift() {
-                if (!this.this.device.name) return false;
-                let params = {
-                    "device_name": this.device.name,
-                    "lift_id": this.device.lift_id
-                };
-                this.$req.post('/dm/device/bind_lift', params).then((result) => {
-                    this.device.binding_time = new Date();
-                    this.$message({
-                        "type": 'success',
-                        "message": '绑定成功'
-                    })
-                })
-            },
-            gteDeviceById() {
-                this.$req.post('/dm/device/fetch', this.$route.query.id).then((result) => {
-                    console.log(result);
-                    this.device = result;
-                })
-            },
-            toggleEdit() {
+            toggleEdit(){
                 this.edit = !this.edit;
             },
-            save() {
-                if (this.addNew === true) {
-                    this.addDevice()
-                } else {
-                }
-            },
+            readLiftFault(id){
+                this.$api_v3.post('/LiftsFault/read',{id:id}).then((res)=>{
+                    console.log(res);
+                    if(res.code===0){
+                        this.liftFault = res.data;
+                    }
+                })
+            }
         },
         mounted() {
-            if (this.$route.query.id !== null) {
-                this.gteDeviceById();
-            } else {
-                this.edit = true;
-                this.addNew = true;
-            }
+            this.readLiftFault(this.$route.query.alarm_id);
         }
     }
 </script>

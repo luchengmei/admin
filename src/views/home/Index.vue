@@ -93,7 +93,7 @@
                 this.$router.push('/lift_list')
             },
             toUserCompany() {
-                this.$router.push('/userCompany_list')
+                this.$router.push('/user_company_list')
             },
             toUserManage() {
                 this.$router.push('/user_manage')

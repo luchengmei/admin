@@ -24,7 +24,7 @@ let company = menu.companyManage.children;
 
 company.user = {
     name: '单位列表',
-    path: '/userCompany_list',
+    path: '/user_company_list',
 
 };
 
@@ -189,10 +189,10 @@ menu.system_setting = {
 };
 let systemSetting = menu.system_setting.children;
 
-systemSetting.list = {
-    name: '单位类型设置',
-    path: '/company_setting',
-};
+// systemSetting.list = {
+//     name: '单位类型设置',
+//     path: '/company_setting',
+// };
 systemSetting.plan = {
     name: '角色权限设置',
     path: '/role_setting'

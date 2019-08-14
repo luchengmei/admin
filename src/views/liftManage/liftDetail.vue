@@ -3,9 +3,6 @@
         <el-card class="box-card">
             <div slot="header" class="box-card-header">
                 <span class="name">{{ lift.name||$route.meta.title}}</span>
-                <!--<el-button style="float: right;margin-left: 10px" type="primary" icon="el-icon-d-arrow-left"-->
-                           <!--@click="goBack">返回-->
-                <!--</el-button>-->
                 <el-button v-show="activeName==='index'||activeName==='second'" type="primary" icon="el-icon-check"
                            style="float: right" @click="addOrUpdateLift()">{{addNew?'新增':'提交'}}
                 </el-button>
@@ -30,6 +27,48 @@
                                 <div class="center">使用登记证编号</div>
                                 <el-input class="right" v-if="edit" v-model="lift.license"></el-input>
                                 <div class="right" v-else="edit">{{lift.license}}</div>
+                            </li>
+                            <li>
+                                <div class="left"><i class="fa fa-building-o"></i></div>
+                                <div class="center">所属单位</div>
+                                <div class="right" v-if="edit" style="display: flex">
+                                    <div style="margin-right: 30px">
+                                        <el-popover
+                                                @show="changePage"
+                                                placement="bottom"
+                                                width="600"
+                                                trigger="click">
+                                            <el-card class="box-card" shadow="never">
+                                                <div slot="header" style="display: flex;align-items: center">
+                                                    <el-input placeholder="请输入名称" v-model="popoverInputVal"
+                                                              @clear="search" clearable
+                                                              @keyup.native.enter="search">
+                                                        <el-button slot="append" icon="el-icon-search"
+                                                                   @click="search"></el-button>
+                                                    </el-input>
+                                                    <el-pagination
+                                                            :page-size.sync="popover.pageSize"
+                                                            :current-page.sync="popover.currentPage"
+                                                            @current-change="changePage"
+                                                            normal
+                                                            layout="prev, pager, next"
+                                                            :total="popover.total">
+                                                    </el-pagination>
+                                                </div>
+                                                <div v-for="(item, index) in popover.data" :key="index"
+                                                     @click="setCompanyName(item)"
+                                                     style="margin-bottom: 10px;font-size: 14px;color: #3C8DBC;cursor: pointer;">
+                                                    {{item.name}}
+                                                </div>
+                                            </el-card>
+                                            <el-button slot="reference" type="primary">点击选择</el-button>
+                                        </el-popover>
+                                    </div>
+                                    <el-input style="flex: 1" v-model="company_name"
+                                              disabled></el-input>
+                                </div>
+                                <div class="right" v-else>{{company_name}}
+                                </div>
                             </li>
                             <li>
                                 <div class="left"><i class="el-icon-location"></i></div>
@@ -71,82 +110,6 @@
                                     <el-input v-model="lift.type"></el-input>
                                 </div>
                                 <div class="right" v-else="edit">{{lift.type}}</div>
-                            </li>
-                            <li v-if="addNew&&edit" v-for="(item1,index1) in companyType">
-                                <div class="left"><i class="fa fa-building-o"></i></div>
-                                <div class="center">{{item1.name}}</div>
-                                <div class="right" style="display: flex">
-                                    <div style="margin-right: 30px">
-                                        <el-popover
-                                                @show="changePage"
-                                                placement="bottom"
-                                                width="600"
-                                                trigger="click">
-                                            <el-card class="box-card" shadow="never">
-                                                <div slot="header" style="display: flex;align-items: center">
-                                                    <el-input placeholder="请输入名称">
-                                                        <el-button slot="append" icon="el-icon-search"></el-button>
-                                                    </el-input>
-                                                    <el-pagination
-                                                            :page-size.sync="popover.pageSize"
-                                                            :current-page.sync="popover.currentPage"
-                                                            @current-change="changePage"
-                                                            small
-                                                            layout="prev, pager, next"
-                                                            :total="popover.total">
-                                                    </el-pagination>
-                                                </div>
-                                                <div v-for="(item, index) in popover.data" :key="index"
-                                                     @click="setCompanyName(item,index1,item1.id)"
-                                                     style="margin-bottom: 10px;font-size: 14px;color: #3C8DBC;cursor: pointer;">
-                                                    {{item.name}}
-                                                </div>
-                                            </el-card>
-                                            <el-button slot="reference" type="primary">点击选择</el-button>
-                                        </el-popover>
-                                    </div>
-                                    <el-input style="flex: 1" v-model="companies_and_types[index1].company_name"
-                                              disabled=""></el-input>
-                                </div>
-                            </li>
-                            <li v-if="!addNew" v-for="(company,index2) in lift.companies">
-                                <div class="left"><i class="fa fa-building-o"></i></div>
-                                <div class="center">{{company.company_type_name}}</div>
-                                <div class="right" v-if="edit" style="display: flex">
-                                    <div style="margin-right: 30px">
-                                        <el-popover
-                                                @show="changePage"
-                                                placement="bottom"
-                                                width="600"
-                                                trigger="click">
-                                            <el-card class="box-card" shadow="never">
-                                                <div slot="header" style="display: flex;align-items: center">
-                                                    <el-input placeholder="请输入名称" clearable v-model="popover.param"
-                                                              @clear="cancelSearch">
-                                                        <el-button slot="append" icon="el-icon-search"
-                                                                   @click="searchCompany"></el-button>
-                                                    </el-input>
-                                                    <el-pagination
-                                                            :page-size.sync="popover.pageSize"
-                                                            :current-page.sync="popover.currentPage"
-                                                            @current-change="changePage"
-                                                            small
-                                                            layout="prev, pager, next"
-                                                            :total="popover.total">
-                                                    </el-pagination>
-                                                </div>
-                                                <div v-for="(item, index3) in popover.data" :key="index3"
-                                                     @click="setCompanyName1(item,index2)"
-                                                     style="margin-bottom: 10px;font-size: 14px;color: #3C8DBC;cursor: pointer;">
-                                                    {{item.name}}
-                                                </div>
-                                            </el-card>
-                                            <el-button slot="reference" type="primary">点击选择</el-button>
-                                        </el-popover>
-                                    </div>
-                                    <el-input style="flex: 1" v-model="company.company_name" disabled=""></el-input>
-                                </div>
-                                <div class="right" v-else="edit">{{company.company_name}}</div>
                             </li>
                             <li>
                                 <div class="left"><i class="fa fa-home"></i></div>
@@ -208,9 +171,9 @@
                         <el-collapse v-model="collapseNames">
                             <el-collapse-item title="楼层分布" name="1" style="color: #3C8DBC;">
                                 <div class="container-floor">
-                                    <el-input v-for="(i,index) in floors" :key="index" v-model="i.label"
+                                    <el-input v-for="(i,index) in lift.floors" :key="index" v-model="i.alias"
                                               style="width: 20%">
-                                        <template slot="prepend">{{i.value}}</template>
+                                        <template slot="prepend">{{i.floor}}</template>
                                     </el-input>
                                 </div>
                             </el-collapse-item>
@@ -835,81 +798,81 @@
                 </el-tab-pane>
                 <el-tab-pane label="年审计划" name="fifth">
                     <div class="lift-plan" style="padding: 0 5px">
-                        <el-timeline>
-                            <transition-group name="slide-fade">
-                                <el-timeline-item v-for="(item,index) in liftPlan" :key="index"
-                                                  :type="item.status|typeFrm"
-                                                  :timestamp="item.arrival_time|dateFrm"
-                                                  placement="top">
-                                    <el-card style="color: #3C8DBC">
-                                        <i class="el-icon-delete"
-                                           style="float: right;font-size: 20px;cursor: pointer;margin-left: 10px"
-                                           @click="deletePlan(item,index)"></i>
-                                        <i :class="item.edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"
-                                           style="float: right;font-size: 20px;cursor: pointer;"
-                                           @click="toggleEditPlan(item)"></i>
-                                        <h4 v-if="item.edit">年审结果：
-                                            <el-select v-model="item.status" placeholder="请选择" value="">
-                                                <el-option
-                                                        v-for="item in result"
-                                                        :key="item.value"
-                                                        :label="item.label"
-                                                        :value="item.value">
-                                                </el-option>
-                                            </el-select>
-                                        </h4>
-                                        <h4 v-else>年审结果：{{item.status|statusFrm}}</h4>
-                                        <div style="display: flex">
-                                            <p v-if="item.edit">实际年审时间：
-                                                <el-date-picker
-                                                        value-format="yyyy-MM-dd HH:mm:ss"
-                                                        v-model="item.arrival_time"
-                                                        type="datetime"
-                                                        placeholder="选择日期">
-                                                </el-date-picker>
-                                            </p>
-                                            <p v-else>实际年审时间：{{item.arrival_time|dateFrm}}</p>
-                                            <p v-if="item.edit">计划年审时间：
-                                                <el-date-picker
-                                                        value-format="yyyy-MM-dd"
-                                                        v-model="item.date"
-                                                        type="date"
-                                                        placeholder="计划年审时间">
-                                                </el-date-picker>
-                                            </p>
-                                            <p v-else>计划年审时间：{{item.date|dateFrm}}</p>
-                                        </div>
-                                    </el-card>
-                                </el-timeline-item>
-                            </transition-group>
-                        </el-timeline>
-                        <div class="plan-add" style="font-size: 14px;color: #3C8DBC">
-                            <span>
-                                <el-date-picker
-                                        value-format="yyyy-MM-dd HH:mm:ss"
-                                        v-model="plan.arrival_time"
-                                        type="datetime"
-                                        placeholder="实际年审时间">
-                                </el-date-picker>
-                            </span>
-                            <span>
-                                <el-date-picker
-                                        value-format="yyyy-MM-dd"
-                                        v-model="plan.date"
-                                        type="date"
-                                        placeholder="计划年审时间">
-                                </el-date-picker>
-                            </span>
-                            <span><el-select v-model="plan.status" placeholder="年审结果" value="">
-                                                <el-option
-                                                        v-for="item in result"
-                                                        :key="item.value"
-                                                        :label="item.label"
-                                                        :value="item.value">
-                                                </el-option>
-                                            </el-select></span>
-                            <el-button type="primary" icon="el-icon-plus" @click="addLiftPlan">添加年审计划</el-button>
-                        </div>
+                        <!--<el-timeline>-->
+                            <!--<transition-group name="slide-fade">-->
+                                <!--<el-timeline-item v-for="(item,index) in liftPlan" :key="index"-->
+                                                  <!--:type="item.status|typeFrm"-->
+                                                  <!--:timestamp="item.arrival_time|dateFrm"-->
+                                                  <!--placement="top">-->
+                                    <!--<el-card style="color: #3C8DBC">-->
+                                        <!--<i class="el-icon-delete"-->
+                                           <!--style="float: right;font-size: 20px;cursor: pointer;margin-left: 10px"-->
+                                           <!--@click="deletePlan(item,index)"></i>-->
+                                        <!--<i :class="item.edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"-->
+                                           <!--style="float: right;font-size: 20px;cursor: pointer;"-->
+                                           <!--@click="toggleEditPlan(item)"></i>-->
+                                        <!--<h4 v-if="item.edit">年审结果：-->
+                                            <!--<el-select v-model="item.status" placeholder="请选择" value="">-->
+                                                <!--<el-option-->
+                                                        <!--v-for="item in result"-->
+                                                        <!--:key="item.value"-->
+                                                        <!--:label="item.label"-->
+                                                        <!--:value="item.value">-->
+                                                <!--</el-option>-->
+                                            <!--</el-select>-->
+                                        <!--</h4>-->
+                                        <!--<h4 v-else>年审结果：{{item.status|statusFrm}}</h4>-->
+                                        <!--<div style="display: flex">-->
+                                            <!--<p v-if="item.edit">实际年审时间：-->
+                                                <!--<el-date-picker-->
+                                                        <!--value-format="yyyy-MM-dd HH:mm:ss"-->
+                                                        <!--v-model="item.arrival_time"-->
+                                                        <!--type="datetime"-->
+                                                        <!--placeholder="选择日期">-->
+                                                <!--</el-date-picker>-->
+                                            <!--</p>-->
+                                            <!--<p v-else>实际年审时间：{{item.arrival_time|dateFrm}}</p>-->
+                                            <!--<p v-if="item.edit">计划年审时间：-->
+                                                <!--<el-date-picker-->
+                                                        <!--value-format="yyyy-MM-dd"-->
+                                                        <!--v-model="item.date"-->
+                                                        <!--type="date"-->
+                                                        <!--placeholder="计划年审时间">-->
+                                                <!--</el-date-picker>-->
+                                            <!--</p>-->
+                                            <!--<p v-else>计划年审时间：{{item.date|dateFrm}}</p>-->
+                                        <!--</div>-->
+                                    <!--</el-card>-->
+                                <!--</el-timeline-item>-->
+                            <!--</transition-group>-->
+                        <!--</el-timeline>-->
+                        <!--<div class="plan-add" style="font-size: 14px;color: #3C8DBC">-->
+                            <!--<span>-->
+                                <!--<el-date-picker-->
+                                        <!--value-format="yyyy-MM-dd HH:mm:ss"-->
+                                        <!--v-model="plan.arrival_time"-->
+                                        <!--type="datetime"-->
+                                        <!--placeholder="实际年审时间">-->
+                                <!--</el-date-picker>-->
+                            <!--</span>-->
+                            <!--<span>-->
+                                <!--<el-date-picker-->
+                                        <!--value-format="yyyy-MM-dd"-->
+                                        <!--v-model="plan.date"-->
+                                        <!--type="date"-->
+                                        <!--placeholder="计划年审时间">-->
+                                <!--</el-date-picker>-->
+                            <!--</span>-->
+                            <!--<span><el-select v-model="plan.status" placeholder="年审结果" value="">-->
+                                                <!--<el-option-->
+                                                        <!--v-for="item in result"-->
+                                                        <!--:key="item.value"-->
+                                                        <!--:label="item.label"-->
+                                                        <!--:value="item.value">-->
+                                                <!--</el-option>-->
+                                            <!--</el-select></span>-->
+                            <!--<el-button type="primary" icon="el-icon-plus" @click="addLiftPlan">添加年审计划</el-button>-->
+                        <!--</div>-->
                     </div>
                 </el-tab-pane>
                 <el-tab-pane label="备注" name="sixth">
@@ -948,19 +911,22 @@
         },
         data() {
             return {
+                popoverInputVal: '',
+                popover: {
+                    "pageSize": 10,
+                    "total": 0,
+                    "currentPage": 1,
+                    "data": []
+                },
                 liftChangeCount: 0,
                 collapseNames: [],
-                camera: false,
-                companyType: [],
-                companies_and_types: [],
                 lift: {},
+                company_name:'',
                 floors: [],
                 value: '',
-                value1: '',
                 edit: true,
                 addNew: false,
                 activeName: 'index',
-                userType: '',
                 userOptions: [
                     {
                         value: 7,
@@ -975,14 +941,6 @@
                         value: 365,
                         label: '一年（365天）'
                     }],
-                popover: {
-                    "url": '/dm/company/all',
-                    "pageSize": 5,
-                    "total": 25,
-                    "currentPage": 1,
-                    "data": [],
-                    "param": ''
-                },
                 //about alarm push
                 APPpush: true,
                 note: true,
@@ -990,7 +948,7 @@
                 updatingNotice: false,
 
                 //about alarm setting
-                alarms: [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+                alarms: [],
                 hasSave: true,
                 value4: '1',
                 value5: '',
@@ -1093,13 +1051,6 @@
         },
         computed: {},
         methods: {
-            goBack() {
-                this.hasSave = true;
-                this.$router.go(-1);
-            },
-            hello() {
-                console.log('hello')
-            },
             //____________________alarmSetting______________start
             isInputDisabled(type) {
                 if (type == 'HOIST_ROPE_BROKEN') return true;
@@ -1112,25 +1063,6 @@
             },
             isPickerDisabled(type) {
                 return type == 'HOIST_ROPE_BROKEN';
-            },
-            getAlarmSetting() {
-                if (!this.$route.query.lift_id) return;
-                let id = this.$route.query.lift_id.toString();
-                this.$req.post('/dm/alarm/list', id).then((result) => {
-                    //console.log(result);
-                    if (result.length !== 0) {
-                        result.forEach((item) => {
-                            if (item.period_start === null) {
-                                item["period_full"] = null
-                            } else {
-                                item.period_start = this.$moment().format("YYYY-MM-DD ") + item.period_start;
-                                item.period_end = this.$moment().format("YYYY-MM-DD ") + item.period_end;
-                                item["period_full"] = [new Date(item.period_start), new Date(item.period_end)];
-                            }
-                        });
-                        this.alarms = result.slice(2);
-                    }
-                })
             },
             updateSingleAlarm(item) {
                 if (item.period_full !== null) {
@@ -1193,21 +1125,6 @@
             //____________________alarmSetting______________end
 
             //___________________alarmNotice________________start
-            getNoticeList() {
-                if (!this.$route.query.lift_id) return;
-                this.$req.post('/dm/text_notice/list/lift_id', this.$route.query.lift_id).then((result) => {
-                    console.log(result);
-                    this.tableData = result;
-                    // Object.keys(result).forEach((key) => {
-                    //     this.tableData.push(result[key]);
-                    //     result[key].notices.forEach((item) => {
-                    //         console.log(item)
-                    //         // result[key].push(item);
-                    //         // console.log(this.tableData)
-                    //     });
-                    // });
-                })
-            },
             updateNoticeByUser(row) {
                 if (!this.$route.query.lift_id) return;
                 this.updatingNotice = true;
@@ -1326,7 +1243,6 @@
             },
             //____________________liftPlan___________________end
 
-
             //____________________remark_____________________start
             updateRemark() {
                 this.$req.post('/dm/lift/remark/add', {
@@ -1352,26 +1268,28 @@
 
 
             //___________________baseInfo______________________start
-            searchCompany() {
-                this.popover.url = '/dm/company/fuzzy/search';
-                this.popover.currentPage = 1;
-                this.changePage();
-            },
-            cancelSearch() {
-                this.popover.url = '/dm/company/fuzzy/search';
-                this.popover.currentPage = 1;
-                this.changePage();
-            },
-            getCompanyType() {
-                this.$req.post('/dm/company_type/all/enabled').then((result) => {
+            changePage(){
+                let params = {
+                    "page": this.popover.currentPage,
+                    "list_rows": this.popover.pageSize,
+                    "name": this.popoverInputVal,
+                    "sort": [{"id": 1}]
+                };
+                this.$api_v3.post('/Group/listPage', params).then((result) => {
                     console.log(result);
-                    this.companyType = [...result];
-                    for (let i = 0; i < result.length; i++) {
-                        this.companies_and_types.push({
-                            "company_name": ''
-                        });
+                    if (result.code === 0) {
+                        this.popover.total = result.data.total;
+                        this.popover.data = result.data.data;
                     }
                 })
+            },
+            search(){
+                this.popover.currentPage = 1;
+                this.changePage();
+            },
+            setCompanyName(item){
+                this.company_name = item.name;
+                this.lift.company_id = item.id
             },
             showMessageBox() {//输入视频存储天数
                 this.$prompt('请输入天数', '视频存储天数', {
@@ -1384,67 +1302,16 @@
                 }).catch(() => {
                 });
             },
-            setCompanyName(item, index1, company_type_id) {
-                this.companies_and_types[index1].company_name = item.name;
-                this.companies_and_types[index1].company_id = item.id;
-                this.companies_and_types[index1].company_type_id = company_type_id;
-            },
-            setCompanyName1(item, index2) {
-                this.lift.companies[index2].company_id = item.id;
-                this.lift.companies[index2].company_name = item.name;
-            },
-            onchangeCity(p, c, s) {
-                console.log(p, c, s)
-            },
-            changePage() {
-                if (this.popover.url === '/dm/company/all') {
-                    let params = {
-                        "page": this.popover.currentPage,
-                        "property": "id",
-                        "size": this.popover.pageSize,
-                        "sort": "DESC"
-                    };
-                    this.$req.post(this.popover.url, params).then((result) => {
-                        console.log(result);
-                        this.popover.total = result.total_elements;
-                        this.popover.data = [...result.content]
-                    })
-                } else if (this.popover.url === '/dm/company/fuzzy/search') {
-                    let params = {
-                        "page_proto": {
-                            "page": this.popover.currentPage,
-                            "property": "id",
-                            "size": this.popover.pageSize,
-                            "sort": "DESC"
-                        },
-                        "value": this.popover.param
-                    };
-                    this.$req.post(this.popover.url, params).then((result) => {
-                        console.log(result);
-                        this.popover.total = result.total_elements;
-                        this.popover.data = [...result.content]
-                    })
-                }
-            },
             findLiftById(id) {
                 this.$api_v3.post('/Lifts/read', {'id': id}).then((res) => {
                     console.log('lift', res);
                     if (res.code === 0) {
-                        // Object.keys(res.data).forEach(function (key) {
-                        //     res.data[key] = res.data[key] + '';
-                        // });
                         this.lift = res.data;
+                        if(res.data.owner_group){
+                            this.company_name = res.data.owner_group.name;
+                        }
                     }
                 })
-            },
-            setFloors() {
-                this.floors = [];
-                for (let i = 1; i <= parseInt(this.lift.floor); i++) {
-                    this.floors.push({
-                        label: '',
-                        value: i
-                    })
-                }
             },
             toggleEdit() {
                 this.edit = !this.edit;
@@ -1459,8 +1326,8 @@
                     for (let i = 1; i <= difference; i++) {
                         this.floors.push(
                             {
-                                label: '',
-                                value: this.floors.length + 1
+                                alias: '',
+                                floor: this.floors.length + 1
                             }
                         )
                     }
@@ -1487,12 +1354,6 @@
                 }
                 this.inputVisible = false;
                 this.inputValue = '';
-            },
-            delete_time(index, arr) {
-                arr.splice(index, 1)
-            },
-            add_time(arr) {
-                arr.push('')
             },
             addOrUpdateLift() {
                 let params = this.lift;
@@ -1523,19 +1384,12 @@
         //     }
         // },
         mounted: function () {
-            //console.log(this.$route.query);
             if (this.$route.query.lift_id !== null) {
                 this.edit = false;
-                this.findLiftById(this.$route.query.lift_id, this.setFloors);
-                //this.getLiftPlan(this.$route.query.lift_id);
-                //this.getAlarmSetting();
-                //this.getNoticeList();
+                this.findLiftById(this.$route.query.lift_id);
             } else {
                 this.edit = true;
-                this.addNew = true;
-                this.getCompanyType();
             }
-            //this.getCompanyType();
         }
     }
 </script>

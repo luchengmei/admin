@@ -11,7 +11,7 @@ let service = axios.create({
 service.interceptors.request.use(
     config => {
         config.headers = {
-            'Content-Type': 'application/json' // 设置很关键
+            'Content-Type': 'application/json'
         };
         if (localStorage.getItem(Config.tokenKey)) { //登录后保存的token
             config.headers['token'] = localStorage.getItem(Config.tokenKey)

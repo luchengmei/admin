@@ -67,12 +67,12 @@
                                                 trigger="click">
                                             <el-card class="box-card" shadow="never">
                                                 <div slot="header" style="display: flex;align-items: center">
-                                                    <!--<el-input placeholder="请输入名称" v-model="popoverInputVal"-->
-                                                    <!--@clear="changePage1" clearable-->
-                                                    <!--@keyup.native.enter="popoverSearch">-->
-                                                    <!--<el-button slot="append" icon="el-icon-search"-->
-                                                    <!--@click="popoverSearch"></el-button>-->
-                                                    <!--</el-input>-->
+                                                    <el-input placeholder="请输入名称" v-model="popoverInputVal"
+                                                              @clear="search1" clearable
+                                                              @keyup.native.enter="search1">
+                                                        <el-button slot="append" icon="el-icon-search"
+                                                                   @click="search1"></el-button>
+                                                    </el-input>
                                                     <el-pagination
                                                             :page-size.sync="popover.pageSize"
                                                             :current-page.sync="popover.currentPage"
@@ -198,7 +198,7 @@
                 addUser: false,
                 company_name: '',
                 user: {},
-                group_name:'',
+                group_name: '',
                 roles: [],
                 activeName: 'index',
                 userType: [],
@@ -306,7 +306,7 @@
                         this.user.roles.forEach((i) => {
                             this.roles.push(i.id)
                         });
-                        this.group_name = this.user.group?this.user.group.name:'';
+                        this.group_name = this.user.group ? this.user.group.name : '';
                     }
                 })
             },
@@ -331,14 +331,19 @@
             setCompanyName(item) {
                 this.group_name = item.name;
                 this.user.group_id = item.id;
-                this.user.group={};
+                this.user.group = {};
                 this.user.group.name = item.name;
                 this.user.group.id = item.id;
+            },
+            search1() {
+                this.popover.currentPage = 1;
+                this.changePage1();
             },
             changePage1() {
                 let params = {
                     "page": this.popover.currentPage,
                     "list_rows": this.popover.pageSize,
+                    "name": this.popoverInputVal,
                     "sort": [{"id": 1}]
                 };
                 this.$api_v3.post('/Group/listPage', params).then((result) => {

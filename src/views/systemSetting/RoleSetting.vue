@@ -20,19 +20,12 @@
                             </el-form-item>
                             <el-form-item label="电梯查看级别">
                                 <el-select v-model="role.lifts_limit_level" placeholder="请选择级别">
-                                    <el-option value="0"></el-option>
-                                    <el-option value="1"></el-option>
-                                    <el-option value="2"></el-option>
+                                    <el-option v-for="i in levelOption" :value="i.value" :label="i.label"></el-option>
                                 </el-select>
-                                <span style="color: #666666;font-size: 14px">(0:无限制,1:只能查看本组电梯,2:只能查看管理员分配的电梯)</span>
                             </el-form-item>
                             <el-form-item label="可访问平台">
                                 <el-checkbox v-for="platform in platforms" v-model="platform.value"
                                              :label="platform.name" border></el-checkbox>
-                            </el-form-item>
-                            <el-form-item label="角色权限">
-                                <el-checkbox v-for="authority in authorities" v-model="authority.value"
-                                             :label="authority.name" border></el-checkbox>
                             </el-form-item>
                             <el-form-item>
                                 <el-button type="primary" :loading="saveLoading" @click="saveRole()">保存</el-button>
@@ -40,7 +33,12 @@
                         </el-form>
                     </div>
                 </el-tab-pane>
-                <el-tab-pane label="角色用户" name="second">
+                <el-tab-pane label="角色权限" name="second">
+                    <el-tree :data="authorityTree" :props="treeProps" ref="tree"
+                             node-key="id" show-checkbox></el-tree>
+                    <el-button style="margin-top: 18px" type="primary" :loading="saveLoading" @click="saveRole()">保存</el-button>
+                </el-tab-pane>
+                <el-tab-pane label="角色用户" name="third">
                     <div>
                         <el-button type="primary" @click="showDialog()">添加用户</el-button>
                     </div>
@@ -110,6 +108,18 @@
         },
         data() {
             return {
+                levelOption: [
+                    {
+                        label: '无限制',
+                        value: 0
+                    }, {
+                        label: '只能查看本组电梯',
+                        value: 1
+                    }, {
+                        label: '只能查看管理员分配的电梯',
+                        value: 2
+                    }
+                ],
                 tableData: [],
                 loading: false,
                 saveLoading: false,
@@ -121,7 +131,11 @@
                     ],
                 },
                 platforms: [],//所有平台
-                authorities:[],//所有权限
+                authorityTree: [],
+                treeProps: {
+                    label: 'name',
+                    children: 'children'
+                },
                 current: null,
                 activeName: 'first',
                 //--------------transfer--------------
@@ -141,24 +155,24 @@
         mounted() {
             this.getRolesList();
             this.getAllPlatforms();
-            this.getAllAuthorities();
+            this.getAuthorityTree();
         },
         filters: {},
         watch: {},
         methods: {
             getAllPlatforms() {
                 this.$api_v3.post('/Platform/listPage', {}).then((res) => {
-                    console.log(res);
+                    console.log('/Platform/listPage', res);
                     if (res.code === 0) {
                         this.platforms = res.data.data;
                     }
                 })
             },
-            getAllAuthorities(){
-                this.$api_v3.post('/Authority/listPage',{}).then((res)=>{
-                    console.log(res);
-                    if(res.code===0){
-                        this.authorities = res.data.data;
+            getAuthorityTree() {
+                this.$api_v3.post('/Authority/listTree', {}).then((res) => {
+                    console.log('/Authority/listTree', res);
+                    if (res.code === 0) {
+                        this.authorityTree = res.data
                     }
                 })
             },
@@ -186,24 +200,20 @@
                     "name": this.role.name,
                     "lifts_limit_level": this.role.lifts_limit_level,
                     "platform_ids": [],
-                    "authority_ids":[]
+                    "authority_ids": []
                 };
                 this.platforms.forEach((item) => {
                     if (item.value) {
                         params["platform_ids"].push(item.id);
                     }
                 });
-                this.authorities.forEach((item) => {
-                    if (item.value) {
-                        params["authority_ids"].push(item.id);
-                    }
-                });
+                params["authority_ids"] = this.getCheckedKeys();
                 this.$api_v3.post('/AuRole/save', params).then((res) => {
                     console.log(res);
                     if (res.code === 0) {
                         this.$message.success('保存成功')
                     } else {
-                        this.$message.error(res.data)
+                        this.$message.error(res.msg)
                     }
                 }).finally(() => {
                     this.saveLoading = false;
@@ -211,14 +221,11 @@
             },
             readRole(id) {
                 this.$api_v3.post('/AuRole/read', {"id": id}).then((res) => {
-                    console.log(res);
+                    console.log('/AuRole/read', res);
                     if (res.code === 0) {
                         this.role = res.data;
                         this.platforms.forEach((platform) => {
                             this.$set(platform, "value", false)
-                        });
-                        this.authorities.forEach((authority) => {
-                            this.$set(authority, "value", false)
                         });
                         this.role.platforms.forEach((item) => {
                             let index = this.platforms.findIndex((i) => {
@@ -226,18 +233,24 @@
                             });
                             this.platforms[index].value = index !== -1;
                         });
-                        this.role.authorities.forEach((item) => {
-                            let index = this.authorities.findIndex((i) => {
-                                return i.id === item.id;
-                            });
-                            this.authorities[index].value = index !== -1;
-                        })
+                        this.setCheckedKeys();
                     }
                 })
             },
+            setCheckedKeys() {
+                let keys = [];
+                this.role.authorities.forEach((item) => {
+                    keys.push(item.id)
+                });
+                this.$refs.tree.setCheckedKeys(keys);
+            },
+            getCheckedKeys() {
+                //console.log('getCheckedKeys', this.$refs.tree.getCheckedKeys());
+                return this.$refs.tree.getCheckedKeys();
+            },
             getRolesList() {
                 this.$api_v3.post('/AuRole/listPage').then((res) => {
-                    console.log(res);
+                    console.log('/AuRole/listPage', res);
                     if (res.code === 0) {
                         this.roles = res.data.data;
                         this.current = res.data.data[0].id;
@@ -336,7 +349,7 @@
             },
             handleClose(done) {
                 done()
-            }
+            },
         }
     }
 </script>

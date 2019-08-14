@@ -54,7 +54,7 @@ let RouteList = [
                 path: '/lift_plan_detail',
                 name: 'liftPlanDetail',
                 meta: {
-                    title: '维保信息',
+                    title: '维保/年审信息',
                     keepAlive: false
                 },
                 component: resolve => require(['@/views/liftManage/liftPlanDetail.vue'], resolve),
@@ -69,7 +69,7 @@ let RouteList = [
                 component: resolve => require(['@/views/liftManage/alarmSetting.vue'], resolve),
             },
             {
-                path: '/userCompany_list',
+                path: '/user_company_list',
                 name: 'UserCompanyList',
                 meta: {
                     title: '单位列表',
@@ -78,31 +78,13 @@ let RouteList = [
                 component: resolve => require(['@/views/userCompany/UserCompanyList.vue'], resolve),
             },
             {
-                path: '/userCompany_detail',
+                path: '/user_company_detail',
                 name: 'UserCompanyDetail',
                 meta: {
                     title: '单位信息',
                     keepAlive: false
                 },
                 component: resolve => require(['@/views/userCompany/UserCompanyDetail.vue'], resolve),
-            },
-            {
-                path: '/maintenance_company',
-                name: 'MaintenanceCompany',
-                meta: {
-                    title: '维保单位列表',
-                    keepAlive: true
-                },
-                component: resolve => require(['@/views/maintenanceManage/MaintenanceCompany.vue'], resolve),
-            },
-            {
-                path: '/maintenanceCompany_detail',
-                name: 'MCDetail',
-                meta: {
-                    title: '维保单位信息',
-                    keepAlive: false
-                },
-                component: resolve => require(['@/views/maintenanceManage/MCDetail.vue'], resolve),
             },
             {
                 path: '/collector_list',
@@ -130,6 +112,15 @@ let RouteList = [
                     keepAlive: true
                 },
                 component: resolve => require(['@/views/alarmManage/alarm_list.vue'], resolve),
+            },
+            {
+                path: '/alarm_detail',
+                name: 'alarmDetail',
+                meta: {
+                    title: '报警详情',
+                    keepAlive: false
+                },
+                component: resolve => require(['@/views/alarmManage/alarm_detail.vue'], resolve),
             },
             {
                 path: '/font_awesome',

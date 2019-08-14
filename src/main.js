@@ -2,6 +2,11 @@ import Vue from 'vue'
 import store from './store/'
 import ElementUI from 'element-ui'
 import './theme/index.css'//自定义element-ui主题
+/**
+ * 若跟新element-ui版本需将新增组件的原样式文件引入theme/index.css
+ * 例如新增了timeline组件:@import "timeline.css"; @import "timeline-item.css";
+ * 原样式文件在 'node_modules/element-ui/lib/theme-chalk/';
+ */
 import './assets/css/font-awesome.min.css'
 import './assets/css/style.css'
 import router from './router/'
@@ -10,7 +15,7 @@ import App from './App.vue'
 import req from './utils/axios'
 import moment from 'moment'
 import {Message} from 'element-ui'
-import  api_v3 from  './api/api_v3'
+import api_v3 from './api/api_v3'
 
 Vue.prototype.$req = req
 Vue.prototype.$Config = Config
@@ -22,34 +27,6 @@ Vue.use(ElementUI, {size: 'small'})
 router.beforeEach((to, from, next) => {
     window.document.title = to.meta.title ? to.meta.title + '-' + Config.siteName : Config.siteName;
     next();
-    // if (localStorage.getItem(Config.tokenKey)) {
-    //     let isOvertime = (new Date - new Date(localStorage.getItem("tokenSetTime"))) >= 259200000;//判断token是否过期
-    //     if (isOvertime) {
-    //         localStorage.removeItem(Config.tokenKey);//移除过期token
-    //         // Message({
-    //         //     message: '身份验证失败，请重新登录',
-    //         //     type: 'error'
-    //         // });
-    //         next({path: '/login'});
-    //     } else if (new Date - new Date(localStorage.getItem("tokenSetTime")) > 216000000) {//判断token是否即将过期
-    //         req.post('/authentication/refresh').then((result) => {//重置token有效时间
-    //             localStorage.setItem("tokenSetTime", new Date);
-    //         });
-    //         next();
-    //     } else {
-    //         next();
-    //     }
-    // }
-    //
-    // if (!localStorage.getItem(Config.tokenKey) && to.path != '/login') {
-    //     Message({
-    //         message: '身份验证失败，请重新登录',
-    //         type: 'error'
-    //     });
-    //     next({path: '/login'});
-    // } else {
-    //     next();
-    // }
 });
 router.afterEach(transition => {
 

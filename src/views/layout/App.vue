@@ -159,24 +159,6 @@
             },
             menu() {
                 let data = JSON.parse(JSON.stringify(Menu));
-                //console.log('data', data);
-                // let permissions = JSON.parse(localStorage.getItem('permissions')) || {};
-                // //console.log(permissions.user_access !== 'true');
-                // if (permissions.user_access !== 'true') {
-                //     delete data.user_manage;
-                // }
-                //
-                // if (permissions.company_access !== 'true') {
-                //     delete data.companyManage
-                // }
-                //
-                // if (permissions.device_access !== 'true') {
-                //     delete  data.collectorManage
-                // }
-                //
-                // if (permissions.lift_access !== 'true') {
-                //     delete  data.lift_manage
-                // }
                 return data;
             }
         },
@@ -255,14 +237,11 @@
             }
         },
         mounted: function () {
-            this.switchTabBar = localStorage.getItem('switchTabBar') ? true : false;
-            this.fixedTabBar = localStorage.getItem('fixedTabBar') ? true : false;
+            this.switchTabBar = !!localStorage.getItem('switchTabBar');
+            this.fixedTabBar = !!localStorage.getItem('fixedTabBar');
             if (this.switchTabBar) document.getElementById('mainContainer').style.minHeight = 'calc(100vh - 139px)';
-
-
             if (!this.isCollapse) {
-
-                document.body.classList.remove('sidebar-hidden')
+                document.body.classList.remove('sidebar-hidden');
                 this.siteName = this.$Config.siteName
             } else {
                 document.body.classList.add('sidebar-hidden')

@@ -24,23 +24,42 @@
                 ref="table"
                 style="width: 100%">
             <el-table-column
-                    width="80"
+                    width="100"
                     prop="id"
                     label="单位ID">
+                <template slot="header" slot-scope="scope">
+                    单位ID
+                    <table-sort @ascending="onAscOrDesc('id',0)"
+                                @descending="onAscOrDesc('id',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     prop="name"
                     label="单位名称">
+                <template slot="header" slot-scope="scope">
+                    单位名称
+                    <table-sort @ascending="onAscOrDesc('name',0)"
+                                @descending="onAscOrDesc('name',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     prop="address"
                     label="地址">
+                <template slot="header" slot-scope="scope">
+                    地址
+                    <table-sort @ascending="onAscOrDesc('address',0)"
+                                @descending="onAscOrDesc('address',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     width="120"
                     prop="lift_count"
-                    sortable
                     label="电梯总数">
+                <template slot="header" slot-scope="scope">
+                    电梯总数
+                    <table-sort @ascending="onAscOrDesc('lift_count',0)"
+                                @descending="onAscOrDesc('lift_count',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     fixed="right"
@@ -51,7 +70,7 @@
                     <el-button @click="editUser(scope.row.id)" type="primary" icon="el-icon-edit" size="small"
                                circle></el-button>
                     <el-button @click="deleteUser(scope.row.id)" type="danger"
-                    icon="el-icon-delete" circle size="small"></el-button>
+                               icon="el-icon-delete" circle size="small"></el-button>
                     <!--<el-button @click="deleteUser(scope.row.id)" v-else icon="el-icon-check" circle-->
                     <!--size="small"></el-button>-->
                 </template>
@@ -103,65 +122,65 @@
 <script>
     import ToolBar from '@/components/ToolBar.vue';
     import HelpHint from '@/components/HelpHint.vue';
+    import TableSort from '@/components/TableSort.vue';
     import Paginate from "../../components/Paginate";
 
     export default {
         data() {
             const data = [
                 {
-                id: 1,
-                label: '管理单位',
-                children: [{
-                    id: 2,
-                    label: '马上到科技',
-                    creator: 'admin',
-                    count: '1',
-                    createTime: '2018-09-21 08:50:08',
-                    operation: true,
+                    id: 1,
+                    label: '管理单位',
                     children: [{
-                        id: 88,
-                        label: '合作单位1',
+                        id: 2,
+                        label: '马上到科技',
                         creator: 'admin',
-                        count: '0',
+                        count: '1',
                         createTime: '2018-09-21 08:50:08',
-                        operation: true
-                    }, {
-                        id: 89,
-                        label: '合作单位2',
-                        creator: 'admin',
-                        account: '123456789',
-                        createTime: '2018-09-21 08:50:08',
-                        operation: true
+                        operation: true,
+                        children: [{
+                            id: 88,
+                            label: '合作单位1',
+                            creator: 'admin',
+                            count: '0',
+                            createTime: '2018-09-21 08:50:08',
+                            operation: true
+                        }, {
+                            id: 89,
+                            label: '合作单位2',
+                            creator: 'admin',
+                            account: '123456789',
+                            createTime: '2018-09-21 08:50:08',
+                            operation: true
+                        }]
                     }]
-                }]
-            }, {
-                id: 4,
-                label: '物业单位',
-                children: [{
-                    id: 2,
-                    label: '百花物业',
-                    creator: 'admin',
-                    count: '1',
-                    createTime: '2018-09-21 08:50:08',
-                    operation: true,
                 }, {
-                    id: 3,
-                    label: '市政府',
-                    creator: 'admin',
-                    count: '1',
-                    createTime: '2018-09-21 08:50:08',
-                    operation: true,
-                }]
-            }];
+                    id: 4,
+                    label: '物业单位',
+                    children: [{
+                        id: 2,
+                        label: '百花物业',
+                        creator: 'admin',
+                        count: '1',
+                        createTime: '2018-09-21 08:50:08',
+                        operation: true,
+                    }, {
+                        id: 3,
+                        label: '市政府',
+                        creator: 'admin',
+                        count: '1',
+                        createTime: '2018-09-21 08:50:08',
+                        operation: true,
+                    }]
+                }];
             return {
                 data: JSON.parse(JSON.stringify(data)),
                 treeModel: false,
                 paginate_api: '/Group/listPage',
                 paginate_params: {
-                    "list_rows": 1,
-                    "size": 10,
-                    "sort":{id:1},
-                    "name":''
+                    "page": 1,
+                    "sort": {id: 1},
+                    "name": ''
                 },
                 refresh: false,
                 params: {
@@ -176,8 +195,8 @@
             changeModel() {
                 this.treeModel = !this.treeModel;
             },
-            searchUser(){
-                this.paginate_params.list_rows = 1;
+            searchUser() {
+                this.paginate_params.page = 1;
                 this.paginate_params.name = this.params.name;
                 this.refresh = !this.refresh;
             },
@@ -191,20 +210,32 @@
                     }
                 }, '操作');
             },
+            onAscOrDesc(str, num) {
+                console.log(str, num);
+                this.paginate_params.sort[str] = num;
+                this.refresh = !this.refresh;
+            },
             editUser(id) {
-                this.$router.push({path: '/userCompany_detail', query: {id: id}})
+                this.$router.push({path: '/user_company_detail', query: {id: id}})
             },
             addUser(id = null) {
-                this.$router.push({path: '/userCompany_detail', query: {id: id}})
+                this.$router.push({path: '/user_company_detail', query: {id: id}})
             },
             deleteUser(id) {
-                this.$api_v3.post('/Group/remove',{"id":id}).then((result)=>{
-                    console.log(result);
-                    if(result.code===0){
-                        this.$message.success('操作成功')
-                    }
-                    this.refresh = !this.refresh;
-                })
+                this.$confirm("此操作将删除单位，是否继续？", "提示", {
+                    type: "warning",
+                    confirmButtonText: '确定',
+                    cancelButtonClass: '取消'
+                }).then(() => {
+                    this.$api_v3.post('/Group/remove', {"id": id}).then((result) => {
+                        console.log(result);
+                        if (result.code === 0) {
+                            this.$message.success('操作成功')
+                        }
+                        this.refresh = !this.refresh;
+                    })
+                }).catch(() => {
+                });
             },
             //------------------------------------分割线------------------------------//
             appendChild(data) {
@@ -255,7 +286,8 @@
         components: {
             Paginate,
             ToolBar,
-            HelpHint
+            HelpHint,
+            TableSort
         }
     }
 </script>

@@ -1,12 +1,19 @@
 <template>
     <div class="user-list">
         <ToolBar>
-            <div style="float: left">
-                <el-button type="primary" icon="fa fa-hand-pointer-o" size="small" @click="updateStatus_multiple"> 批量处理
-                </el-button>
-                <el-button type="danger" icon="el-icon-delete" size="small" @click="editUser(false)">批量删除</el-button>
-            </div>
-            <div style="float: right;display: flex">
+            <div style="float: right;">
+                <el-date-picker
+                        clearable
+                        v-model="pickerValue"
+                        type="daterange"
+                        align="right"
+                        unlink-panels
+                        value-format="yyyy-MM-dd"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        :picker-options="pickerOptions">
+                </el-date-picker>
                 <el-select style="" v-model="params.alarm_type" placeholder="报警类型" size="small"
                            clearable>
                     <el-option
@@ -16,7 +23,7 @@
                             :value="item.value">
                     </el-option>
                 </el-select>
-                <el-select style="width: 140px;" v-model="params.status" placeholder="状态" size="small" clearable>
+                <el-select style="width: 140px;" v-model="params.status" placeholder="报警状态" size="small" clearable>
                     <el-option
                             v-for="item in statusOption"
                             :key="item.value"
@@ -30,7 +37,7 @@
                         style="width: 200px"
                         v-model="params.name"
                         @keyup.native.enter="searchUser"
-                        @clear="initList"
+                        @clear="searchUser"
                         clearable>
                 </el-input>
                 <el-button @click="searchUser" type="success" icon="el-icon-search" size="small"></el-button>
@@ -47,6 +54,13 @@
                     type="selection"
                     width="40">
             </el-table-column>
+            <el-table-column width="100px" prop="id">
+                <template slot="header" slot-scope="scope">
+                    ID
+                    <table-sort @ascending="onAscOrDesc('id',0)"
+                                @descending="onAscOrDesc('id',1)"></table-sort>
+                </template>
+            </el-table-column>
             <el-table-column
                     width="100px"
                     prop="img_urls"
@@ -54,7 +68,7 @@
                 <template slot-scope="scope">
                     <el-dropdown>
                         <img style="width: 100%;height: 100%;border-radius: 4px;cursor: pointer"
-                             :src="scope.row.img_urls"/>
+                             :src="scope.row.img_thumb"/>
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item>
                                 <img :src="scope.row.img_urls"/>
@@ -66,11 +80,16 @@
             <el-table-column
                     prop="lift_name"
                     label="电梯名称">
+                <template slot="header" slot-scope="scope">
+                    电梯名称
+                    <table-sort @ascending="onAscOrDesc('lift_name',0)"
+                                @descending="onAscOrDesc('lift_name',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     prop="fault_code"
                     label="报警类型">
-                <template slot-scope="scope">{{scope.row.fault_code}}</template>
+                <template slot-scope="scope">{{scope.row.fault_code|typeFilter}}</template>
             </el-table-column>
             <el-table-column
                     prop="description"
@@ -88,17 +107,28 @@
             <el-table-column
                     prop="ctime"
                     label="报警首次发生时间">
+                <template slot="header" slot-scope="scope">
+                    报警首次发生时间
+                    <table-sort @ascending="onAscOrDesc('ctime',0)"
+                                @descending="onAscOrDesc('ctime',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     prop="utime"
                     label="报警最新一次更新时间">
+                <template slot="header" slot-scope="scope">
+                    报警最新一次时间
+                    <table-sort @ascending="onAscOrDesc('utime',0)"
+                                @descending="onAscOrDesc('utime',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     label="操作"
                     :render-header="tableAction"
                     width="180">
                 <template slot-scope="scope">
-                    <el-button @click="editUser(scope.row)" type="primary" icon="el-icon-edit" size="small" circle></el-button>
+                    <el-button @click="editUser(scope.row.id)" type="primary" icon="el-icon-edit" size="small"
+                               circle></el-button>
                     <!--<el-button @click="" type="danger" icon="el-icon-delete" circle size="small"></el-button>-->
                 </template>
             </el-table-column>
@@ -111,6 +141,7 @@
     import ToolBar from '@/components/ToolBar.vue';
     import HelpHint from '@/components/HelpHint.vue';
     import Paginate from '@/components/Paginate.vue';
+    import TableSort from '../../components/TableSort'
 
     export default {
         data() {
@@ -118,7 +149,7 @@
                 refresh: false,
                 list_url: '/LiftsFault/listPage',
                 list_params: {
-                    "list_rows": 1,
+                    "page": 1,
                     "size": 10,
                     "sort": {id: 1}
                 },
@@ -129,98 +160,182 @@
                 },
                 alarmTypeOption: [
                     {
-                        value: 'HUMIDIT',
-                        label: '湿度'
+                        value: '301',
+                        label: '机房湿度异常'
                     }, {
-                        value: 'TEMPERATURE',
-                        label: '温度'
+                        value: '302',
+                        label: '机房温度异常'
                     }, {
-                        value: 'NOISE',
-                        label: '噪声'
+                        value: '303',
+                        label: '机房噪声异常'
                     }, {
-                        value: 'MACHINE_TEMPERATURE',
-                        label: '电机温度'
+                        value: '304',
+                        label: '安全回路断路'
                     }, {
-                        value: 'CABINET_TEMPERATURE',
-                        label: '电柜温度'
+                        value: '305',
+                        label: '抱闸温度异常'
                     }, {
-                        value: 'CIRCUIT',
-                        label: '安全回路'
+                        value: '306',
+                        label: '电流异常'
                     }, {
-                        value: 'DOOR_NOT_OPEN_TIMEOUT',
+                        value: '307',
+                        label: '曳引绳断股'
+                    }, {
+                        value: '201',
                         label: '超时不开门'
                     }, {
-                        value: 'DOOR_NOT_CLOSED_TIMEOUT',
+                        value: '202',
                         label: '超时不关门'
                     }, {
-                        value: 'LEVELING',
-                        label: '平层'
+                        value: '204',
+                        label: '电梯非门区停车'
                     }, {
-                        value: 'LIFTING_WITH_DOOR_OPEN',
-                        label: '开门行车'
+                        value: '205',
+                        label: '电梯意外移动'
                     }, {
-                        value: 'HALT_OUT_OF_DOOR_ZONE',
-                        label: '门区外停车'
+                        value: '206',
+                        label: '电梯非门区开门'
                     }, {
-                        value: 'DOOR_OPEN_OUT_OF_DOOR_ZONE',
-                        label: '门区外开门'
+                        value: '401',
+                        label: '电梯困人'
                     }, {
-                        value: 'CALL_BUTTON_HIT',
-                        label: '呼叫按钮按下'
+                        value: '402',
+                        label: '紧急按钮被按下'
                     }, {
-                        value: 'OVERSPEED',
-                        label: '超速'
+                        value: '207',
+                        label: '电梯超速'
                     }, {
-                        value: 'PONDING',
-                        label: '积水'
+                        value: '208',
+                        label: '电梯失速'
+                    }, {
+                        value: '209',
+                        label: '轿厢含氧量低'
+                    }, {
+                        value: '210',
+                        label: '电梯停电'
+                    }, {
+                        value: '211',
+                        label: '轿厢倾斜超标'
+                    }, {
+                        value: '212',
+                        label: '轿厢振动超标'
+                    }, {
+                        value: '101',
+                        label: '底坑湿度异常'
+                    }, {
+                        value: '102',
+                        label: '底坑温度异常'
+                    }, {
+                        value: '103',
+                        label: '底坑噪声异常'
+                    }, {
+                        value: '104',
+                        label: '钢丝绳伸长'
+                    }, {
+                        value: '105',
+                        label: '安全钳保护装置异常'
+                    }, {
+                        value: '106',
+                        label: '底坑积水报警'
                     }
                 ],
                 statusOption: [
                     {
-                        value: 1,
-                        label: '已处理'
-                    }, {
                         value: 0,
                         label: '未处理'
+                    }, {
+                        value: 2,
+                        label: '已处理'
+                    }, {
+                        value: 3,
+                        label: '误报'
                     }
                 ],
                 usersData: [],
-                selectData: []
+                selectData: [],
+                pickerValue: [],
+                pickerOptions: {
+                    shortcuts: [{
+                        text: '最近一周',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, {
+                        text: '最近一个月',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, {
+                        text: '最近三个月',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }]
+                },
             }
         },
         mounted() {
         },
         filters: {
-            typeFrm(el) {
-                if (el === 'HUMIDITY') return '湿度';
-                if (el === 'TEMPERATURE') return '温度';
-                if (el === 'NOISE') return '噪声';
-                if (el === 'MACHINE_TEMPERATURE') return '电机温度';
-                if (el === 'CABINET_TEMPERATURE') return '电柜温度';
-                if (el === 'CIRCUIT') return '安全回路';
-                if (el === 'DOOR_NOT_OPEN_TIMEOUT') return '超时不开门';
-                if (el === 'DOOR_NOT_CLOSED_TIMEOUT') return '超时不关门';
-                if (el === 'LEVELING') return '平层';
-                if (el === 'LIFTING_WITH_DOOR_OPEN') return '开门行车';
-                if (el === 'HALT_OUT_OF_DOOR_ZONE') return '门区外停车';
-                if (el === 'DOOR_OPEN_OUT_OF_DOOR_ZONE') return '门区外开门';
-                if (el === 'CALL_BUTTON_HIT') return '呼叫按钮按下';
-                if (el === 'OVERSPEED') return '超速';
-                if (el === 'PONDING') return '积水';
-                return el;
+            typeFilter(val){
+                if(val=='301') return '机房湿度异常';
+                if(val=='302') return '机房温度异常';
+                if(val=='304') return '安全回路断路';
+                if(val=='305') return '抱闸温度异常';
+                if(val=='306') return '电流异常';
+                if(val=='307') return '曳引绳断股';
+                if(val=='201') return '超时不开门';
+                if(val=='202') return '超时不关门';
+                if(val=='204') return '电梯非门区停车';
+                if(val=='205') return '电梯意外移动';
+                if(val=='206') return '电梯非门区开门';
+                if(val=='401') return '电梯困人';
+                if(val=='402') return '紧急按钮被按下';
+                if(val=='207') return '电梯超速';
+                if(val=='208') return '电梯失速';
+                if(val=='209') return '轿厢含氧量低';
+                if(val=='210') return '电梯停电';
+                if(val=='211') return '轿厢倾斜超标';
+                if(val=='211') return '轿厢振动超标';
+                if(val=='101') return '底坑湿度异常';
+                if(val=='102') return '底坑温度异常';
+                if(val=='103') return '底坑噪声异常';
+                if(val=='104') return '钢丝绳伸长';
+                if(val=='105') return '安全钳保护装置异常';
+                if(val=='106') return '底坑积水报警';
+                return val;
             }
         },
         methods: {
             onValChange(data) {
                 this.usersData = data;
             },
-            initList() {
-                this.list_params.search_content = '';
-                this.refresh = !this.refresh
+            onAscOrDesc(str, num) {
+                console.log(str, num);
+                this.list_params.sort[str] = num;
+                this.refresh = !this.refresh;
             },
             searchUser() {
+                this.list_params.page = 1;
                 this.list_params.search_content = this.params.name;
-                this.status = this.params.status;
+                this.list_params.status = this.params.status;
+                this.list_params.fault_code = this.params.alarm_type;
+                if (this.pickerValue && this.pickerValue.length === 2) {
+                    this.list_params.start_date = this.pickerValue[0];
+                    this.list_params.end_date = this.pickerValue[1];
+                } else {
+                    this.list_params.start_date = '';
+                    this.list_params.end_date = '';
+                }
                 this.refresh = !this.refresh;
             },
             tableAction() {
@@ -230,34 +345,8 @@
                     }
                 }, '操作');
             },
-            editUser(data) {},
-            updateStatus_multiple() {
-                if (this.selectData.length === 0) {
-                    this.$message({type: 'info', message: '请先选中需要处理的报警'}
-                    );
-                    return false;
-                } else {
-                    let arr = [];
-                    let data = [];
-                    this.usersData.forEach((item) => {//Find the item in userData and also in selectData, then change it's status
-                        if (this.selectData.some((item1) => {
-                            return item === item1;
-                        })) {
-                            arr.push({
-                                "id": item.id,
-                                "status": item.status === '1' ? '0' : '1'
-                            });
-                            data.push(item)
-                        }
-                    });
-                    //console.log('arr', arr);
-                    this.$req.post('/dm/alarm_log/update/multiple/status', arr).then((result) => {
-                        data.forEach((el) => {
-                            el.status = el.status === '1' ? '0' : '1'
-                        });
-                        //console.log('完成')
-                    })
-                }
+            editUser(id) {
+                this.$router.push({path: '/alarm_detail', query: {alarm_id: id}})
             },
             onSelectionChange(selection) {
                 console.log(selection);
@@ -266,7 +355,7 @@
 
         },
         components: {
-            ToolBar, HelpHint, Paginate
+            ToolBar, HelpHint, Paginate,TableSort
         }
     }
 </script>

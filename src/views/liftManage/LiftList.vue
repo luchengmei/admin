@@ -3,17 +3,6 @@
         <ToolBar>
             <el-button type="primary" icon="el-icon-plus" size="small" @click="addLift()">添加</el-button>
             <div style="float: right">
-                <!--<el-select v-model="params.singleField" placeholder="功能" size="small" @change="onSingleFieldChange"-->
-                <!--@clear="initList"-->
-                <!--clearable-->
-                <!--style="width: 100px">-->
-                <!--<el-option-->
-                <!--v-for="item in singleFieldOption"-->
-                <!--:key="item.value"-->
-                <!--:label="item.label"-->
-                <!--:value="item.value">-->
-                <!--</el-option>-->
-                <!--</el-select>-->
                 <el-input
                         placeholder="请输入电梯名称/单位名称"
                         size="small"
@@ -32,48 +21,94 @@
                 ref="table"
                 style="width: 100%">
             <el-table-column
-                    width=""
+                    width="100"
                     prop="id"
                     label="电梯ID">
+                <template slot="header" slot-scope="scope">
+                    电梯ID
+                    <table-sort @ascending="onAscOrDesc('id',0)"
+                                @descending="onAscOrDesc('id',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     width="200"
                     prop="name"
                     label="电梯名称">
+                <template slot="header" slot-scope="scope">
+                    电梯名称
+                    <table-sort @ascending="onAscOrDesc('name',0)"
+                                @descending="onAscOrDesc('name',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
-                    width="120"
+                    width="140"
                     prop="license"
                     label="使用登记证编号">
+                <template slot="header" slot-scope="scope">
+                    使用登记证编号
+                    <table-sort @ascending="onAscOrDesc('license',0)"
+                                @descending="onAscOrDesc('license',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     width="250"
                     prop="address_shot"
                     label="地址">
             </el-table-column>
+            <template slot="header" slot-scope="scope">
+                地址
+                <table-sort @ascending="onAscOrDesc('address_shot',0)"
+                            @descending="onAscOrDesc('address_shot',1)"></table-sort>
+            </template>
             <el-table-column
                     width="200px"
                     prop="owner_company_name"
                     label="物业单位">
+                <template slot="header" slot-scope="scope">
+                    物业单位
+                    <table-sort @ascending="onAscOrDesc('owner_company_name',0)"
+                                @descending="onAscOrDesc('owner_company_name',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     width="200px"
                     prop="maintenance_company_name"
                     label="维保单位">
+                <template slot="header" slot-scope="scope">
+                    维保单位
+                    <table-sort @ascending="onAscOrDesc('maintenance_company_name',0)"
+                                @descending="onAscOrDesc('maintenance_company_name',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
-                    width="100"
+                    width="140"
                     prop="rated_load"
                     label="额定载重(kg)">
+                <template slot="header" slot-scope="scope">
+                    额定载重(kg)
+                    <table-sort @ascending="onAscOrDesc('rated_load',0)"
+                                @descending="onAscOrDesc('rated_load',1)"></table-sort>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    width="140"
+                    prop="rated_speed"
+                    label="额定速度(m/s)">
+                <template slot="header" slot-scope="scope">
+                    额定速度(m/s)
+                    <table-sort @ascending="onAscOrDesc('rated_speed',0)"
+                                @descending="onAscOrDesc('rated_speed',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     width="100"
-                    prop="rated_speed"
-                    label="额定速度(m/s)">
-            </el-table-column>
-            <el-table-column
                     prop="floor"
                     label="层站数">
+                <template slot="header" slot-scope="scope">
+                    层站数
+                    <table-sort @ascending="onAscOrDesc('floor',0)"
+                                @descending="onAscOrDesc('floor',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     width="200"
@@ -93,8 +128,12 @@
             <el-table-column
                     width="100"
                     prop="manufacture_date"
-                    sortable
                     label="出厂时间">
+                <template slot="header" slot-scope="scope">
+                    出厂时间
+                    <table-sort @ascending="onAscOrDesc('manufacture_date',0)"
+                                @descending="onAscOrDesc('manufacture_date',1)"></table-sort>
+                </template>
             </el-table-column>
             <el-table-column
                     label="操作"
@@ -117,7 +156,8 @@
     import ToolBar from '@/components/ToolBar.vue';
     import HelpHint from '@/components/HelpHint.vue';
     import Paginate from "../../components/Paginate";
-    import linkage from '../../components/linkage'
+    import linkage from '../../components/linkage';
+    import TableSort from '../../components/TableSort'
 
     export default {
         mounted() {
@@ -132,7 +172,7 @@
                 usersData: [],
                 list_url: '/Lifts/listPage',
                 list_params: {
-                    "list_rows": 1,
+                    "page": 1,
                     "size": 10,
                     "sort": {id: 1}
                 },
@@ -217,10 +257,12 @@
                 this.usersData = data;
             },
             initList() {
+                this.paginate_params.page = 1;
                 this.list_params.search_content = '';//清空搜索关键词
                 this.refresh = !this.refresh;//refresh paginate
             },
             searchUser() {
+                this.paginate_params.page = 1;
                 this.list_params.search_content = this.params.name;//搜索关键词
                 this.refresh = !this.refresh;
             },
@@ -232,10 +274,10 @@
                 }).then(() => {
                         this.$api_v3.post('/Lifts/remove', {'id': id}).then((result) => {
                             console.log(result);
-                            if(result.code === 0){
+                            if (result.code === 0) {
                                 this.$message.success('操作成功');
                                 this.refresh = !this.refresh;
-                            }else {
+                            } else {
                                 this.$message.error('操作失败')
                             }
                         })
@@ -255,13 +297,19 @@
             },
             addLift(id = null) {
                 this.$router.push({path: '/lift_detail', query: {lift_id: id}})
-            }
+            },
+            onAscOrDesc(str, num) {
+                console.log(str, num);
+                this.list_params.sort[str] = num;
+                this.refresh = !this.refresh;
+            },
         },
         components: {
             Paginate,
             ToolBar,
             HelpHint,
-            linkage
+            linkage,
+            TableSort
         }
     }
 </script>

@@ -19,7 +19,7 @@
         <el-pagination
                 background
                 layout="sizes, prev, pager, next"
-                :current-page.sync="current"
+                :current-page.sync="params.page"
                 :page-sizes="[10,25, 50, 100,200]"
                 :page-size.sync="size"
                 @current-change="change"
@@ -39,7 +39,6 @@
             return {
                 size: 10,
                 total: null,
-                current: 1,
                 currentDataLength: 0,
             }
         },
@@ -48,7 +47,6 @@
                 let _this = this;
                 let params = _this.params;
                 params.list_rows = _this.size;//一页数据条数
-                params.page = _this.current;//页码
                 _this.$api_v3.post(_this.api, params).then((result) => {
                     console.log(_this.api, result);
                     if (result.code === 0) {
