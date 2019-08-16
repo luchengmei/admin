@@ -86,7 +86,7 @@
                                 <div class="left"><i class="el-icon-info"></i></div>
                                 <div class="center">ip</div>
                                 <div class="right" v-if="edit">
-                                    <el-input v-model="device.ip" disabled></el-input>
+                                    <el-input v-model="device.ip"></el-input>
                                 </div>
                                 <div class="right" v-else="edit">{{device.ip}}</div>
                             </li>
@@ -94,7 +94,7 @@
                                 <div class="left"><i class="el-icon-info"></i></div>
                                 <div class="center">mac</div>
                                 <div class="right" v-if="edit">
-                                    <el-input v-model="device.mac"></el-input>
+                                    <el-input v-model="device.mac" disabled></el-input>
                                 </div>
                                 <div class="right" v-else="edit">{{device.mac}}</div>
                             </li>

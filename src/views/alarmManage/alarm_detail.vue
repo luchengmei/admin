@@ -8,10 +8,10 @@
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
                     <!--<div class="panel-heading">-->
-                        <!--<span class="title"><span class="name"></span></span>-->
-                        <!--<i :class="edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"-->
-                           <!--@click="toggleEdit"-->
-                           <!--style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>-->
+                    <!--<span class="title"><span class="name"></span></span>-->
+                    <!--<i :class="edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"-->
+                    <!--@click="toggleEdit"-->
+                    <!--style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>-->
                     <!--</div>-->
                     <div class="panel-body">
                         <ul>
@@ -47,7 +47,16 @@
                                 <div class="right" v-if="edit">
                                     <el-input></el-input>
                                 </div>
-                                <div class="right" v-else="edit">{{liftFault.status|statusFilter}}</div>
+                                <div class="right" v-else="edit">
+                                    <el-select v-model="liftFault.status" value="">
+                                        <el-option
+                                                v-for="item in option"
+                                                :key="item.value"
+                                                :label="item.label"
+                                                :value="item.value">
+                                        </el-option>
+                                    </el-select>
+                                </div>
                             </li>
                         </ul>
                     </div>
@@ -62,37 +71,52 @@
     export default {
         data() {
             return {
-                activeName:'index',
-                edit:false,
-                liftFault:{}
+                activeName: 'index',
+                edit: false,
+                liftFault: {},
+                option: [
+                    {
+                        label: '未处理',
+                        value: 0,
+                    }, {
+                        label: '已查看',
+                        value: 1
+                    }, {
+                        label: '已处理',
+                        value: 2
+                    }, {
+                        label: '误报',
+                        value: 3
+                    }
+                ]
             }
         },
         filters: {
-            statusFilter(value){
-               // 0未处理，1已查看，2已处理，3误报
-                if(value==0){
+            statusFilter(value) {
+                // 0未处理，1已查看，2已处理，3误报
+                if (value == 0) {
                     return '未处理'
                 }
-                if(value==1){
+                if (value == 1) {
                     return '已查看'
                 }
-                if(value==2){
+                if (value == 2) {
                     return '已处理'
                 }
-                if(value==3){
+                if (value == 3) {
                     return '误报'
                 }
                 return value;
             }
         },
         methods: {
-            toggleEdit(){
+            toggleEdit() {
                 this.edit = !this.edit;
             },
-            readLiftFault(id){
-                this.$api_v3.post('/LiftsFault/read',{id:id}).then((res)=>{
+            readLiftFault(id) {
+                this.$api_v3.post('/LiftsFault/read', {id: id}).then((res) => {
                     console.log(res);
-                    if(res.code===0){
+                    if (res.code === 0) {
                         this.liftFault = res.data;
                     }
                 })
