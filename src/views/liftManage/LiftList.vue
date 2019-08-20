@@ -257,12 +257,12 @@
                 this.usersData = data;
             },
             initList() {
-                this.paginate_params.page = 1;
+                this.list_params.page = 1;
                 this.list_params.search_content = '';//清空搜索关键词
                 this.refresh = !this.refresh;//refresh paginate
             },
             searchUser() {
-                this.paginate_params.page = 1;
+                this.list_params.page = 1;
                 this.list_params.search_content = this.params.name;//搜索关键词
                 this.refresh = !this.refresh;
             },
