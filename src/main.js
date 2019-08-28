@@ -3,7 +3,7 @@ import store from './store/'
 import ElementUI from 'element-ui'
 import './theme/index.css'//自定义element-ui主题
 /**
- * 若跟新element-ui版本需将新增组件的原样式文件引入theme/index.css
+ * 若更新element-ui版本需将新增组件的原样式文件引入theme/index.css
  * 例如新增了timeline组件:@import "timeline.css"; @import "timeline-item.css";
  * 原样式文件在 'node_modules/element-ui/lib/theme-chalk/';
  */

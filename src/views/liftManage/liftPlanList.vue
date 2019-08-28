@@ -147,17 +147,8 @@
                 },
                 typeOption: [
                     {
-                        value: 1,
-                        label: '半月维保'
-                    }, {
-                        value: 2,
-                        label: '季度维保'
-                    }, {
-                        value: 3,
-                        label: '半年维保'
-                    }, {
-                        value: 4,
-                        label: '年度维保'
+                        value: -1,
+                        label: '维保'
                     },
                     {
                         value: 5,
@@ -268,7 +259,7 @@
                 this.paginate_params.page = 1;
                 this.paginate_params.search_content = this.params.name;
                 this.paginate_params.status = this.params.status;
-                this.paginate_params.type = this.params.type;
+                this.paginate_params.type = this.params.type===-1?[1,2,3,4]:this.params.type;
                 if (this.pickerValue && this.pickerValue.length === 2) {
                     this.paginate_params.start_date = this.pickerValue[0];
                     this.paginate_params.end_date = this.pickerValue[1];
