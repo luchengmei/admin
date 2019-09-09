@@ -62,16 +62,20 @@ lift.list = {
     path: '/lift_list',
 };
 lift.plan = {
-    name: '维保计划',
+    name: '维保年审',
     path: '/lift_plan_list'
 };
 
+lift.map= {
+  name:'地图',
+  path:'/map'
+};
 
-// company.maintenance = {
-//     name: '维保单位列表',
-//     path: '/maintenance_company',
-//
-// };
+lift.comment = {
+  name:'评论列表',
+  path:'/comment_list'
+};
+
 
 /**
  * 采集仪管理
@@ -105,78 +109,7 @@ alarm.list = {
     name: '报警列表',
     path: '/alarm_list',
 };
-/**
- * 字体图标
- * @type {{name: string, icon: string, children: {}}}
- */
-// menu.font_icon = {
-//     name: '字体图标',
-//     icon: 'fa fa-th',
-//     children: {}
-// };
-// let icon = menu.font_icon.children;
-//
-// icon.font_awesome = {
-//     name: 'FontAwesome 4.7',
-//     path: '/font_awesome',
-//
-// };
-// icon.element_icon = {
-//     name: 'ElementIcon',
-//     path: '/element_icon',
-// };
 
-/**
- * 内容管理
- * @type {{name: string, icon: string, children: {}}}
- */
-// menu.content_manage = {
-//     name: '内容管理',
-//     icon: 'fa fa-file-text-o',
-//     children: {}
-// };
-//
-// let ContentManage = menu.content_manage.children;
-//
-// ContentManage.post = {
-//     name: '文章管理',
-//     path: '/post_manage',
-// };
-
-
-/**
- * 分类管理
- * @type {{name: string, icon: string, children: {}}}
- */
-// menu.category_manage = {
-//     name: '分类管理',
-//     icon: 'fa fa-sitemap',
-//     children: {}
-// };
-// let CategoryManage = menu.category_manage.children;
-//
-// CategoryManage.category = {
-//     name: '分类列表',
-//     path: '/category_manage',
-// };
-//
-//
-// menu.permission_manage = {
-//     name: '权限管理',
-//     icon: 'fa fa-qrcode',
-//     children: {}
-// };
-// let PermissionManage = menu.permission_manage.children;
-//
-// PermissionManage.role = {
-//     name: '角色管理',
-//     path: '/role_manage',
-// };
-//
-// PermissionManage.permission = {
-//     name: '权限列表',
-//     path: '/permission_list',
-// };
 
 /**
  * 系统设置
@@ -198,20 +131,3 @@ systemSetting.plan = {
     path: '/role_setting'
 };
 export default menu;
-
-// if (process.env.NODE_ENV == 'development') {
-//
-//     menu.development_tools = {
-//         name: '开发工具',
-//         icon: 'fa fa-wrench',
-//         children: {}
-//     };
-//
-//     let DevelopmentTools = menu.development_tools.children;
-//
-//     DevelopmentTools.code = {
-//         name: '构建代码',
-//         path: '/build_code',
-//     };
-//
-// }

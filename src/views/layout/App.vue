@@ -328,6 +328,7 @@
             .menu {
                 overflow-y: auto;
                 height: calc(~'100vh - 100px');
+                overflow-x: hidden;
             }
             .sidebar-toggle {
                 position: relative;

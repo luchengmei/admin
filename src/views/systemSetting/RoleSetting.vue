@@ -29,6 +29,7 @@
                             </el-form-item>
                             <el-form-item>
                                 <el-button type="primary" :loading="saveLoading" @click="saveRole()">保存</el-button>
+                                <el-button type="danger" @click="deleteRole(current)">删除角色</el-button>
                             </el-form-item>
                         </el-form>
                     </div>
@@ -36,7 +37,8 @@
                 <el-tab-pane label="角色权限" name="second">
                     <el-tree :data="authorityTree" :props="treeProps" ref="tree"
                              node-key="id" show-checkbox></el-tree>
-                    <el-button style="margin-top: 18px" type="primary" :loading="saveLoading" @click="saveRole()">保存</el-button>
+                    <el-button style="margin-top: 18px" type="primary" :loading="saveLoading" @click="saveRole()">保存
+                    </el-button>
                 </el-tab-pane>
                 <el-tab-pane label="角色用户" name="third">
                     <div>
@@ -54,8 +56,11 @@
                                 label="账号">
                         </el-table-column>
                         <el-table-column
-                                prop="created_at"
-                                label="创建时间">
+                                prop="company"
+                                label="所属单位">
+                            <template slot-scope="scope">
+                                {{scope.row.company?scope.row.company.name:''}}
+                            </template>
                         </el-table-column>
                         <el-table-column
                                 label="操作">
@@ -219,6 +224,27 @@
                     this.saveLoading = false;
                 })
             },
+            deleteRole(id) {
+                if (this.role.users.length > 0) {
+                    this.$message.error('请先将此角色的用户移除');
+                    return;
+                }
+                this.$confirm('删除此角色，是否继续？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$api_v3.post('/AuRole/remove', {"id": id}).then((res) => {
+                        console.log('/AuRole/remove', res);
+                        if (res.code === 0) {
+                            this.getRolesList();
+                            this.$message.success('删除成功');
+                        } else {
+                            this.$message.error(res.msg)
+                        }
+                    })
+                }).catch();
+            },
             readRole(id) {
                 this.$api_v3.post('/AuRole/read', {"id": id}).then((res) => {
                     console.log('/AuRole/read', res);
@@ -292,7 +318,7 @@
                             this.$message.success('操作成功');
                             this.readRole(this.role.id);
                         } else {
-                            this.$message.error(res.data)
+                            this.$message.error(res.msg)
                         }
                     }
                 }).finally(() => {
@@ -341,7 +367,7 @@
                                 this.role.users.splice(index, 1);
                             }
                         } else {
-                            this.$message.error('移除失败')
+                            this.$message.error(res.msg)
                         }
                     })
                 }).catch(() => {

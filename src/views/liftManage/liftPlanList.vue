@@ -79,6 +79,9 @@
                     <table-sort @ascending="onAscOrDesc('next_date',0)"
                                 @descending="onAscOrDesc('next_date',1)"></table-sort>
                 </template>
+                <template slot-scope="scope">
+                    <span style="margin-right: 6px">{{scope.row.next_date}}</span>
+                </template>
             </el-table-column>
             <el-table-column
                     prop="date"
@@ -91,6 +94,18 @@
                 <template slot-scope="scope">
                     <span style="margin-right: 6px">{{scope.row.date}}</span>
                     <el-tag v-if="scope.row.status==0">{{scope.row.date|formatDate}}</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="next_date"
+                    label="上次维保/年审计划日期">
+                <template slot="header" slot-scope="scope">
+                    上次维保/年审计划日期
+                    <table-sort @ascending="onAscOrDesc('last_date',0)"
+                                @descending="onAscOrDesc('last_date',1)"></table-sort>
+                </template>
+                <template slot-scope="scope">
+                    <span style="margin-right: 6px">{{scope.row.last_date}}</span>
                 </template>
             </el-table-column>
             <el-table-column

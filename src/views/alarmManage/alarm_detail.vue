@@ -120,6 +120,16 @@
                         this.liftFault = res.data;
                     }
                 })
+            },
+            save() {
+                this.$api_v3.post('/LiftsFault/save', this.liftFault).then((res) => {
+                    console.log('/LiftsFault/save', res);
+                    if (res.code === 0) {
+                        this.$message.success('保存成功')
+                    } else {
+                        this.$message.error(res.msg)
+                    }
+                })
             }
         },
         mounted() {

@@ -1,6 +1,4 @@
 import Menu from './menu';
-//import permissions from "../api/permissions";
-import req from '../utils/axios'
 //这里可以根据权限做菜单过滤
 if (process.env.NODE_ENV == 'development') {
 
@@ -15,6 +13,26 @@ if (process.env.NODE_ENV == 'development') {
     DevelopmentTools.code = {
         name: '构建代码',
         path: '/build_code',
+    };
+    DevelopmentTools.role = {
+        name: '角色管理',
+        path: '/role_manage',
+    };
+
+    DevelopmentTools.permission = {
+        name: '权限列表',
+        path: '/permission_list',
+    };
+
+
+    DevelopmentTools.font_awesome = {
+        name: 'FontAwesome 4.7',
+        path: '/font_awesome',
+
+    };
+    DevelopmentTools.element_icon = {
+        name: 'ElementIcon',
+        path: '/element_icon',
     };
 }
 export default Menu;

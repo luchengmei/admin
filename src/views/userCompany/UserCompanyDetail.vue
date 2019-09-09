@@ -86,7 +86,7 @@
                         <el-button type="primary" @click="showDialog()">添加用户</el-button>
                     </div>
                     <el-table
-                            :data="company.users"
+                            :data="users"
                             style="width: 100%;margin-top: 15px;color: #3C8DBC;font-size: 14px">
                         <el-table-column
                                 prop="id"
@@ -100,8 +100,13 @@
                                 prop="phone"
                                 label="联系电话">
                         </el-table-column>
+                        <el-table-column
+                                prop="roles"
+                                label="用户类型">
+                        </el-table-column>
                         <el-table-column label="操作">
                             <template slot-scope="scope">
+                                <el-button @click="checkUser(scope.row)" size="mini">查看</el-button>
                                 <el-button @click="removeUsers(scope.row)" size="mini">移除</el-button>
                             </template>
                         </el-table-column>
@@ -164,6 +169,7 @@
                 addNew: false,
                 activeName: 'index',
                 company: {},
+                users:[],
                 //--------------transfer--------------
                 placeholder: '',
                 loading: false,
@@ -277,6 +283,12 @@
                     }
                 });
             },
+            findUserByCompanyId(id){
+                this.$api_v3.post('/AuUser/listPage',{"company_id":id,"list_rows":999}).then((res)=>{
+                    console.log('/AuUser/listPage',res);
+                    this.users = res.data.data
+                })
+            },
             toggleEdit() {
                 this.edit = !this.edit;
             },
@@ -317,6 +329,9 @@
                     })
                 }).catch(() => {
                 });
+            },
+            checkUser(row){
+                this.$router.push({path: '/user_detail', query: {id: row.id}})
             },
             removeLifts(row) {
                 let params = {
@@ -374,6 +389,7 @@
         mounted() {
             if (this.$route.query.id !== null) {
                 this.findCompanyById(this.$route.query.id);
+                this.findUserByCompanyId(this.$route.query.id);
             } else {
                 this.edit = true;
                 this.addNew = true;

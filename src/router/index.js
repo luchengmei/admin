@@ -51,6 +51,15 @@ let RouteList = [
                 component: resolve => require(['@/views/liftManage/liftPlanList.vue'], resolve),
             },
             {
+                path: '/comment_list',
+                name: 'commentList',
+                meta: {
+                    title: '评论管理',
+                    keepAlive: true
+                },
+                component: resolve => require(['@/views/liftManage/CommentList.vue'], resolve),
+            },
+            {
                 path: '/lift_plan_detail',
                 name: 'liftPlanDetail',
                 meta: {
@@ -123,6 +132,15 @@ let RouteList = [
                 component: resolve => require(['@/views/alarmManage/alarm_detail.vue'], resolve),
             },
             {
+                path: '/map',
+                name: 'Map',
+                meta: {
+                    title: '地图',
+                    keepAlive: true
+                },
+                component: resolve => require(['@/views/map/Map.vue'], resolve),
+            },
+            {
                 path: '/font_awesome',
                 name: 'FontAwesome',
                 meta: {
@@ -139,15 +157,6 @@ let RouteList = [
                     keepAlive: false
                 },
                 component: resolve => require(['@/views/icon/ElementIcon.vue'], resolve),
-            },
-            {
-                path: '/post_manage',
-                name: 'PostManage',
-                meta: {
-                    title: '文章管理',
-                    keepAlive: false
-                },
-                component: resolve => require(['@/views/contentManage/Index.vue'], resolve),
             },
             {
                 path: '/user_manage',
@@ -168,15 +177,6 @@ let RouteList = [
                 component: resolve => require(['@/views/userManage/userDetail.vue'], resolve),
             },
             {
-                path: '/company_setting',
-                name: 'CompanySetting',
-                meta: {
-                    title: '单位类型设置',
-                    keepAlive: true
-                },
-                component: resolve => require(['@/views/systemSetting/CompanySetting.vue'], resolve),
-            },
-            {
                 path: '/role_setting',
                 name: 'RoleSetting',
                 meta: {
@@ -184,15 +184,6 @@ let RouteList = [
                     keepAlive: true
                 },
                 component: resolve => require(['@/views/systemSetting/RoleSetting.vue'], resolve),
-            },
-            {
-                path: '/category_manage',
-                name: 'CategoryManage',
-                meta: {
-                    title: '分类列表',
-                    keepAlive: true
-                },
-                component: resolve => require(['@/views/categoryManage/Index.vue'], resolve),
             },
             {
                 path: '/role_manage',
