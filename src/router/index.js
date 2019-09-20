@@ -73,7 +73,7 @@ let RouteList = [
                 name: 'alarmSetting',
                 meta: {
                     title: '报警设置',
-                    keepAlive: false
+                    keepAlive: true
                 },
                 component: resolve => require(['@/views/liftManage/alarmSetting.vue'], resolve),
             },

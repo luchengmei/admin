@@ -180,7 +180,6 @@
                 paginate_params: {
                     "page": 1,
                     "sort": {id: 1},
-                    "name": ''
                 },
                 refresh: false,
                 params: {
@@ -197,7 +196,7 @@
             },
             searchUser() {
                 this.paginate_params.page = 1;
-                this.paginate_params.name = this.params.name;
+                this.paginate_params.name = this.params.name||null;
                 this.refresh = !this.refresh;
             },
             onValChange(data) {

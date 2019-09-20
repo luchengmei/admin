@@ -109,6 +109,10 @@ alarm.list = {
     name: '报警列表',
     path: '/alarm_list',
 };
+alarm.setting = {
+  name:'报警设置',
+  path:'/alarm_setting'
+};
 
 
 /**
