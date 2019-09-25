@@ -30,7 +30,7 @@
                             </li>
                             <li>
                                 <div class="left"><i class="fa fa-building-o"></i></div>
-                                <div class="center">所属单位</div>
+                                <div class="center">物业单位</div>
                                 <div class="right" v-if="edit" style="display: flex">
                                     <div style="margin-right: 30px">
                                         <el-popover
@@ -68,6 +68,48 @@
                                               disabled></el-input>
                                 </div>
                                 <div class="right" v-else>{{company_name}}
+                                </div>
+                            </li>
+                            <li>
+                                <div class="left"><i class="fa fa-building-o"></i></div>
+                                <div class="center">维保单位</div>
+                                <div class="right" v-if="edit" style="display: flex">
+                                    <div style="margin-right: 30px">
+                                        <el-popover
+                                                @show="changePage"
+                                                placement="bottom"
+                                                width="600"
+                                                trigger="click">
+                                            <el-card class="box-card" shadow="never">
+                                                <div slot="header" style="display: flex;align-items: center">
+                                                    <el-input placeholder="请输入名称" v-model="popoverInputVal"
+                                                              @clear="search" clearable
+                                                              @keyup.native.enter="search">
+                                                        <el-button slot="append" icon="el-icon-search"
+                                                                   @click="search"></el-button>
+                                                    </el-input>
+                                                    <el-pagination
+                                                            :page-size.sync="popover.pageSize"
+                                                            :current-page.sync="popover.currentPage"
+                                                            @current-change="changePage"
+                                                            normal
+                                                            layout="prev, pager, next"
+                                                            :total="popover.total">
+                                                    </el-pagination>
+                                                </div>
+                                                <div v-for="(item, index) in popover.data" :key="index"
+                                                     @click="setMaintenanceName(item)"
+                                                     style="margin-bottom: 10px;font-size: 14px;color: #3C8DBC;cursor: pointer;">
+                                                    {{item.name}}
+                                                </div>
+                                            </el-card>
+                                            <el-button slot="reference" type="primary">点击选择</el-button>
+                                        </el-popover>
+                                    </div>
+                                    <el-input style="flex: 1" v-model="maintenance_name"
+                                              disabled></el-input>
+                                </div>
+                                <div class="right" v-else>{{maintenance_name}}
                                 </div>
                             </li>
                             <li>
@@ -290,512 +332,6 @@
                         </div>
                     </transition>
                 </el-tab-pane>
-                <el-tab-pane label="报警设置" name="third">
-                    <div style="text-align: center;">
-                        <el-row :gutter="10" style="color: #ffffff">
-                            <el-col :span="6">
-                                <div class="grid-content bg-purple">报警类型</div>
-                            </el-col>
-                            <el-col :span="2">
-                                <div class="grid-content bg-purple">阈值(max)</div>
-                            </el-col>
-                            <el-col :span="2">
-                                <div class="grid-content bg-purple">阈值(min)</div>
-                            </el-col>
-                            <el-col :span="8">
-                                <div class="grid-content bg-purple">报警时间</div>
-                            </el-col>
-                            <el-col :span="2">
-                                <div class="grid-content bg-purple">开关</div>
-                            </el-col>
-                            <el-col :span="4">
-                                <div class="grid-content bg-purple">操作</div>
-                            </el-col>
-                        </el-row>
-                        <transition-group name="slide-fade">
-                            <el-row :gutter="10" v-for="(item,index) in alarms" :key="index">
-                                <el-col :span="6">
-                                    <div class="grid-content">{{item.type|formatAlarmType}}</div>
-                                </el-col>
-                                <el-col :span="2">
-                                    <div class="grid-content">
-                                        <el-input v-model="item.threshold_max"
-                                                  :disabled="isInputDisabled(item.type)"></el-input>
-                                    </div>
-                                </el-col>
-                                <el-col :span="2">
-                                    <div class="grid-content">
-                                        <el-input v-model="item.threshold_min"
-                                                  :disabled="isInputDisabled(item.type)"></el-input>
-                                    </div>
-                                </el-col>
-                                <el-col :span="8">
-                                    <div class="grid-content">
-                                        <el-time-picker
-                                                :disabled="isPickerDisabled(item.type)"
-                                                v-model="item.period_full"
-                                                is-range
-                                                range-separator="至"
-                                                start-placeholder="开始时间"
-                                                end-placeholder="结束时间"
-                                                placeholder="选择时间范围">
-                                        </el-time-picker>
-                                    </div>
-                                </el-col>
-                                <el-col :span="2">
-                                    <div class="grid-content">
-                                        <el-switch v-model="item.is_enabled"></el-switch>
-                                    </div>
-                                </el-col>
-                                <el-col :span="4">
-                                    <div class="grid-content" v-if="item.adding">
-                                        <el-button type="primary" size="small" plain @click="add_confirm(item)">确定
-                                        </el-button>
-                                        <el-button type="danger" size="small" @click="add_cancel(item)">取消
-                                        </el-button>
-                                    </div>
-                                    <div class="grid-content" v-else>
-                                        <el-button :disabled="isPickerDisabled(item.type)" type="primary" size="small"
-                                                   plain @click="addPeriod(item)">添加时段
-                                        </el-button>
-                                        <el-button type="primary" size="small" @click="updateSingleAlarm(item)">保存
-                                        </el-button>
-                                    </div>
-                                </el-col>
-                            </el-row>
-                        </transition-group>
-                    </div>
-                    <template><!--<div style="margin-bottom: 15px;color: #3C8DBC;">-->
-                        <!--<div style="display: flex">-->
-                        <!--<div style="margin-right: 15px">APP推送-->
-                        <!--<el-switch v-model="APPpush"></el-switch>-->
-                        <!--</div>-->
-                        <!--<div>短信通知-->
-                        <!--<el-switch v-model="note"></el-switch>-->
-                        <!--</div>-->
-                        <!--</div>-->
-                        <!--<transition name="slide-fade">-->
-                        <!--<div v-show="note" class="noteSetting">-->
-                        <!--<el-card shadow="never">-->
-                        <!--<div slot="header">-->
-                        <!--<span>短信通知配置</span>-->
-                        <!--</div>-->
-                        <!--<div>-->
-                        <!--<el-checkbox-group v-model="checkList" style="margin-bottom: 10px">-->
-                        <!--<el-checkbox label="物业"></el-checkbox>-->
-                        <!--<el-checkbox label="维保"></el-checkbox>-->
-                        <!--<el-checkbox label="管理员"></el-checkbox>-->
-                        <!--</el-checkbox-group>-->
-                        <!--<el-tag-->
-                        <!--:key="tag"-->
-                        <!--v-for="tag in dynamicTags"-->
-                        <!--closable-->
-                        <!--:disable-transitions="false"-->
-                        <!--@close="handleClose(tag)">-->
-                        <!--{{tag}}-->
-                        <!--</el-tag>-->
-                        <!--<el-input-->
-                        <!--placeholder="请输入手机号"-->
-                        <!--class="input-new-tag"-->
-                        <!--v-show="inputVisible"-->
-                        <!--v-model="inputValue"-->
-                        <!--ref="saveTagInput"-->
-                        <!--size="small"-->
-                        <!--@keyup.enter.native="handleInputConfirm"-->
-                        <!--@blur="handleInputConfirm">-->
-                        <!--</el-input>-->
-                        <!--<el-button icon="el-icon-plus" v-show="!inputVisible" class="button-new-tag"-->
-                        <!--size="small" @click="showInput">添加指定用户-->
-                        <!--</el-button>-->
-                        <!--</div>-->
-                        <!--</el-card>-->
-                        <!--</div>-->
-                        <!--</transition>-->
-                        <!--</div>--></template>
-                </el-tab-pane>
-                <el-tab-pane label="报警通知" name="fourth">
-                    <div style="margin-bottom: 15px;color: #3C8DBC;">
-                        <div style="display: flex">
-                            <div style="margin-right: 30px">
-                                <el-switch v-model="APPpush" style="margin-left: 10px" active-text="报警通知"></el-switch>
-                            </div>
-                            <div>
-                                <el-switch v-model="note" style="margin-left: 10px" active-text="短信通知"></el-switch>
-                            </div>
-                        </div>
-                    </div>
-                    <el-table
-                            :data="tableData"
-                            style="width: 100%;color: #3C8DBC">
-                        <el-table-column type="expand">
-                            <template slot-scope="props">
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>机房湿度超标</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.HUMIDITY_IN_MACHINE_ROOM.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.HUMIDITY_IN_MACHINE_ROOM.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>机房温度超标</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.TEMPERATURE_IN_MACHINE_ROOM.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.TEMPERATURE_IN_MACHINE_ROOM.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>机房噪声超标</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.NOISE_IN_MACHINE_ROOM.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.NOISE_IN_MACHINE_ROOM.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>安全回路</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.CIRCUIT.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.CIRCUIT.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>抱闸异常</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.BRAKE_EXCEPTION.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.BRAKE_EXCEPTION.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>曳引绳断股</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.HOIST_ROPE_BROKEN.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.HOIST_ROPE_BROKEN.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>电流异常</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.ELECTRICITY_EXCEPTION.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.ELECTRICITY_EXCEPTION.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>超时不开门</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.DOOR_NOT_OPEN_TIMEOUT.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.DOOR_NOT_OPEN_TIMEOUT.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>超时不关门</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.DOOR_NOT_CLOSED_TIMEOUT.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.DOOR_NOT_CLOSED_TIMEOUT.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>电梯非门区停车</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.HALT_OUT_OF_DOOR_ZONE.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.HALT_OUT_OF_DOOR_ZONE.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>轿厢意外移动（开门行车）</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.LIFTING_WITH_DOOR_OPEN.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.LIFTING_WITH_DOOR_OPEN.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>电梯门区开门</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.DOOR_OPEN_OUT_OF_DOOR_ZONE.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.DOOR_OPEN_OUT_OF_DOOR_ZONE.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>电梯困人</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.STUCK_IN_LIFT.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.STUCK_IN_LIFT.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>紧急按钮按下</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.CALL_BUTTON_HIT.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.CALL_BUTTON_HIT.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>超速或失速报警</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.OVERSPEED_OR_STALLING.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.OVERSPEED_OR_STALLING.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>轿厢空气检测</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.AIR_IN_LIFT.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.AIR_IN_LIFT.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>电梯断电报警</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.BLACKOUT.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.BLACKOUT.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>轿厢倾斜超标报警</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.LIFT_INCLINE.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.LIFT_INCLINE.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>轿厢震动超标报警</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.LIFT_QUAKE.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.LIFT_QUAKE.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>底坑噪声</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.NOISE_IN_PIT.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.NOISE_IN_PIT.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>底坑温度</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.TEMPERATURE_IN_PIT.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.TEMPERATURE_IN_PIT.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>底坑湿度</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.HUMIDITY_IN_PIT.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.HUMIDITY_IN_PIT.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>钢丝绳异常</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.WIRE_ROPE_EXCEPTION.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.WIRE_ROPE_EXCEPTION.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>超速保护</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.OVERSPEED_PROTECTION.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.OVERSPEED_PROTECTION.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <el-row type="flex" class="row-bg">
-                                    <el-col :span="4">
-                                        <div>积水</div>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.PONDING.is_enabled"
-                                                   active-text="报警通知"></el-switch>
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-switch v-model="props.row.PONDING.message_switch"
-                                                   active-text="短信通知"></el-switch>
-                                    </el-col>
-                                </el-row>
-                                <div>
-                                    <el-button :disabled="updatingNotice" style="float: right" type="primary"
-                                               @click="updateNoticeByUser(props.row)">
-                                        {{updatingNotice===true?'正在保存':'保存'}}
-                                    </el-button>
-                                </div>
-                            </template>
-                        </el-table-column>
-                        <el-table-column
-                                label="姓名"
-                                prop="name">
-                        </el-table-column>
-                        <el-table-column
-                                label="手机号"
-                                prop="cellphone">
-                        </el-table-column>
-                        <el-table-column
-                                label="用户类型"
-                                prop="roles">
-                            <template slot-scope="scope">
-                                <span style="margin-right: 5px" v-for="i in scope.row.roles">{{i|userTypeFrm}}</span>
-                            </template>
-                        </el-table-column>
-                        <el-table-column
-                                label="单位"
-                                prop="name">
-                        </el-table-column>
-                        <el-table-column
-                                label="报警通知">
-                            <template slot-scope="scope">
-                                <el-switch v-model="scope.row.MASTER_SWITCH.is_enabled"></el-switch>
-                            </template>
-                        </el-table-column>
-                        <el-table-column
-                                label="短信通知"
-                                prop="MASTER_TEXT_SWITCH">
-                            <template slot-scope="scope">
-                                <el-switch v-model="scope.row.MASTER_TEXT_SWITCH.is_enabled"></el-switch>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                </el-tab-pane>
                 <el-tab-pane label="年审计划" name="fifth">
                     <div class="lift-plan" style="padding: 0 5px">
                         <!--<el-timeline>-->
@@ -921,7 +457,8 @@
                 liftChangeCount: 0,
                 collapseNames: [],
                 lift: {},
-                company_name:'',
+                company_name: '',
+                maintenance_name: '',
                 floors: [],
                 value: '',
                 edit: true,
@@ -941,23 +478,6 @@
                         value: 365,
                         label: '一年（365天）'
                     }],
-                //about alarm push
-                APPpush: true,
-                note: true,
-                tableData: [],
-                updatingNotice: false,
-
-                //about alarm setting
-                alarms: [],
-                hasSave: true,
-                value4: '1',
-                value5: '',
-                checkList: [],
-                dynamicTags: [],
-                overTime_open: [1],
-                overTime_close: [1],
-                inputVisible: false,
-                inputValue: '',
                 //about remark
                 dialogImageUrl: '',
                 dialogVisible: false,
@@ -982,17 +502,6 @@
             }
         },
         filters: {
-            userTypeFrm(val) {
-                if (val === 'ROLE_ADMIN') return '管理员';
-                if (val === 'ROLE_DEVELOPER') return '开发人员';
-                if (val === 'ROLE_CLIENT_ADMIN') return '物业管理员';
-                if (val === 'ROLE_CLIENT') return '物业';
-                if (val === 'ROLE_MAINTAINER_ADMIN') return '维保管理员';
-                if (val === 'ROLE_MAINTAINER') return '维保';
-                if (val === 'ROLE_INSTALLER_ADMIN') return '安装人员管理员';
-                if (val === 'ROLE_INSTALLER') return '安装人员';
-                return val;
-            },
             statusFrm(el) {
                 if (el == 1) return '合格';
                 if (el == 2) return '不合格';
@@ -1006,36 +515,6 @@
             dateFrm(el) {
                 if (el === null) return '';
                 return moment(el).format("YYYY-MM-DD")
-            },
-            formatAlarmType(type) {
-                if (type === 'HUMIDITY_IN_MACHINE_ROOM') return '机房湿度超标（%）';
-                if (type === 'TEMPERATURE_IN_MACHINE_ROOM') return '机房温度超标（℃）';
-                if (type === 'NOISE_IN_MACHINE_ROOM') return '机房噪声超标（db）';
-                if (type === 'CIRCUIT') return '安全回路断路';
-                if (type === 'BRAKE_EXCEPTION') return '抱闸异常';
-                if (type === 'HOIST_ROPE_BROKEN') return '曳引绳断股';
-                if (type === 'ELECTRICITY_EXCEPTION') return '电流异常';
-                if (type === 'DOOR_NOT_OPEN_TIMEOUT') return '超时不开门（s）';
-                if (type === 'DOOR_NOT_CLOSED_TIMEOUT') return '超时不关门（s）';
-                if (type === 'HALT_OUT_OF_DOOR_ZONE') return '电梯非门区停车';
-                if (type === 'LIFTING_WITH_DOOR_OPEN') return '轿厢意外移动（开门行车）';
-                if (type === 'DOOR_OPEN_OUT_OF_DOOR_ZONE') return '电梯门区开门';
-                if (type === 'STUCK_IN_LIFT') return '电梯困人';
-                if (type === 'CALL_BUTTON_HIT') return '紧急按钮按下';
-                if (type === 'OVERSPEED_OR_STALLING') return '超速或失速报警';
-                if (type === 'AIR_IN_LIFT') return '轿厢空气检测';
-                if (type === 'BLACKOUT') return '电梯断电报警';
-                if (type === 'LIFT_INCLINE') return '轿厢倾斜超标报警';
-                if (type === 'LIFT_QUAKE') return '轿厢震动超标报警';
-                if (type === 'NOISE_IN_PIT') return '底坑噪声';
-                // if (type === 'MACHINE_TEMPERATURE') return '电机温度';
-                // if (type === 'CABINET_TEMPERATURE') return '电柜温度';
-                if (type === 'WIRE_ROPE_EXCEPTION') return '钢丝绳异常';
-                if (type === 'OVERSPEED_PROTECTION') return '超速保护';
-                if (type === 'PONDING') return '积水';
-                if (type === 'TEMPERATURE_IN_PIT') return '底坑温度';
-                if (type === 'HUMIDITY_IN_PIT') return '底坑湿度';
-                return "未知类型"
             }
         },
         watch: {
@@ -1051,198 +530,6 @@
         },
         computed: {},
         methods: {
-            //____________________alarmSetting______________start
-            isInputDisabled(type) {
-                if (type == 'HOIST_ROPE_BROKEN') return true;
-                if (type == 'HALT_OUT_OF_DOOR_ZONE') return true;
-                if (type == 'LIFTING_WITH_DOOR_OPEN') return true;
-                if (type == 'DOOR_OPEN_OUT_OF_DOOR_ZONE') return true;
-                if (type == 'OVERSPEED_PROTECTION') return true;
-                if (type == 'WIRE_ROPE_EXCEPTION') return true;
-                return type == 'PONDING';
-            },
-            isPickerDisabled(type) {
-                return type == 'HOIST_ROPE_BROKEN';
-            },
-            updateSingleAlarm(item) {
-                if (item.period_full !== null) {
-                    item.period_start = this.$moment(item.period_full[0]).format("HH:mm:ss");
-                    item.period_end = this.$moment(item.period_full[1]).format("HH:mm:ss")
-                }
-                this.$req.post('/dm/alarm/update', item).then((result) => {
-                    if (result.Code === 7000) {
-                        this.$message({
-                            type: 'success',
-                            message: '设置成功'
-                        })
-                    }
-                })
-            },
-            addPeriod(item) {
-                this.alarms.unshift({
-                    "lift_id": item.lift_id,
-                    "period_end": null,
-                    "period_start": null,
-                    "threshold_max": "",
-                    "threshold_min": "",
-                    "type": item.type,
-                    "period_full": null,
-                    "is_enabled": true,
-                    "adding": true
-                })
-            },
-            add_confirm(item) {
-                if (item.period_full == null) {
-                    this.$message({
-                        "type": 'error',
-                        "message": '添加时间段不能为空'
-                    });
-                    return false;
-                } else if (item.period_full !== null) {
-                    item.period_start = this.$moment(item.period_full[0]).format("HH:mm:ss");
-                    item.period_end = this.$moment(item.period_full[1]).format("HH:mm:ss");
-                    this.$req.post('/dm/alarm/add', item).then((result) => {
-                        if (result.Code === 7000) {
-                            this.$message({
-                                "type": 'success',
-                                "message": '添加成功'
-                            });
-                            item.id = result.id;
-                            item.adding = false;
-                        }
-                    }).catch((err) => {
-                        console.log(err)
-                    })
-                }
-            },
-            add_cancel(item) {
-                let index = this.alarms.findIndex((value) => {
-                    return value === item
-                });
-                if (index === -1) return;
-                this.alarms.splice(index, 1)
-            },
-            //____________________alarmSetting______________end
-
-            //___________________alarmNotice________________start
-            updateNoticeByUser(row) {
-                if (!this.$route.query.lift_id) return;
-                this.updatingNotice = true;
-                let params = [];
-                let Cellphone = row.cellphone;
-                //console.log(row);
-                Object.keys(row).forEach((key) => {
-                    if (key !== "cellphone") {
-                        params.push({
-                            "cellphone": Cellphone,
-                            "is_enabled": row[key].is_enabled,
-                            "lift_id": this.$route.query.lift_id,
-                            "message_switch": row[key].message_switch,
-                            "type": key
-                        })
-                    }
-                });
-                //console.log(params);
-                this.$req.post('/dm/text_notice/batch_update', params).then((result) => {
-                    if (result.Code === 7000) {
-                        this.$message({
-                            "type": 'success',
-                            "message": '保存成功'
-                        })
-                    }
-                }).finally(() => {
-                    this.updatingNotice = false
-                })
-            },
-            //___________________alarmNotice________________end
-
-            //____________________liftPlan___________________start
-            deletePlan(item, index) {
-                //console.log(item);
-                this.$confirm('删除此条年审记录, 是否继续?', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    this.$req.post('/dm/lift_plan/delete', item.id).then((result) => {
-                        //console.log(result);
-                        this.liftPlan.splice(index, 1);
-                        this.$message({
-                            type: 'success',
-                            message: '删除成功'
-                        })
-                    });
-                }).catch(() => {
-                });
-            },
-            updatePlan(item) {
-                let params = {};
-                params = item;
-                this.$req.post('/dm/lift_plan/update', params).then((result) => {
-                    if (result.Code === 7000) {
-                        this.$message({
-                            type: 'success',
-                            message: '更新成功'
-                        })
-                    }
-                })
-            },
-            toggleEditPlan(item) {
-                item.edit = !item.edit;
-                if (item.edit === false) {
-                    this.updatePlan(item)
-                }
-            },
-            addLiftPlan() {
-                if (this.plan.date === null && this.plan.arrival_time === null) {
-                    this.$message({
-                        type: 'error',
-                        message: '请先选择年审时间'
-                    });
-                    return false;
-                }
-                let params = {...this.plan};
-                this.$req.post('/dm/lift_plan/add', params).then((result) => {
-                    if (result.Code === 7000) {
-                        this.liftPlan.push(params);
-                        this.plan = {
-                            "arrival_time": null,
-                            "date": null,
-                            "lift_id": this.$route.query.lift_id,
-                            "type": 5,
-                            "status": null,
-                            "edit": false
-                        };
-                        this.$message({
-                            type: 'success',
-                            message: '添加成功'
-                        });
-                    }
-                })
-            },
-            getLiftPlan(id) {
-                let params = {
-                    "lift_id": id,
-                    "page_proto": {
-                        "page": 1,
-                        "property": "id",
-                        "size": 10,
-                        "sort": "ASC"
-                    }
-                };
-                this.$req.post('/dm/lift_plan/list/lift_id', params).then((result) => {
-                    console.log(result);
-                    let arr = result.content.filter((item) => {
-                        return item.type == 5;
-                    });
-                    arr.forEach((i) => {
-                        i.edit = false;
-                    });
-                    this.liftPlan = arr;
-                })
-            },
-            //____________________liftPlan___________________end
-
             //____________________remark_____________________start
             updateRemark() {
                 this.$req.post('/dm/lift/remark/add', {
@@ -1268,7 +555,7 @@
 
 
             //___________________baseInfo______________________start
-            changePage(){
+            changePage() {
                 let params = {
                     "page": this.popover.currentPage,
                     "list_rows": this.popover.pageSize,
@@ -1283,13 +570,17 @@
                     }
                 })
             },
-            search(){
+            search() {
                 this.popover.currentPage = 1;
                 this.changePage();
             },
-            setCompanyName(item){
+            setCompanyName(item) {
                 this.company_name = item.name;
                 this.lift.company_id = item.id
+            },
+            setMaintenanceName(item) {
+                this.maintenance_name = item.name;
+                this.lift.maintenance_id = item.id
             },
             showMessageBox() {//输入视频存储天数
                 this.$prompt('请输入天数', '视频存储天数', {
@@ -1307,8 +598,11 @@
                     console.log('lift', res);
                     if (res.code === 0) {
                         this.lift = res.data;
-                        if(res.data.owner_group){
+                        if (res.data.owner_group) {
                             this.company_name = res.data.owner_group.name;
+                        }
+                        if (res.data.maintenance_group) {
+                            this.maintenance_name = res.data.maintenance_group.name
                         }
                     }
                 })

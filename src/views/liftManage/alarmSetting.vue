@@ -1,7 +1,7 @@
 <template>
     <div>
         <ToolBar>
-            <el-time-picker value-format="yyyy-mm-dd HH:mm:ss" v-model="test" :is-range="true"></el-time-picker>
+            <el-button type="primary" icon="el-icon-plus" size="small" @click="dialogVisible = true">添加</el-button>
             <div style="float: right">
                 <el-select value="" v-model="paginate_params.level" placeholder="请选择级别" clearable>
                     <el-option
@@ -37,24 +37,33 @@
                     <div class="hide-scrollbar expand-container">
                         <transition-group name="slide-fade">
                             <p class="expand-container-row" v-for="(i,index) in props.row.condition" v-bind:key="index">
-                            <span style="flex: 4;min-width: 350px"><el-time-picker @change="onSwitchChange($event,props.row,true)"
-                                                                  :is-range="true"
-                                                                  v-model="i.time_period"></el-time-picker></span>
+                            <span style="flex: 4;min-width: 350px">
+                                <div style="display: flex">
+                                    <el-time-select placeholder="起始时间" v-model="i.start_time"
+                                                    :picker-options="{start: '00:00',step: '01:00',end: '23:00' }"></el-time-select>
+                                    <el-time-select placeholder="结束时间" v-model="i.end_time"
+                                                    :picker-options="{start: '01:00',step: '01:00',end: '24:00',minTime: i.start_time}"></el-time-select>
+                                </div>
+                            </span>
                                 <span style="flex: 2"><el-switch :disabled="props.row.status !==1" :active-value="1"
                                                                  :inactive-value="0"
+                                                                 @change="onInputChange(props.row)"
                                                                  v-model="i.enable_message"></el-switch></span>
                                 <span style="flex: 2"><el-switch :disabled="props.row.status !==1" :active-value="1"
                                                                  :inactive-value="0"
+                                                                 @change="onInputChange(props.row)"
                                                                  v-model="i.enable_sms"></el-switch></span>
-                                <span style="flex: 2"><el-input v-model="i.max"></el-input></span>
-                                <span style="flex: 2"><el-input v-model="i.min"></el-input></span>
-                                <span style="flex: 1"><el-button @click="deleteCondition(props.row.condition,index)"
+                                <span style="flex: 2"><el-input v-model="i.max"
+                                                                @change="onInputChange(props.row)"></el-input></span>
+                                <span style="flex: 2"><el-input v-model="i.min"
+                                                                @change="onInputChange(props.row)"></el-input></span>
+                                <span style="flex: 1"><el-button @click="deleteCondition(props.row,index)"
                                                                  icon="el-icon-minus" circle type="danger"></el-button></span>
                             </p>
                         </transition-group>
                     </div>
                     <el-button style="margin-top: 5px" icon="el-icon-plus" circle
-                               @click="addCondition(props.row.condition)"></el-button>
+                               @click="addCondition(props.row)"></el-button>
                 </template>
             </el-table-column>
             <el-table-column
@@ -68,7 +77,7 @@
             </el-table-column>
             <el-table-column
                     prop="fault_name"
-                    label="报警名称">
+                    label="报警类型">
             </el-table-column>
             <el-table-column
                     prop="lift_name"
@@ -91,7 +100,7 @@
                     prop="status"
                     label="是否开启">
                 <template slot-scope="scope">
-                    <el-switch :active-value="1"
+                    <el-switch :active-value="1" @change="onInputChange(scope.row)"
                                :inactive-value="0" v-model="scope.row.status"></el-switch>
                 </template>
             </el-table-column>
@@ -99,7 +108,7 @@
                     prop="enable_message"
                     label="是否开启消息通知">
                 <template slot-scope="scope">
-                    <el-switch :disabled="scope.row.status !==1" @change="onSwitchChange($event,scope.row)"
+                    <el-switch :disabled="scope.row.status !==1" @change="onInputChange(scope.row)"
                                :active-value="1" :inactive-value="0"
                                v-model="scope.row.enable_message"></el-switch>
                 </template>
@@ -108,13 +117,66 @@
                     prop="enable_sms"
                     label="是否开启短息通知">
                 <template slot-scope="scope">
-                    <el-switch :disabled="scope.row.status !==1" :active-value="1" :inactive-value="0"
+                    <el-switch :disabled="scope.row.status !==1" @change="onInputChange(scope.row)"
+                               :active-value="1" :inactive-value="0"
                                v-model="scope.row.enable_sms"></el-switch>
                 </template>
             </el-table-column>
         </el-table>
-        <paginate :api="paginate_api" :params="paginate_params" @val-change="onValChange"
-                  :refresh="refresh"></paginate>
+        <paginate :api="paginate_api" :params="paginate_params" @val-change="onValChange" :refresh="refresh"></paginate>
+        <el-dialog title="添加报警项" :visible.sync="dialogVisible">
+            <el-form :model="form">
+                <el-form-item label="报警类型" :label-width="formLabelWidth">
+                    <el-select value="" v-model="form.fault_type_id" clearable>
+                        <el-option v-for="i in faultTypeOption" :key="i.id" :value="i.id" :label="i.name"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="选择电梯" :label-width="formLabelWidth">
+                    <el-autocomplete
+                            clearable
+                            v-model="form.lift_name"
+                            :fetch-suggestions="querySearchAsync"
+                            placeholder="请输入内容"
+                            value-key="name"
+                            :debounce="1000"
+                            @select="handleSelect">
+                    </el-autocomplete>
+                    (请务必在列表中选取)
+                </el-form-item>
+                <el-form-item label="是否开启" :label-width="formLabelWidth">
+                    <el-switch v-model="form.status" :active-value="1" :inactive-value="0">
+                    </el-switch>
+                </el-form-item>
+                <el-form-item label="通知方式" :label-width="formLabelWidth">
+                    <el-checkbox :disabled="form.status===0" :true-label="1" :false-label="0"
+                                 v-model="form.enable_message" label="消息通知">
+                    </el-checkbox>
+                    <el-checkbox :disabled="form.status===0" label="短信通知" :true-label="1" :false-label="0"
+                                 v-model="form.enable_sms">
+                    </el-checkbox>
+                </el-form-item>
+                <el-form-item label="时段设置" :label-width="formLabelWidth">
+                    <div style="display: flex;">
+                        <el-time-select style="margin-right: 30px" placeholder="起始时间"
+                                        v-model="form.condition[0].start_time"
+                                        :picker-options="{start: '00:00',step: '01:00',end: '23:00' }"></el-time-select>
+                        <el-time-select style="margin-right: 30px" placeholder="结束时间"
+                                        v-model="form.condition[0].end_time"
+                                        :picker-options="{start: '01:00',step: '01:00',end: '24:00',minTime: form.condition[0].start_time}"></el-time-select>
+                        <el-checkbox :disabled="form.status===0" :true-label="1" :false-label="0"
+                                     v-model="form.condition[0].enable_message" label="消息通知">
+                        </el-checkbox>
+                        <el-checkbox :disabled="form.status===0" label="短信通知" :true-label="1" :false-label="0"
+                                     v-model="form.condition[0].enable_sms">
+                        </el-checkbox>
+                    </div>
+                </el-form-item>
+                <el-form-item label="" :label-width="formLabelWidth">
+                    <el-button size="small" type="primary" @click="submitForm" :loading="loading">立即创建</el-button>
+                    <el-button size="small">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
     </div>
 </template>
 
@@ -127,7 +189,22 @@
     export default {
         data() {
             return {
-                test: ['2019-09-12 12:00:00', '2019-09-12 13:00:00'],
+                loading: false,
+                formLabelWidth: '120px',
+                form: {
+                    status: 1,
+                    condition: [
+                        {
+                            "start_time": "00:00:00",
+                            "end_time": "08:00:00",
+                            "enable_message": 0,
+                            "enable_sms": 0,
+                            "max": 0,
+                            "min": 0
+                        },
+                    ],
+                },
+                dialogVisible: false,
                 tableData: [],
                 params: {name: ''},
                 paginate_api: '/LiftsFaultSetting/listPage',
@@ -137,23 +214,14 @@
                     "level": ''
                 },
                 refresh: false,
-                level: [1, 2, 3, 4]
+                level: [1, 2, 3, 4],
+                faultTypeOption: []
             }
         },
         methods: {
             search() {
             },
             onValChange(data) {
-                if (data.length > 0) {
-                    data.forEach((i) => {
-                        if (i.condition.length > 0) {
-                            i.condition.forEach((j) => {
-                                //为什么是2019-9-19？  因为这行代码写于2019-9-19
-                                this.$set(j, 'time_period', [new Date(`2019-9-19 ${j.start_time}`), new Date(`2019-9-19 ${j.end_time}`)])
-                            })
-                        }
-                    })
-                }
                 this.tableData = data;
             },
             onAscOrDesc(str, num) {
@@ -161,39 +229,87 @@
                 this.paginate_params.sort[str] = num;
                 this.refresh = !this.refresh;
             },
-            onSwitchChange($event, data, isTime = false) {
-                console.log($event);
+            onInputChange(data) {
                 console.log(data);
-                console.log(isTime);
-                // if (isTime) {
-                //     data.condition.start_time = this.$moment(data.condition.time_period[0]).format('hh:mm:ss');
-                //     data.condition.end_time = this.$moment(data.condition.time_period[1]).format('hh:mm:ss');
-                // }
-                this.saveFaultSetting(data);
+                this.saveFaultSetting(data)
             },
-            saveFaultSetting(param) {
+            saveFaultSetting(param, success, error) {
                 this.$api_v3.post('/LiftsFaultSetting/save', param).then((res) => {
                     console.log('/LiftsFaultSetting/save', res);
                     if (res.code === 0) {
+                        if (success) {
+                            success();
+                        }
                     } else {
                         this.$message.error(res.msg);
+                        if (error) {
+                            error();
+                        }
                     }
                 })
             },
             addCondition(data) {
                 console.log(data);
-                data.push({
-                    enable_message: 1,
-                    enable_sms: 1,
-                    end_time: "02:00:00",
-                    max: 40.6,
-                    min: 10,
-                    start_time: "01:00:00"
-                })
+                data.condition.push({
+                    enable_message: 0,
+                    enable_sms: 0,
+                    end_time: "00:00",
+                    max: 0,
+                    min: 0,
+                    start_time: "00:00"
+                });
+                this.saveFaultSetting(data);
             },
             deleteCondition(data, index) {
-                data.splice(index, 1);
+                this.$confirm('')
+                data.condition.splice(index, 1);
+                this.saveFaultSetting(data);
+            },
+            getFaultType() {
+                this.$api_v3.post('/LiftsFaultType/listPage', {list_rows: 99}).then((res) => {
+                    console.log('/LiftsFaultType/listPage', res);
+                    if (res.code === 0) {
+                        this.faultTypeOption = res.data.data;
+                    }
+                })
+            },
+            handleSelect(item) {
+                this.form.lift_id = item.id;
+            },
+            querySearchAsync(queryString, cb) {
+                this.$api_v3.post('/Lifts/listPage', {search_content: queryString, list_rows: 999}).then((res) => {
+                    console.log('/Lifts/listPage', res);
+                    if (res.code === 0) {
+                        cb(res.data.data)
+                    }
+                })
+            },
+            submitForm() {
+                this.loading = true;
+                this.saveFaultSetting(this.form, () => {
+                    this.loading = false;
+                    this.dialogVisible = false;
+                    this.from = {
+                        status: 1,
+                        condition: [
+                            {
+                                "start_time": "00:00:00",
+                                "end_time": "08:00:00",
+                                "enable_message": 0,
+                                "enable_sms": 0,
+                                "max": 0,
+                                "min": 0
+                            },
+                        ],
+                    };
+                    this.refresh = !this.refresh;
+                },()=>{
+                    this.loading = false;
+                })
             }
+        },
+        mounted() {
+            this.getFaultType();
         },
         // beforeRouteLeave(to, from, next) {
         //     if (this.hasSave === false) {
