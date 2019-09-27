@@ -312,6 +312,9 @@
             },
             addOrUpdateUser() {
                 let params = this.user;
+                if(!params.id){
+                    params.password = '123456';
+                }
                 params.role_ids = this.roles;
                 this.$api_v3.post('/AuUser/save', params).then((res) => {
                     console.log('/AuUser/save', res);

@@ -261,9 +261,15 @@
                 this.saveFaultSetting(data);
             },
             deleteCondition(data, index) {
-                this.$confirm('')
-                data.condition.splice(index, 1);
-                this.saveFaultSetting(data);
+                this.$confirm('删除此时间段，是否继续', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    data.condition.splice(index, 1);
+                    this.saveFaultSetting(data);
+                }).catch(() => {
+                })
             },
             getFaultType() {
                 this.$api_v3.post('/LiftsFaultType/listPage', {list_rows: 99}).then((res) => {
@@ -303,7 +309,7 @@
                         ],
                     };
                     this.refresh = !this.refresh;
-                },()=>{
+                }, () => {
                     this.loading = false;
                 })
             }
