@@ -131,6 +131,8 @@
                 <template slot-scope="scope">
                     <el-button @click="editPlan(scope.row.id)" type="primary" icon="el-icon-edit" size="small"
                                circle></el-button>
+                    <el-button @click="removePlan(scope.row.id)" type="danger" icon="el-icon-delete" size="small"
+                               circle></el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -274,7 +276,7 @@
                 this.paginate_params.page = 1;
                 this.paginate_params.search_content = this.params.name;
                 this.paginate_params.status = this.params.status;
-                this.paginate_params.type = this.params.type===-1?[1,2,3,4]:this.params.type;
+                this.paginate_params.type = this.params.type === -1 ? [1, 2, 3, 4] : this.params.type;
                 if (this.pickerValue && this.pickerValue.length === 2) {
                     this.paginate_params.start_date = this.pickerValue[0];
                     this.paginate_params.end_date = this.pickerValue[1];
@@ -296,6 +298,23 @@
             },
             addPlan(id = null) {
                 this.$router.push({path: '/lift_plan_detail', query: {plan_id: id}})
+            },
+            removePlan(id) {
+                this.$confirm('删除该记录, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$api_v3.post('/LiftsPlan/remove', {id: id}).then((res) => {
+                        if (res.code === 0) {
+                            this.refresh = !this.refresh;
+                            this.$message.success('删除成功');
+                        } else {
+                            this.$message.error(res.msg);
+                        }
+                    })
+                }).catch(() => {
+                });
             },
             onAscOrDesc(str, num) {
                 console.log(str, num);
