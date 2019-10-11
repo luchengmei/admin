@@ -39,9 +39,9 @@
                             <p class="expand-container-row" v-for="(i,index) in props.row.condition" v-bind:key="index">
                             <span style="flex: 4;min-width: 350px">
                                 <div style="display: flex">
-                                    <el-time-select placeholder="起始时间" v-model="i.start_time"
+                                    <el-time-select placeholder="起始时间" v-model="i.start_time" @change="onInputChange(props.row)"
                                                     :picker-options="{start: '00:00',step: '01:00',end: '23:00' }"></el-time-select>
-                                    <el-time-select placeholder="结束时间" v-model="i.end_time"
+                                    <el-time-select placeholder="结束时间" v-model="i.end_time" @change="onInputChange(props.row)"
                                                     :picker-options="{start: '01:00',step: '01:00',end: '24:00',minTime: i.start_time}"></el-time-select>
                                 </div>
                             </span>
@@ -76,12 +76,12 @@
                 </template>
             </el-table-column>
             <el-table-column
-                    prop="fault_name"
-                    label="报警类型">
-            </el-table-column>
-            <el-table-column
                     prop="lift_name"
                     label="电梯名称">
+            </el-table-column>
+            <el-table-column
+                    prop="fault_name"
+                    label="报警类型">
             </el-table-column>
             <el-table-column
                     prop="level"
@@ -231,7 +231,12 @@
             },
             onInputChange(data) {
                 console.log(data);
-                this.saveFaultSetting(data)
+                this.saveFaultSetting(data,()=>{
+                    this.$message({
+                        duration:500,
+                        message:"自动保存"
+                    })
+                })
             },
             saveFaultSetting(param, success, error) {
                 this.$api_v3.post('/LiftsFaultSetting/save', param).then((res) => {

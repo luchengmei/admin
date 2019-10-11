@@ -8,11 +8,10 @@
 <script>
     export default {
         name: 'app',
-        data(){
-            return{
-            }
+        data() {
+            return {}
         },
-        mounted(){
+        mounted() {
             console.log(process.env.NODE_ENV);
         }
     }

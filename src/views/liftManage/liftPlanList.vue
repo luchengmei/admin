@@ -50,10 +50,41 @@
             </div>
         </ToolBar>
         <el-table
+                @expand-change="onExpandChange"
                 :data="usersData"
                 border
                 ref="table"
                 style="width: 100%">
+            <el-table-column type="expand">
+                <template slot-scope="props">
+                    <p class="expand-container-row">
+                        <span style="flex: 4">电梯名称</span>
+                        <span style="flex: 2">预计维保/年审日期</span>
+                        <span style="flex: 2">上次维保/年审日期</span>
+                        <span style="flex: 2">类型</span>
+                        <span style="flex: 2">结果</span>
+                        <span style="flex: 2">操作</span>
+                    </p>
+                    <div class="expand-container" v-loading="!props.row.hasLoadAllRecord">
+                        <transition-group name="slide-fade">
+                            <p class="expand-container-row" v-for="(item,index) in props.row.allRecord"
+                               v-bind:key="index">
+                                <span style="flex: 4">{{item.lift_name}}</span>
+                                <span style="flex: 2">{{item.next_date}}</span>
+                                <span style="flex: 2">{{item.date}}</span>
+                                <span style="flex: 2">{{item.type|formatType}}</span>
+                                <span style="flex: 2">
+                                    <el-tag type="danger" v-if="item.status===2">{{item.status|formatStatus}}</el-tag>
+                                    <el-tag v-else>{{item.status|formatStatus}}</el-tag></span>
+                                <span style="flex: 2">
+                                    <el-button @click="editPlan(item.row.id)" type="primary" icon="el-icon-edit" size="small" circle></el-button>
+                                    <el-button @click="removePlan(item.row.id)" type="danger" icon="el-icon-delete" size="small" circle></el-button>
+                                </span>
+                            </p>
+                        </transition-group>
+                    </div>
+                </template>
+            </el-table-column>
             <el-table-column width="100" prop="id">
                 <template slot="header" slot-scope="scope">
                     ID
@@ -75,7 +106,7 @@
                     prop="next_date"
                     label="下次维保/年审计划日期">
                 <template slot="header" slot-scope="scope">
-                    下次维保/年审计划日期
+                    预计维保/年审日期
                     <table-sort @ascending="onAscOrDesc('next_date',0)"
                                 @descending="onAscOrDesc('next_date',1)"></table-sort>
                 </template>
@@ -87,25 +118,13 @@
                     prop="date"
                     label="本次维保/年审日期">
                 <template slot="header" slot-scope="scope">
-                    本次维保/年审日期
+                    上次维保/年审日期
                     <table-sort @ascending="onAscOrDesc('date',0)"
                                 @descending="onAscOrDesc('date',1)"></table-sort>
                 </template>
                 <template slot-scope="scope">
                     <span style="margin-right: 6px">{{scope.row.date}}</span>
                     <el-tag v-if="scope.row.status==0">{{scope.row.date|formatDate}}</el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column
-                    prop="next_date"
-                    label="上次维保/年审计划日期">
-                <template slot="header" slot-scope="scope">
-                    上次维保/年审计划日期
-                    <table-sort @ascending="onAscOrDesc('last_date',0)"
-                                @descending="onAscOrDesc('last_date',1)"></table-sort>
-                </template>
-                <template slot-scope="scope">
-                    <span style="margin-right: 6px">{{scope.row.last_date}}</span>
                 </template>
             </el-table-column>
             <el-table-column
@@ -126,7 +145,6 @@
             <el-table-column
                     label="操作"
                     :render-header="tableAction"
-                    fixed="right"
                     width="180">
                 <template slot-scope="scope">
                     <el-button @click="editPlan(scope.row.id)" type="primary" icon="el-icon-edit" size="small"
@@ -149,17 +167,16 @@
     export default {
         data() {
             return {
-                paginate_api: '/LiftsPlan/listPage',
+                paginate_api: '/LiftsPlan/listPageGroupByLift',
                 paginate_params: {
                     "page": 1,
                     "size": 10,
                     "sort": {id: 1},
-                    "status": 0
                 },
                 refresh: false,
                 params: {
                     name: '',
-                    status: '0',
+                    status: '',
                     type: ''
                 },
                 typeOption: [
@@ -270,7 +287,11 @@
         methods: {
             onValChange(data) {
                 //console.log(data);
-                this.usersData = data
+                data.forEach((i) => {
+                    i.hasLoadAllRecord = false;
+                    i.allRecord = [];
+                });
+                this.usersData = data;
             },
             searchUser() {
                 this.paginate_params.page = 1;
@@ -320,6 +341,23 @@
                 console.log(str, num);
                 this.paginate_params.sort[str] = num;
                 this.refresh = !this.refresh;
+            },
+            onExpandChange(row) {
+                //console.log(row);
+                if (row.hasLoadAllRecord) {
+                    return false;
+                } else {
+                    this.$api_v3.post('/LiftsPlan/listPage', {lift_id: row.lift_id}).then((res) => {
+                        console.log('/LiftsPlan/listPage', res);
+                        if (res.code === 0) {
+                            row.allRecord = res.data.data;
+                        } else {
+                            this.$message.error(res.msg)
+                        }
+                    }).finally(() => {
+                        row.hasLoadAllRecord = true;
+                    });
+                }
             }
         },
         mounted() {
@@ -329,5 +367,25 @@
         }
     }
 </script>
-<style lang="less">
+<style lang="less" scoped>
+    .expand-container {
+        min-height: 50px;
+        max-height: 300px;
+        overflow: scroll;
+        &&::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    .expand-container-row {
+        margin-bottom: 10px;
+        line-height: 24px;
+        display: flex;
+        align-items: center;
+        span {
+            margin-right: 10px;
+            overflow: hidden;
+            word-break: keep-all;
+        }
+    }
 </style>
