@@ -77,8 +77,10 @@
                                     <el-tag type="danger" v-if="item.status===2">{{item.status|formatStatus}}</el-tag>
                                     <el-tag v-else>{{item.status|formatStatus}}</el-tag></span>
                                 <span style="flex: 2">
-                                    <el-button @click="editPlan(item.row.id)" type="primary" icon="el-icon-edit" size="small" circle></el-button>
-                                    <el-button @click="removePlan(item.row.id)" type="danger" icon="el-icon-delete" size="small" circle></el-button>
+                                    <el-button @click="editPlan(item.id)" type="primary" icon="el-icon-edit"
+                                               size="small" circle></el-button>
+                                    <el-button @click="removePlan(item,index,props.row.allRecord)" type="danger"
+                                               icon="el-icon-delete" size="small" circle></el-button>
                                 </span>
                             </p>
                         </transition-group>
@@ -149,7 +151,7 @@
                 <template slot-scope="scope">
                     <el-button @click="editPlan(scope.row.id)" type="primary" icon="el-icon-edit" size="small"
                                circle></el-button>
-                    <el-button @click="removePlan(scope.row.id)" type="danger" icon="el-icon-delete" size="small"
+                    <el-button @click="removePlanPlus(scope.row.id)" type="danger" icon="el-icon-delete" size="small"
                                circle></el-button>
                 </template>
             </el-table-column>
@@ -320,7 +322,28 @@
             addPlan(id = null) {
                 this.$router.push({path: '/lift_plan_detail', query: {plan_id: id}})
             },
-            removePlan(id) {
+            removePlan(item, index, data) {
+                if (data.length === 1) {
+                    this.removePlanPlus(item.id);
+                    return;
+                }
+                this.$confirm('删除该记录, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$api_v3.post('/LiftsPlan/remove', {id: item.id}).then((res) => {
+                        if (res.code === 0) {
+                            data.splice(index, 1);
+                            this.$message.success('删除成功');
+                        } else {
+                            this.$message.error(res.msg);
+                        }
+                    })
+                }).catch(() => {
+                });
+            },
+            removePlanPlus(id) {
                 this.$confirm('删除该记录, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',

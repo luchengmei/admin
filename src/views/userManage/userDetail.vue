@@ -321,7 +321,7 @@
                     if (res.code === 0) {
                         this.$message.success('操作成功');
                     } else {
-                        this.$message.error('操作失败');
+                        this.$message.error(res.msg);
                     }
                 })
             },

@@ -22,6 +22,16 @@ Vue.prototype.$Config = Config
 Vue.prototype.$moment = moment
 Vue.prototype.$api_v3 = api_v3
 
+//socket.io
+let socket = io('https://www.msddtsw.com:8010/user');
+Vue.prototype.$socket = socket;
+socket.on("connect", function () {
+    console.log("connected");
+});
+socket.on("disconnect", function () {
+    console.log("disconnected");
+});
+
 Vue.use(ElementUI, {size: 'small'})
 
 router.beforeEach((to, from, next) => {
