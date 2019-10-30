@@ -15,37 +15,43 @@
             <el-table-column width="100" prop="id">
                 <template slot="header" slot-scope="scope">ID
                     <table-sort @ascending="onAscOrDesc('id',0)"
-                                @descending="onAscOrDesc('id',1)"></table-sort>
+                                @descending="onAscOrDesc('id',1)"
+                                @reset="onReset('id')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column prop="lift_id" width="100">
                 <template slot="header" slot-scope="scope">电梯ID
                     <table-sort @ascending="onAscOrDesc('lift_id',0)"
-                                @descending="onAscOrDesc('lift_id',1)"></table-sort>
+                                @descending="onAscOrDesc('lift_id',1)"
+                                @reset="onReset('lift_id')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column prop="name">
                 <template slot="header" slot-scope="scope">名字
                     <table-sort @ascending="onAscOrDesc('name',0)"
-                                @descending="onAscOrDesc('name',1)"></table-sort>
+                                @descending="onAscOrDesc('name',1)"
+                                @reset="onReset('name')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column prop="phone">
                 <template slot="header" slot-scope="scope">手机号
                     <table-sort @ascending="onAscOrDesc('phone',0)"
-                                @descending="onAscOrDesc('phone',1)"></table-sort>
+                                @descending="onAscOrDesc('phone',1)"
+                                @reset="onReset('phone')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column prop="qq">
                 <template slot="header" slot-scope="scope">QQ号
                     <table-sort @ascending="onAscOrDesc('qq',0)"
-                                @descending="onAscOrDesc('qq',1)"></table-sort>
+                                @descending="onAscOrDesc('qq',1)"
+                                @reset="onReset('qq')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column prop="email">
                 <template slot="header" slot-scope="scope">电子邮箱
                     <table-sort @ascending="onAscOrDesc('email',0)"
-                                @descending="onAscOrDesc('email',1)"></table-sort>
+                                @descending="onAscOrDesc('email',1)"
+                                @reset="onReset('email')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column prop="text" label="留言内容">
@@ -72,7 +78,7 @@
                 paginate_params: {
                     "page": 1,
                     "size": 10,
-                    "sort": {id: 1},
+                    "sort": {},
                     "status": 0
                 },
                 refresh: false,
@@ -88,6 +94,10 @@
                 console.log(str, num);
                 this.paginate_params.sort[str] = num;
                 this.refresh = !this.refresh;
+            },
+            onReset(str) {
+                delete this.paginate_params.sort[str];
+                this.refresh = !refresh;
             }
         },
         mounted() {

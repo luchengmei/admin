@@ -58,7 +58,8 @@
                 <template slot="header" slot-scope="scope">
                     ID
                     <table-sort @ascending="onAscOrDesc('id',0)"
-                                @descending="onAscOrDesc('id',1)"></table-sort>
+                                @descending="onAscOrDesc('id',1)"
+                                @reset="onReset('id')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -83,7 +84,8 @@
                 <template slot="header" slot-scope="scope">
                     电梯名称
                     <table-sort @ascending="onAscOrDesc('lift_name',0)"
-                                @descending="onAscOrDesc('lift_name',1)"></table-sort>
+                                @descending="onAscOrDesc('lift_name',1)"
+                                @reset="onReset('lift_name')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -110,7 +112,8 @@
                 <template slot="header" slot-scope="scope">
                     报警首次发生时间
                     <table-sort @ascending="onAscOrDesc('ctime',0)"
-                                @descending="onAscOrDesc('ctime',1)"></table-sort>
+                                @descending="onAscOrDesc('ctime',1)"
+                                @reset="onReset('ctime')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -119,7 +122,8 @@
                 <template slot="header" slot-scope="scope">
                     报警最新一次时间
                     <table-sort @ascending="onAscOrDesc('utime',0)"
-                                @descending="onAscOrDesc('utime',1)"></table-sort>
+                                @descending="onAscOrDesc('utime',1)"
+                                @reset="onReset('utime')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -151,7 +155,7 @@
                 list_params: {
                     "page": 1,
                     "size": 10,
-                    "sort": {id: 1}
+                    "sort": {}
                 },
                 params: {
                     name: '',
@@ -286,32 +290,32 @@
         mounted() {
         },
         filters: {
-            typeFilter(val){
-                if(val=='301') return '机房湿度异常';
-                if(val=='302') return '机房温度异常';
-                if(val=='304') return '安全回路断路';
-                if(val=='305') return '抱闸温度异常';
-                if(val=='306') return '电流异常';
-                if(val=='307') return '曳引绳断股';
-                if(val=='201') return '超时不开门';
-                if(val=='202') return '超时不关门';
-                if(val=='204') return '电梯非门区停车';
-                if(val=='205') return '电梯意外移动';
-                if(val=='206') return '电梯非门区开门';
-                if(val=='401') return '电梯困人';
-                if(val=='402') return '紧急按钮被按下';
-                if(val=='207') return '电梯超速';
-                if(val=='208') return '电梯失速';
-                if(val=='209') return '轿厢含氧量低';
-                if(val=='210') return '电梯停电';
-                if(val=='211') return '轿厢倾斜超标';
-                if(val=='211') return '轿厢振动超标';
-                if(val=='101') return '底坑湿度异常';
-                if(val=='102') return '底坑温度异常';
-                if(val=='103') return '底坑噪声异常';
-                if(val=='104') return '钢丝绳伸长';
-                if(val=='105') return '安全钳保护装置异常';
-                if(val=='106') return '底坑积水报警';
+            typeFilter(val) {
+                if (val == '301') return '机房湿度异常';
+                if (val == '302') return '机房温度异常';
+                if (val == '304') return '安全回路断路';
+                if (val == '305') return '抱闸温度异常';
+                if (val == '306') return '电流异常';
+                if (val == '307') return '曳引绳断股';
+                if (val == '201') return '超时不开门';
+                if (val == '202') return '超时不关门';
+                if (val == '204') return '电梯非门区停车';
+                if (val == '205') return '电梯意外移动';
+                if (val == '206') return '电梯非门区开门';
+                if (val == '401') return '电梯困人';
+                if (val == '402') return '紧急按钮被按下';
+                if (val == '207') return '电梯超速';
+                if (val == '208') return '电梯失速';
+                if (val == '209') return '轿厢含氧量低';
+                if (val == '210') return '电梯停电';
+                if (val == '211') return '轿厢倾斜超标';
+                if (val == '211') return '轿厢振动超标';
+                if (val == '101') return '底坑湿度异常';
+                if (val == '102') return '底坑温度异常';
+                if (val == '103') return '底坑噪声异常';
+                if (val == '104') return '钢丝绳伸长';
+                if (val == '105') return '安全钳保护装置异常';
+                if (val == '106') return '底坑积水报警';
                 return val;
             }
         },
@@ -322,6 +326,10 @@
             onAscOrDesc(str, num) {
                 console.log(str, num);
                 this.list_params.sort[str] = num;
+                this.refresh = !this.refresh;
+            },
+            onReset(str) {
+                delete this.list_params.sort[str];
                 this.refresh = !this.refresh;
             },
             searchUser() {
@@ -355,7 +363,7 @@
 
         },
         components: {
-            ToolBar, HelpHint, Paginate,TableSort
+            ToolBar, HelpHint, Paginate, TableSort
         }
     }
 </script>

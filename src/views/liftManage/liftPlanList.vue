@@ -91,7 +91,8 @@
                 <template slot="header" slot-scope="scope">
                     ID
                     <table-sort @ascending="onAscOrDesc('id',0)"
-                                @descending="onAscOrDesc('id',1)"></table-sort>
+                                @descending="onAscOrDesc('id',1)"
+                                @reset="onReset('id')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -101,7 +102,8 @@
                 <template slot="header" slot-scope="scope">
                     电梯名称
                     <table-sort @ascending="onAscOrDesc('lift_name',0)"
-                                @descending="onAscOrDesc('lift_name',1)"></table-sort>
+                                @descending="onAscOrDesc('lift_name',1)"
+                                @reset="onReset('lift_name')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -110,7 +112,8 @@
                 <template slot="header" slot-scope="scope">
                     预计维保/年审日期
                     <table-sort @ascending="onAscOrDesc('next_date',0)"
-                                @descending="onAscOrDesc('next_date',1)"></table-sort>
+                                @descending="onAscOrDesc('next_date',1)"
+                                @reset="onReset('next_date')"></table-sort>
                 </template>
                 <template slot-scope="scope">
                     <span style="margin-right: 6px">{{scope.row.next_date}}</span>
@@ -120,9 +123,10 @@
                     prop="date"
                     label="本次维保/年审日期">
                 <template slot="header" slot-scope="scope">
-                    上次维保/年审日期
+                    本次维保/年审日期
                     <table-sort @ascending="onAscOrDesc('date',0)"
-                                @descending="onAscOrDesc('date',1)"></table-sort>
+                                @descending="onAscOrDesc('date',1)"
+                                @reset="onReset('date')"></table-sort>
                 </template>
                 <template slot-scope="scope">
                     <span style="margin-right: 6px">{{scope.row.date}}</span>
@@ -173,7 +177,7 @@
                 paginate_params: {
                     "page": 1,
                     "size": 10,
-                    "sort": {id: 1},
+                    "sort": {},
                 },
                 refresh: false,
                 params: {
@@ -365,12 +369,16 @@
                 this.paginate_params.sort[str] = num;
                 this.refresh = !this.refresh;
             },
+            onReset(str) {
+                delete this.paginate_params.sort[str];
+                this.refresh = !this.refresh
+            },
             onExpandChange(row) {
                 //console.log(row);
                 if (row.hasLoadAllRecord) {
                     return false;
                 } else {
-                    this.$api_v3.post('/LiftsPlan/listPage', {lift_id: row.lift_id}).then((res) => {
+                    this.$api_v3.post('/LiftsPlan/listPage', {lift_id: row.lift_id, sort: {id: 1}}).then((res) => {
                         console.log('/LiftsPlan/listPage', res);
                         if (res.code === 0) {
                             row.allRecord = res.data.data;

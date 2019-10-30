@@ -4,7 +4,7 @@
             <div slot="header" class="box-card-header">
                 <span class="name">{{ company.name}}</span>
                 <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateCompany()">
-                    {{addNew?'新增':'提交'}}
+                    {{addNew?'提交':'保存'}}
                 </el-button>
             </div>
             <el-tabs v-model="activeName">
@@ -19,7 +19,7 @@
                         <ul>
                             <li>
                                 <div class="left"><i class="fa fa-id-card"></i></div>
-                                <div class="center">单位名称</div>
+                                <div class="center">单位名称<span style="color: red">*</span></div>
                                 <div class="right" v-if="edit">
                                     <el-input v-model="company.name" clearable></el-input>
                                 </div>
@@ -43,7 +43,7 @@
                             </li>
                             <li>
                                 <div class="left"><i class="fa fa-address-book-o"></i></div>
-                                <div class="center">单位类型</div>
+                                <div class="center">单位类型<span style="color: red">*</span></div>
                                 <div class="right" v-if="edit">
                                     <el-select v-model="company.type" placeholder="请选择" value="">
                                         <el-option

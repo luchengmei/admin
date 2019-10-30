@@ -30,7 +30,8 @@
                 <template slot="header" slot-scope="scope">
                     单位ID
                     <table-sort @ascending="onAscOrDesc('id',0)"
-                                @descending="onAscOrDesc('id',1)"></table-sort>
+                                @descending="onAscOrDesc('id',1)"
+                                @reset="onReset('id')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -39,7 +40,8 @@
                 <template slot="header" slot-scope="scope">
                     单位名称
                     <table-sort @ascending="onAscOrDesc('name',0)"
-                                @descending="onAscOrDesc('name',1)"></table-sort>
+                                @descending="onAscOrDesc('name',1)"
+                                @reset="onReset('name')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -48,7 +50,8 @@
                 <template slot="header" slot-scope="scope">
                     地址
                     <table-sort @ascending="onAscOrDesc('address',0)"
-                                @descending="onAscOrDesc('address',1)"></table-sort>
+                                @descending="onAscOrDesc('address',1)"
+                                @reset="onReset('address')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -58,7 +61,8 @@
                 <template slot="header" slot-scope="scope">
                     电梯总数
                     <table-sort @ascending="onAscOrDesc('lift_count',0)"
-                                @descending="onAscOrDesc('lift_count',1)"></table-sort>
+                                @descending="onAscOrDesc('lift_count',1)"
+                                @reset="onReset('lift_count')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -179,7 +183,7 @@
                 paginate_api: '/Group/listPage',
                 paginate_params: {
                     "page": 1,
-                    "sort": {id: 1},
+                    "sort": {},
                 },
                 refresh: false,
                 params: {
@@ -196,7 +200,7 @@
             },
             searchUser() {
                 this.paginate_params.page = 1;
-                this.paginate_params.name = this.params.name||null;
+                this.paginate_params.name = this.params.name || null;
                 this.refresh = !this.refresh;
             },
             onValChange(data) {
@@ -212,6 +216,10 @@
             onAscOrDesc(str, num) {
                 console.log(str, num);
                 this.paginate_params.sort[str] = num;
+                this.refresh = !this.refresh;
+            },
+            onReset(str) {
+                delete this.paginate_params.sort[str];
                 this.refresh = !this.refresh;
             },
             editUser(id) {

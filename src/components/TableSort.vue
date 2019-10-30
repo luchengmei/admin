@@ -13,14 +13,25 @@
                 activeClass: ''
             }
         },
-        methods:{
-            clickAsc(){
-                this.activeClass = 'ascending';
-                this.$emit('ascending')
+        methods: {
+            clickAsc() {
+                if (this.activeClass === 'ascending') {
+                    this.activeClass = '';
+                    this.$emit('reset')
+                } else {
+                    this.activeClass = 'ascending';
+                    this.$emit('ascending')
+                }
+
             },
-            clickDesc(){
-                this.activeClass = 'descending';
-                this.$emit('descending')
+            clickDesc() {
+                if (this.activeClass === 'descending') {
+                    this.activeClass = '';
+                    this.$emit('reset');
+                } else {
+                    this.activeClass = 'descending';
+                    this.$emit('descending')
+                }
             }
         }
     }

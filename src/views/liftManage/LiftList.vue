@@ -27,7 +27,8 @@
                 <template slot="header" slot-scope="scope">
                     电梯ID
                     <table-sort @ascending="onAscOrDesc('id',0)"
-                                @descending="onAscOrDesc('id',1)"></table-sort>
+                                @descending="onAscOrDesc('id',1)"
+                                @reset="onReset('id')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -37,7 +38,8 @@
                 <template slot="header" slot-scope="scope">
                     电梯名称
                     <table-sort @ascending="onAscOrDesc('name',0)"
-                                @descending="onAscOrDesc('name',1)"></table-sort>
+                                @descending="onAscOrDesc('name',1)"
+                                @reset="onReset('name')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -47,7 +49,8 @@
                 <template slot="header" slot-scope="scope">
                     使用登记证编号
                     <table-sort @ascending="onAscOrDesc('license',0)"
-                                @descending="onAscOrDesc('license',1)"></table-sort>
+                                @descending="onAscOrDesc('license',1)"
+                                @reset="onReset('license')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -58,7 +61,8 @@
             <template slot="header" slot-scope="scope">
                 地址
                 <table-sort @ascending="onAscOrDesc('address_shot',0)"
-                            @descending="onAscOrDesc('address_shot',1)"></table-sort>
+                            @descending="onAscOrDesc('address_shot',1)"
+                            @reset="onReset('address_shot')"></table-sort>
             </template>
             <el-table-column
                     width="200px"
@@ -67,7 +71,8 @@
                 <template slot="header" slot-scope="scope">
                     物业单位
                     <table-sort @ascending="onAscOrDesc('owner_company_name',0)"
-                                @descending="onAscOrDesc('owner_company_name',1)"></table-sort>
+                                @descending="onAscOrDesc('owner_company_name',1)"
+                                @reset="onReset('owner_company_name')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -77,7 +82,8 @@
                 <template slot="header" slot-scope="scope">
                     维保单位
                     <table-sort @ascending="onAscOrDesc('maintenance_company_name',0)"
-                                @descending="onAscOrDesc('maintenance_company_name',1)"></table-sort>
+                                @descending="onAscOrDesc('maintenance_company_name',1)"
+                                @reset="onReset('maintenance_company_name')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -87,7 +93,8 @@
                 <template slot="header" slot-scope="scope">
                     额定载重(kg)
                     <table-sort @ascending="onAscOrDesc('rated_load',0)"
-                                @descending="onAscOrDesc('rated_load',1)"></table-sort>
+                                @descending="onAscOrDesc('rated_load',1)"
+                                @reset="onReset('rated_load')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -97,7 +104,8 @@
                 <template slot="header" slot-scope="scope">
                     额定速度(m/s)
                     <table-sort @ascending="onAscOrDesc('rated_speed',0)"
-                                @descending="onAscOrDesc('rated_speed',1)"></table-sort>
+                                @descending="onAscOrDesc('rated_speed',1)"
+                                @reset="onReset('rated_speed')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -107,7 +115,8 @@
                 <template slot="header" slot-scope="scope">
                     层站数
                     <table-sort @ascending="onAscOrDesc('floor',0)"
-                                @descending="onAscOrDesc('floor',1)"></table-sort>
+                                @descending="onAscOrDesc('floor',1)"
+                                @reset="onReset('floor')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -132,7 +141,8 @@
                 <template slot="header" slot-scope="scope">
                     出厂时间
                     <table-sort @ascending="onAscOrDesc('manufacture_date',0)"
-                                @descending="onAscOrDesc('manufacture_date',1)"></table-sort>
+                                @descending="onAscOrDesc('manufacture_date',1)"
+                                @reset="onReset('manufacture')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -165,16 +175,14 @@
         activated() {
         },
         data() {
-            const permissions = JSON.parse(localStorage.getItem('permissions'));
             return {
-                permissions: permissions,
                 companyType: [],
                 usersData: [],
                 list_url: '/Lifts/listPage',
                 list_params: {
                     "page": 1,
                     "size": 10,
-                    "sort": {id: 1}
+                    "sort": {}
                 },
                 refresh: false,
                 params: {
@@ -303,6 +311,11 @@
                 this.list_params.sort[str] = num;
                 this.refresh = !this.refresh;
             },
+            onReset(str) {
+                console.log('delete', str);
+                delete this.list_params.sort[str];
+                this.refresh = !this.refresh;
+            }
         },
         components: {
             Paginate,

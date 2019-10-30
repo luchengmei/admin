@@ -5,7 +5,8 @@
             <!--<el-button type="primary" @click="multipleHandle">批量禁用/允许</el-button>-->
             <!--<el-button type="danger" icon="el-icon-delete" @click="multipleDelete">批量删除</el-button>-->
             <div style="float: right">
-                <el-select style="width: 100px" v-model="params.type" placeholder="用户类型" size="small" clearable value="">
+                <el-select style="width: 100px" v-model="params.type" placeholder="用户类型" size="small" clearable
+                           value="">
                     <el-option
                             v-for="item in typeOption"
                             :key="item.value"
@@ -13,7 +14,8 @@
                             :value="item.value">
                     </el-option>
                 </el-select>
-                <el-select style="width: 100px" v-model="params.status" placeholder="用户状态" size="small" clearable value="">
+                <el-select style="width: 100px" v-model="params.status" placeholder="用户状态" size="small" clearable
+                           value="">
                     <el-option
                             v-for="item in statusOption"
                             :key="item.value"
@@ -52,7 +54,8 @@
                 <template slot="header" slot-scope="scope">
                     用户ID
                     <table-sort @ascending="onAscOrDesc('id',0)"
-                                @descending="onAscOrDesc('id',1)"></table-sort>
+                                @descending="onAscOrDesc('id',1)"
+                                @reset="onReset('id')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -61,7 +64,8 @@
                 <template slot="header" slot-scope="scope">
                     手机号
                     <table-sort @ascending="onAscOrDesc('phone',0)"
-                                @descending="onAscOrDesc('phone',1)"></table-sort>
+                                @descending="onAscOrDesc('phone',1)"
+                                @reset="onReset('phone')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -70,7 +74,8 @@
                 <template slot="header" slot-scope="scope">
                     姓名
                     <table-sort @ascending="onAscOrDesc('name',0)"
-                                @descending="onAscOrDesc('name',1)"></table-sort>
+                                @descending="onAscOrDesc('name',1)"
+                                @reset="onReset('name')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -88,7 +93,8 @@
                 <template slot="header" slot-scope="scope">
                     所属单位
                     <table-sort @ascending="onAscOrDesc('company_name',0)"
-                                @descending="onAscOrDesc('company_name',1)"></table-sort>
+                                @descending="onAscOrDesc('company_name',1)"
+                                @reset="onReset('company_name')"></table-sort>
                 </template>
             </el-table-column>
             <el-table-column
@@ -130,7 +136,7 @@
     import ToolBar from '@/components/ToolBar.vue';
     import HelpHint from '@/components/HelpHint.vue';
     import Paginate from "../../components/Paginate";
-    import TableSort from  "../../components/TableSort"
+    import TableSort from "../../components/TableSort"
 
     export default {
         data() {
@@ -139,7 +145,7 @@
                 paginate_params: {
                     "page": 1,
                     "size": 10,
-                    "sort": {id: 1}
+                    "sort": {}
                 },
                 refresh: false,
                 params: {
@@ -169,8 +175,7 @@
                 usersData: []
             }
         },
-        filters: {
-        },
+        filters: {},
         methods: {
             onValChange(data) {
                 data.forEach((i) => {
@@ -250,6 +255,10 @@
                 this.paginate_params.sort[str] = num;
                 this.refresh = !this.refresh;
             },
+            onReset(str) {
+                delete this.paginate_params.sort[str];
+                this.refresh = !this.refresh;
+            },
             addUser(id = null) {
                 this.$router.push({path: '/user_detail', query: {id: id}})
             },
@@ -272,9 +281,9 @@
                 })
             },
             resetPassword(row) {
-                let params ={
-                    "id":row.id,
-                    "password":'12345678'
+                let params = {
+                    "id": row.id,
+                    "password": '12345678'
                 };
                 this.$confirm('此操作将重置密码, 是否继续?', '提示', {
                     confirmButtonText: '确定',
@@ -283,11 +292,11 @@
                 }).then(() => {
                     let dom = this.$refs[row.id].$el;
                     dom.style.transform = 'rotate(180deg)';
-                    this.$api_v3.post('/AuUser/save',params).then((result) => {
+                    this.$api_v3.post('/AuUser/save', params).then((result) => {
                         console.log(result);
-                        if(result.code===0){
+                        if (result.code === 0) {
                             this.$message.success('操作成功');
-                        }else {
+                        } else {
                             this.$message.error(result.data);
                         }
                     }).finally(() => {
@@ -300,7 +309,7 @@
         mounted() {
         },
         components: {
-            ToolBar, HelpHint, Paginate,TableSort
+            ToolBar, HelpHint, Paginate, TableSort
         }
     }
 </script>

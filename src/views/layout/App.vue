@@ -16,6 +16,25 @@
         </span>
                 <el-dropdown>
           <span class="header-btn">
+               <i class="el-icon-download"></i>
+          </span>
+                    <el-dropdown-menu slot="dropdown">
+                        <div style="padding: 10px;text-align: center;width: 420px">
+                            <div style="display: flex;justify-content: space-around;text-align: center;color: #409EFF">
+                                <div>
+                                    <img style="width: 160px" src="../../assets/images/d5facda43229fc860e7bfd69cc5cad4.png"/>
+                                    <p style="text-align: center">客户APP（android）</p>
+                                </div>
+                                <div>
+                                    <img style="width: 160px" src="../../assets/images/9b74842b9bf949c5053dd0ac4715831.png"/>
+                                    <p>安装APP（android）</p>
+                                </div>
+                            </div>
+                        </div>
+                    </el-dropdown-menu>
+                </el-dropdown>
+                <el-dropdown>
+          <span class="header-btn">
                <i class="el-icon-setting"></i>
           </span>
                     <el-dropdown-menu slot="dropdown">
@@ -63,7 +82,6 @@
                         </div>
                     </el-dropdown-menu>
                 </el-dropdown>
-
                 <!--<span class="header-btn">-->
                 <!--<el-badge :value="3" class="badge">-->
                 <!--<i class="el-icon-bell"></i>-->

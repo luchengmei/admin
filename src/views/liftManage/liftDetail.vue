@@ -4,7 +4,7 @@
             <div slot="header" class="box-card-header">
                 <span class="name">{{ lift.name||$route.meta.title}}</span>
                 <el-button v-show="activeName==='index'||activeName==='second'" type="primary" icon="el-icon-check"
-                           style="float: right" @click="addOrUpdateLift()">{{addNew?'新增':'提交'}}
+                           style="float: right" @click="addOrUpdateLift()">{{addNew?'提交':'保存'}}
                 </el-button>
             </div>
             <el-tabs v-model="activeName">

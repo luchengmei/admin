@@ -4,7 +4,7 @@
             <div slot="header" class="box-card-header">
                 <span class="name">{{ user.name}}</span>
                 <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateUser()">
-                    {{addUser?'新增':'提交'}}
+                    {{addUser?'提交':'保存'}}
                 </el-button>
             </div>
             <el-tabs v-model="activeName">

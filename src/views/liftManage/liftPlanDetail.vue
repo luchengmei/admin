@@ -3,7 +3,7 @@
         <el-card class="box-card">
             <div slot="header">
                 <span>{{ $route.meta.title}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="addPlan()">提交</el-button>
+                <el-button type="primary" icon="el-icon-check" style="float: right" @click="addPlan()">保存</el-button>
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
@@ -90,7 +90,7 @@
                             </li>
                             <li>
                                 <div class="left"><i class="el-icon-date"></i></div>
-                                <div class="center">下次日期</div>
+                                <div class="center">预计日期</div>
                                 <div class="right" v-if="edit">
                                     <el-date-picker v-model="plan.next_date" type="date" placeholder="选择日期"
                                                     value-format="yyyy-MM-dd">
