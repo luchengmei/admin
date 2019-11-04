@@ -66,14 +66,18 @@ lift.plan = {
     path: '/lift_plan_list'
 };
 
-lift.map= {
-  name:'地图',
-  path:'/map'
+lift.map = {
+    name: '地图',
+    path: '/map'
 };
 
 lift.comment = {
-  name:'评论列表',
-  path:'/comment_list'
+    name: '评论列表',
+    path: '/comment_list'
+};
+lift.countPeople = {
+    name: '人数检测',
+    path: '/count_people_index'
 };
 
 
@@ -110,8 +114,8 @@ alarm.list = {
     path: '/alarm_list',
 };
 alarm.setting = {
-  name:'报警设置',
-  path:'/alarm_setting'
+    name: '报警设置',
+    path: '/alarm_setting'
 };
 
 

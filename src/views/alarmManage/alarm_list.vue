@@ -67,15 +67,12 @@
                     prop="img_urls"
                     label="报警截图">
                 <template slot-scope="scope">
-                    <el-dropdown>
-                        <img style="width: 100%;height: 100%;border-radius: 4px;cursor: pointer"
-                             :src="scope.row.img_thumb"/>
-                        <el-dropdown-menu slot="dropdown">
-                            <el-dropdown-item>
-                                <img :src="scope.row.img_urls"/>
-                            </el-dropdown-item>
-                        </el-dropdown-menu>
-                    </el-dropdown>
+                    <el-image
+                            @click="previewImage(scope.row.img_urls)"
+                            :src="scope.row.img_thumb"
+                            fit="scale-down"
+                            :preview-src-list="srcList">
+                    </el-image>
                 </template>
             </el-table-column>
             <el-table-column
@@ -157,6 +154,7 @@
                     "size": 10,
                     "sort": {}
                 },
+                srcList:[],
                 params: {
                     name: '',
                     status: '',
@@ -320,6 +318,10 @@
             }
         },
         methods: {
+            previewImage(url) {
+                //console.log(url);
+                this.srcList.splice(0, 1, url);
+            },
             onValChange(data) {
                 this.usersData = data;
             },
