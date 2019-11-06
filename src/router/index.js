@@ -5,16 +5,14 @@ import Personal from './personal'
 Vue.use(Router)
 
 
-let RouteList = [
-    {
+let RouteList = [{
         path: '/home',
         component: resolve => require(['@/views/layout/App.vue'], resolve),
         meta: {
             title: '首页',
             keepAlive: false,
         },
-        children: [
-            {
+        children: [{
                 path: '/home',
                 name: 'Dashboard',
                 meta: {
@@ -112,6 +110,15 @@ let RouteList = [
                     keepAlive: false
                 },
                 component: resolve => require(['@/views/collectorManage/collectorDetail.vue'], resolve),
+            },
+            {
+                path: '/analysis_list',
+                name: 'analysisList',
+                meta: {
+                    title: '在/离线统计',
+                    keepAlive: false
+                },
+                component: resolve => require(['@/views/statistical/analysisList.vue'], resolve),
             },
             {
                 path: '/alarm_list',
@@ -231,6 +238,4 @@ RouteList[0].children.push({
     component: resolve => require(['@/views/developmentTool/Build.vue'], resolve),
 });
 
-export default new Router({routes: RouteList})
-
-
+export default new Router({ routes: RouteList })

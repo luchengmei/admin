@@ -66,14 +66,14 @@ lift.plan = {
     path: '/lift_plan_list'
 };
 
-lift.map= {
-  name:'地图',
-  path:'/map'
+lift.map = {
+    name: '地图',
+    path: '/map'
 };
 
 lift.comment = {
-  name:'评论列表',
-  path:'/comment_list'
+    name: '评论列表',
+    path: '/comment_list'
 };
 
 
@@ -91,6 +91,21 @@ let collector = menu.collectorManage.children;
 collector.list = {
     name: '采集仪列表',
     path: '/collector_list',
+};
+/**
+ * 统计分析
+ * @type {{name: string, icon: string, children: {}}}
+ */
+menu.statistical = {
+    name: '统计分析',
+    icon: 'fa fa-bar-chart',
+    children: {}
+};
+let analysis = menu.statistical.children;
+
+analysis.list = {
+    name: '在/离线统计',
+    path: '/analysis_list',
 };
 
 
@@ -110,8 +125,8 @@ alarm.list = {
     path: '/alarm_list',
 };
 alarm.setting = {
-  name:'报警设置',
-  path:'/alarm_setting'
+    name: '报警设置',
+    path: '/alarm_setting'
 };
 
 
