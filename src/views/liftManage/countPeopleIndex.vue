@@ -95,7 +95,7 @@
                 paginate_params: {
                     "page": 1,
                     "size": 10,
-                    "sort": {}
+                    "sort": {id:1}
                 },
                 srcList: [],
                 refresh: false,
