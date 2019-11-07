@@ -49,6 +49,15 @@ let RouteList = [{
                 component: resolve => require(['@/views/liftManage/liftPlanList.vue'], resolve),
             },
             {
+                path: '/count_people_index',
+                name: 'countPeopleIndex',
+                meta: {
+                    title: '人数检测',
+                    keepAlive: true
+                },
+                component: resolve => require(['@/views/liftManage/countPeopleIndex.vue'], resolve),
+            },
+            {
                 path: '/comment_list',
                 name: 'commentList',
                 meta: {

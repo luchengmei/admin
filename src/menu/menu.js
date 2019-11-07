@@ -74,6 +74,13 @@ lift.map = {
 lift.comment = {
     name: '评论列表',
     path: '/comment_list'
+<<<<<<< HEAD
+=======
+};
+lift.countPeople = {
+    name: '人数检测',
+    path: '/count_people_index'
+>>>>>>> b8e47945cd8a9f9271f623378a3c06fcb5a4c880
 };
 
 
