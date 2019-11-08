@@ -125,7 +125,7 @@ let RouteList = [{
                 name: 'analysisList',
                 meta: {
                     title: '在/离线统计',
-                    keepAlive: false
+                    keepAlive: true
                 },
                 component: resolve => require(['@/views/statistical/analysisList.vue'], resolve),
             },

@@ -3,23 +3,60 @@
         <el-tabs v-model="activeName" type="card" style="backgroundColor:inherit;">
             <el-tab-pane label="总体情况" name="all" style="backgroundColor:inherit;">
                 <div class="header_l">
+                    <el-select v-model="Selectpicker" placeholder="请选择">
+                        <el-option
+                        v-for="item in dateSelect"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                        </el-option>
+                    </el-select>
                     <el-date-picker
+                        v-show="Selectpicker===1"
+                        v-model="value"
+                        type="date"
+                        style="margin:0 10px"
+                        placeholder="选择日期">
+                    </el-date-picker>
+                    <el-date-picker
+                        v-show="Selectpicker===2"
+                        v-model="value"
+                        type="week"
+                        format="yyyy 第 WW 周"
+                        style="margin:0 10px"
+                        placeholder="选择周">
+                    </el-date-picker>
+                    <el-date-picker
+                        v-show="Selectpicker===3"
+                        v-model="value"
+                        type="month"
+                        style="margin:0 10px"
+                        placeholder="选择月">
+                    </el-date-picker>
+                    <el-date-picker
+                        v-show="Selectpicker===4"
+                        v-model="value"
+                        type="year"
+                        style="margin:0 10px"
+                        placeholder="选择年">
+                    </el-date-picker>
+                    <!-- <el-date-picker
                         v-model="date"
                         type="daterange"
                         range-separator="至"
                         start-placeholder="开始日期"
                         end-placeholder="结束日期"
-                        style="margin-right: 10px">
-                    </el-date-picker>
+                        style="margin:0 10px">
+                    </el-date-picker> -->
                     <el-button type="primary" size="medium">查询</el-button>
                     <el-button type="primary" size="medium">重置</el-button>
                     <el-button type="primary" size="medium">刷新</el-button>
-                    <span class="update">更新时间:</span>
+                    <span class="update">更新时间:  {{updateTime}}</span>
                 </div>
                 <div class="countBox">
                     <div>
                         <p class="title">当前离线台数</p>
-                        <p class="count">12</p>
+                        <p class="count">{{currentoff}}</p>
                     </div>
                     <div>
                         <p class="title">累计离线台数</p>
@@ -27,7 +64,7 @@
                     </div>
                     <div>
                         <p class="title">累计离线时长</p>
-                        <p class="count">10h</p>
+                        <p class="count">{{addUp}}</p>
                     </div>
                 </div>
                 <div class="offline" style="backgroundColor:#fff;">
@@ -35,10 +72,10 @@
                     <div class="content">
                         <div id="allof_count" style="width: 70%;height:350px;"></div>
                         <el-table
-                        :data="tableData"
+                        :data="offlineList"
                         stripe>
                             <el-table-column
-                                prop="date"
+                                prop="lift_id"
                                 align="center"
                                 label="id"
                                 width="50">
@@ -47,13 +84,13 @@
                                 prop="name"
                                 label="电梯名称"
                                 align="center"
-                                width="100">
+                                width="200">
                             </el-table-column>
                             <el-table-column
-                                prop="address"
+                                prop="ctime"
                                 align="center"
                                 label="离线时间"
-                                width="250">
+                                width="230">
                             </el-table-column>
                         </el-table>
                     </div>
@@ -84,15 +121,19 @@
                         prop="online"
                         align="center"
                         label="上线/下线">
+                        <div slot-scope="scope" style="width: 100%;">
+                            <span v-if="scope.row.online">上线</span>
+                            <span v-else>下线</span>
+                        </div>
                     </el-table-column>
                     <el-table-column
                         prop="time"
                         align="center"
-                        label="持续时间">
+                        label="持续时间"
+                        :formatter="formatSeconds">
                     </el-table-column>
                 </el-table>
-                <paginate :api="paginate_api" :params="paginate_params" @val-change="onValChange"
-                    :refresh="refresh"></paginate>
+                <paginate :api="paginate_api" :params="paginate_params" @val-change="onValChange" :refresh="refresh"></paginate>
             </el-tab-pane>
             <el-tab-pane label="单台情况" name="single">
                 <div class="header_l">
@@ -129,7 +170,7 @@
                 <div id="single_count" style="width: 100%;height:350px;"></div>
                 <div id="single_time"  style="width: 100%;height:350px;"></div>
                 <el-table
-                :data="tableData"
+                :data="allData"
                 style="width: 100%"
                 stripe>
                     <el-table-column
@@ -160,22 +201,23 @@
                         label="持续时间">
                     </el-table-column>
                 </el-table>
-                <paginate :api="paginate_api" :params="paginate_params" @val-change="onValChange"
-                    :refresh="refresh"></paginate>
+                <!-- <paginate :api="paginate_api" :params="paginate_params" @val-change="onValChange" :refresh="refresh"></paginate> -->
             </el-tab-pane>
         </el-tabs>
     </div>
 </template>
 <script>
-import Paginate from "../../components/Paginate";
+import Paginate from "@/components/Paginate";
 export default{
-    components:{
+    components: {
         Paginate
     },
     data () {
         return {
+            updateTime:new Date().toLocaleDateString()+`  ${new Date().toLocaleTimeString('chinese', { hour12: false })}`,
             activeName:'all',
             date:'',
+            addUp:'',
             allof_count:{
                 tooltip: {
                     trigger: 'axis',
@@ -222,7 +264,7 @@ export default{
                         rotate:-45,
                         color:'#666'
                     },
-                    data: ['10/1', '10/2', '10/3','10/4','10/5','10/6','10/7','10/8','10/9','10/10','10/11','10/12','10/13','10/14','10/15','10/16','10/17','10/18','10/19','10/20','10/21','10/22','10/23','10/24','10/25','10/26','10/27','10/28','10/29','10/30','10/31']
+                    data: []
                 },
                 yAxis: {
                     type: 'value',
@@ -242,13 +284,13 @@ export default{
                 series: [{
                     name:'离线',
                     symbol:'circle',
-                    data: [820, 932, 901, 934, 1290, 1330, 1320,820, 932, 901, 934, 1290, 1330, 1320,820, 932, 901, 934, 1290, 1330, 1320,820, 932, 901, 934, 1290, 1330, 1320,820, 932, 901, 934, 1290, 1330, 1320],
+                    data: [],
                     type: 'line',
                     color: ['#2fc25b']
                 },{
                     name:'总台数',
                     symbol:'circle',
-                    data: [45, 66, 44, 88, 1290, 1800, 600,45, 66, 44, 88, 1290, 1800, 600,45, 66, 44, 88, 1290, 1800, 600,45, 66, 44, 88, 1290, 1800, 600],
+                    data: [],
                     type: 'line',
                     color: ['#1890ff']
                 }]
@@ -281,7 +323,7 @@ export default{
                 },
                 xAxis : [{
                     type : 'category',
-                    data: ['1日', '2日', '3日','4日','5日','6日','7日','8日','9日','10日','11日','12日','13日','14日','15日','16日','17日','18日','19日','20日','21日','22日','23日','24日','25日','26日','27日','28日','29日','30日','31日'],
+                    data: [],
                     axisPointer:{
                         type:'none'
                     },
@@ -320,49 +362,40 @@ export default{
                     name:'离线时长',
                     type:'bar',
                     barWidth: '55%',
-                    data:[820, 932, 901, 934, 1290, 1330, 1320,820, 932, 901, 934, 1290, 1330, 1320,820, 932, 901, 934, 1290, 1330, 1320,820, 932, 901, 934, 1290, 1330, 1320,820, 932, 901]
+                    data:[]
                 }]
             },
-            allData:[],
-            tableData: [{
-                date: '123',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1518 弄'
-            }, {
-                date: '123',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1517 弄'
-            }, {
-                date: '123',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1519 弄'
-            }, {
-                date: '123',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1516 弄'
-            }, {
-                date: '123',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1517 弄'
-            }, {
-                date: '123',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1519 弄'
-            }, {
-                date: '123',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1516 弄'
-            }],
+            dateSelect:[
+                {
+                    label:'按天统计',
+                    value:1
+                },
+                {
+                    label:'按周统计',
+                    value:2
+                },
+                {
+                    label:'按月统计',
+                    value:3
+                },
+                {
+                    label:'按年统计',
+                    value:4
+                }
+            ],
+            Selectpicker:3,
+            currentoff:'',
+            offlineList: [],
             paginate_api: '/LogOnline/listPage',
             paginate_params: {
                 "page": 1,
-                "size": 10,
-                "sort": {name:1,status:1,sort:1},
+                "sort": {ctime:1,status:1,sort:1}
             },
             refresh: false,
             params: {
                 name: '',
             },
+            allData:[],
             options: [
                 {
                     value: '选项1',
@@ -397,24 +430,71 @@ export default{
       }  
     },
     mounted () {
-        let allof_count=this.$echarts.init(document.getElementById('allof_count'))
-        let allof_time=this.$echarts.init(document.getElementById('allof_time'))
-        allof_count.setOption(this.allof_count)
-        allof_time.setOption(this.allof_time)
-        this.initdata()
+        this.$echarts.init(document.getElementById('allof_count')).setOption(this.allof_count)
+        this.$echarts.init(document.getElementById('allof_time')).setOption(this.allof_time)
+        this.initData()
     },
     methods:{
-        initdata(){
-            this.$api_v3.post('/LogOnline/listPage',{list_rows:10,sort:{name:1,status:1,sort:1}}).then((res)=>{
-                console.log(res);
+        initData(){
+            this.$api_v3.post('/LogOnline/currentOfflineStatistic').then((res)=>{
                 if(res.code===0){
-                    this.allData=res.data.data
+                    this.offlineList=res.data.slice(0,7)
+                    this.currentoff=res.data.length
+                }
+            })
+            let start=new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-01'
+            let end=new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-31'
+            this.$api_v3.post('LogOnline/offlineStatistic',{start_date:start,end_date:end}).then((res)=>{
+                if(res.code===0){
+                    let xArr=[]
+                    let yArr=[]
+                    res.data.forEach((i)=>{
+                        xArr.push(i.date)
+                        yArr.push(i.number)
+                    })
+                    this.$echarts.init(document.getElementById('allof_count')).setOption({xAxis:{data:xArr},series:[{data:yArr}]})
+                }
+            })
+            this.$api_v3.post('LogOnline/offlineTimeStatistic',{start_date:start,end_date:end}).then((res)=>{
+                if(res.code===0){
+                    let xArr=[]
+                    let yArr=[]
+                    let addUp={time:0};
+                    res.data.forEach((i)=>{
+                        xArr.push(i.date)
+                        yArr.push(i.number)
+                        addUp.time+=parseInt(i.number)
+                    })
+                    this.addUp=this.formatSeconds(addUp)
+                    this.$echarts.init(document.getElementById('allof_time')).setOption({xAxis:{data:xArr},series:[{data:yArr}]})
                 }
             })
         },
         onValChange(data) {
             this.allData = data;
         },
+        formatSeconds(value) {
+            if(!value.time) return '--'
+            var secondTime = parseInt(value.time);
+            var minuteTime = 0;
+            var hourTime = 0;
+            if(secondTime > 60) {
+                minuteTime = parseInt(secondTime / 60);
+                secondTime = parseInt(secondTime % 60);
+                if(minuteTime > 60) {
+                    hourTime = parseInt(minuteTime / 60);
+                    minuteTime = parseInt(minuteTime % 60);
+                }
+            }
+            var result = "" + parseInt(secondTime) + "秒";
+            if(minuteTime > 0) {
+            result = "" + parseInt(minuteTime) + "分" + result;
+            }
+            if(hourTime > 0) {
+            result = "" + parseInt(hourTime) + "小时" + result;
+            }
+            return result;
+        }
     }
 }
 </script>
@@ -452,6 +532,7 @@ export default{
                 padding-top: 20px;
                 color: #666;
                 font-size: 30px;
+                line-height: 1;
             }
         }
     }
