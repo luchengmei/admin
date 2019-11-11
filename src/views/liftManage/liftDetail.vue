@@ -194,13 +194,13 @@
                                 <div class="left"><i class="fa fa-bars"></i></div>
                                 <div class="center">层/站/门</div>
                                 <div class="right" v-if="edit" style="display: flex;align-items: center">
-                                    <el-input placeholder="" v-model="lift.floor">
+                                    <el-input clearable placeholder="层" v-model="lift.floor" @change="changeFloor">
                                         <template slot="append">层</template>
                                     </el-input>
-                                    <el-input-number placeholder="站" style="width: 300px" v-model="lift.station"
-                                                     @change="changeFloor" :min="1">
-                                    </el-input-number>
-                                    <el-input placeholder="" v-model="lift.door">
+                                    <el-input clearable placeholder="站" v-model="lift.station">
+                                        <template slot="append">站</template>
+                                    </el-input>
+                                    <el-input clearable placeholder="门" v-model="lift.door">
                                         <template slot="append">门</template>
                                     </el-input>
                                 </div>
@@ -615,19 +615,19 @@
             changeFloor(val) {
                 //console.log(val);
                 this.collapseNames = ["1"];
-                let difference = val - this.floors.length;
+                let difference = val - this.lift.floors.length;
                 if (difference > 0) {
                     for (let i = 1; i <= difference; i++) {
-                        this.floors.push(
+                        this.lift.floors.push(
                             {
                                 alias: '',
-                                floor: this.floors.length + 1
+                                floor: this.lift.floors.length + 1
                             }
                         )
                     }
                 } else if (difference < 0) {
                     for (let j = 1; j <= -difference; j++) {
-                        this.floors.pop();
+                        this.lift.floors.pop();
                     }
                 }
             },
