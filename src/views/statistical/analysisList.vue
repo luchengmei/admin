@@ -1,7 +1,7 @@
 <template>
     <div class="analy">
         <el-tabs v-model="activeName" type="card" style="backgroundColor:inherit;">
-            <el-tab-pane label="总体情况" name="all" style="backgroundColor:inherit;">
+            <el-tab-pane label="总体情况" name="all" style="backgroundColor:inherit;" v-loading="loading">
                 <div class="header_l">
                     <el-date-picker
                             clearable
@@ -14,12 +14,11 @@
                             range-separator="至"
                             start-placeholder="开始日期"
                             end-placeholder="结束日期"
-                            :picker-options="pickerOptions"
-                            @change="handleSelectDate">
+                            :picker-options="pickerOptions">
                     </el-date-picker>
-                    <el-button type="primary" size="medium" @click="handleSearch">查询</el-button>
-                    <el-button type="primary" size="medium">重置</el-button>
-                    <el-button type="primary" size="medium">刷新</el-button>
+                    <el-button type="primary" size="medium" @click="handleSearch(0)">查询</el-button>
+                    <el-button type="primary" size="medium" @click="handleReset(0)">重置</el-button>
+                    <el-button type="primary" size="medium" @click="handleRefresh(0)">刷新</el-button>
                     <span class="update">更新时间:  {{updateTime}}</span>
                 </div>
                 <div class="countBox">
@@ -104,73 +103,46 @@
                 </el-table>
                 <paginate :api="paginate_api" :params="paginate_params" @val-change="onValChange" :refresh="refresh"></paginate>
             </el-tab-pane>
-            <el-tab-pane label="单台情况" name="single">
+            <el-tab-pane label="单台情况" name="single" v-loading="loading">
                 <div class="header_l">
                     <el-date-picker
-                        v-model="date"
-                        type="daterange"
-                        range-separator="至"
-                        start-placeholder="开始日期"
-                        end-placeholder="结束日期">
+                            clearable
+                            v-model="searchSingle"
+                            type="daterange"
+                            align="right"
+                            unlink-panels
+                            value-format="yyyy-MM-dd"
+                            style="margin:0 10px"
+                            range-separator="至"
+                            start-placeholder="开始日期"
+                            end-placeholder="结束日期"
+                            :picker-options="pickerOptions">
                     </el-date-picker>
-                    <el-select v-model="value" placeholder="请选择" style="margin: 0 10px">
+                    <el-select v-model="liftTarget" placeholder="请选择" style="margin: 0 10px">
                         <el-option
-                        v-for="item in options"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
+                        v-for="item in singleList"
+                        :key="item.device_id"
+                        :label="item.name"
+                        :value="item.lift_id">
                         </el-option>
                     </el-select>
-                    <el-button type="primary" size="medium">查询</el-button>
-                    <el-button type="primary" size="medium">重置</el-button>
-                    <el-button type="primary" size="medium">刷新</el-button>
-                    <span class="update">更新时间:</span>
+                    <el-button type="primary" size="medium" @click="handleSearch(1)">查询</el-button>
+                    <el-button type="primary" size="medium" @click="handleReset(1)">重置</el-button>
+                    <el-button type="primary" size="medium" @click="handleRefresh(1)">刷新</el-button>
+                    <span class="update">更新时间:  {{updateTime}}</span>
                 </div>
                 <div class="countBox">
                     <div>
-                        <p class="title">累计离线时长</p>
-                        <p class="count">10h</p>
+                        <p class="title">累计离线次数</p>
+                        <p class="count">{{singleCount}}</p>
                     </div>
                     <div>
-                        <p class="title">累计离线次数</p>
-                        <p class="count">12</p>
+                        <p class="title">累计离线时长</p>
+                        <p class="count">{{singleAddup}}</p>
                     </div>
                 </div>
-                <div id="single_count" style="width: 100%;height:350px;"></div>
-                <div id="single_time"  style="width: 100%;height:350px;"></div>
-                <el-table
-                :data="allData"
-                style="width: 100%"
-                stripe>
-                    <el-table-column
-                        prop="date"
-                        align="center"
-                        label="时间"
-                        width="180">
-                    </el-table-column>
-                    <el-table-column
-                        prop="name"
-                        align="center"
-                        label="id"
-                        width="180">
-                    </el-table-column>
-                    <el-table-column
-                        prop="address"
-                        align="center"
-                        label="电梯名称">
-                    </el-table-column>
-                    <el-table-column
-                        prop="address"
-                        align="center"
-                        label="上线/下线">
-                    </el-table-column>
-                    <el-table-column
-                        prop="address"
-                        align="center"
-                        label="持续时间">
-                    </el-table-column>
-                </el-table>
-                <!-- <paginate :api="paginate_api" :params="paginate_params" @val-change="onValChange" :refresh="refresh"></paginate> -->
+                <div id="single_time" style="width: 100%;height:350px;"></div>
+                <div id="single_count"  style="width: 100%;height:350px;"></div>
             </el-tab-pane>
         </el-tabs>
     </div>
@@ -183,10 +155,12 @@ export default{
     },
     data () {
         return {
+            loading:false,
             updateTime:new Date().toLocaleDateString()+`  ${new Date().toLocaleTimeString('chinese', { hour12: false })}`,
             activeName:'all',
             date:'',
             addUp:'',
+            singleAddup:'',
             allof_count:{
                 tooltip: {
                     trigger: 'axis',
@@ -334,17 +308,156 @@ export default{
                     data:[]
                 }]
             },
-            searchDate:'',
+            single_time:{
+                color: ['#3aa1ff'],
+                title:{
+                    text:'离线时长统计表',
+                    left:'center',
+                    textStyle:{
+                        fontSize:13,
+                        fontWeight:400
+                    },
+                    top: 15,
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor:'rgba(255,255,255,0.8)',
+                    textStyle:{
+                        color:'#666',
+                        fontSize:12,
+                    },
+                    extraCssText: 'box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);'
+                },
+                grid: {
+                    left: '2%',
+                    right: '2%',
+                    bottom: '2%',
+                    containLabel: true
+                },
+                xAxis : [{
+                    type : 'category',
+                    data:  [],
+                    axisPointer:{
+                        type:'none'
+                    },
+                    axisLine:{
+                        lineStyle:{
+                            color:'#ccc'
+                        }
+                    },
+                    axisTick:{
+                        alignWithLabel: true,
+                        lineStyle:{
+                            color:'#ccc'
+                        }
+                    },
+                    axisLabel:{
+                        interval:0,
+                        color:'#666'
+                    }
+                }],
+                yAxis : [{
+                    type : 'value',
+                    axisLine:{
+                        show:false
+                    },
+                    axisTick:{
+                        show:false
+                    },
+                    splitLine:{
+                        lineStyle:{
+                            color:'rgba(0,0,0,0.1)',
+                            type:'dotted'
+                        }
+                    }
+                }],
+                series : [{
+                    name:'离线时长',
+                    type:'bar',
+                    barWidth: '55%',
+                    data: []
+                }]
+            },
+            single_count:{
+                color: ['#3aa1ff'],
+                title:{
+                    text:'离线次数统计表',
+                    left:'center',
+                    textStyle:{
+                        fontSize:13,
+                        fontWeight:400
+                    },
+                    top: 15,
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor:'rgba(255,255,255,0.8)',
+                    textStyle:{
+                        color:'#666',
+                        fontSize:12,
+                    },
+                    extraCssText: 'box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);'
+                },
+                grid: {
+                    left: '2%',
+                    right: '2%',
+                    bottom: '2%',
+                    containLabel: true
+                },
+                xAxis : [{
+                    type : 'category',
+                    data: [],
+                    axisPointer:{
+                        type:'none'
+                    },
+                    axisLine:{
+                        lineStyle:{
+                            color:'#ccc'
+                        }
+                    },
+                    axisTick:{
+                        alignWithLabel: true,
+                        lineStyle:{
+                            color:'#ccc'
+                        }
+                    },
+                    axisLabel:{
+                        interval:0,
+                        color:'#666'
+                    }
+                }],
+                yAxis : [{
+                    type : 'value',
+                    axisLine:{
+                        show:false
+                    },
+                    axisTick:{
+                        show:false
+                    },
+                    splitLine:{
+                        lineStyle:{
+                            color:'rgba(0,0,0,0.1)',
+                            type:'dotted'
+                        }
+                    }
+                }],
+                series : [{
+                    name:'离线时长',
+                    type:'bar',
+                    barWidth: '55%',
+                    data:[]
+                }]
+            },
+            searchDate:[new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-01',new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-31'],
+            searchSingle:[new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-01',new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-31'],
             pickerOptions: {
                 shortcuts: [
                     {
                         text: '最近一天',
                         onClick(picker) {
-                            const end = new Date();
                             const start = new Date();
-                            console.log(start.getTime())
                             start.setTime(start.getTime() - 3600 * 1000 * 24 * 0.5);
-                            picker.$emit('pick', [start, end]);
+                            picker.$emit('pick', [start, start]);
                         }
                     }, 
                     {
@@ -352,7 +465,7 @@ export default{
                         onClick(picker) {
                             const end = new Date();
                             const start = new Date();
-                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 6.5);
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 6);
                             picker.$emit('pick', [start, end]);
                         }
                     }, 
@@ -376,8 +489,11 @@ export default{
                     }
                 ]
             },
-            currentoff:'',
+            currentoff:0,
+            singleCount:0,
+            liftTarget:'',
             offlineList: [],
+            singleList: [],
             paginate_api: '/LogOnline/listPage',
             paginate_params: {
                 "page": 1,
@@ -388,36 +504,14 @@ export default{
                 name: '',
             },
             allData:[],
-            options: [
-                {
-                    value: '选项1',
-                    label: '1'
-                }, {
-                value: '选项2',
-                label: '2'
-                }, {
-                value: '选项3',
-                label: '3'
-                }, {
-                value: '选项4',
-                label: '4'
-                }, {
-                value: '选项5',
-                label: '5'
-                }
-            ],
-            value: ''
         }
     },
     watch: {
       activeName(newVal){
           if(newVal==='single'){
-              this.$nextTick(()=>{
-                  let single_count=this.$echarts.init(document.getElementById('single_count'))
-                  let single_time=this.$echarts.init(document.getElementById('single_time'))
-                  single_count.setOption(this.allof_time)
-                  single_time.setOption(this.allof_time)
-              })
+            this.$nextTick(()=>{
+                this.initChart(this.searchSingle,['single_count','single_time'],this.liftTarget)
+            })
           }
       }  
     },
@@ -431,15 +525,15 @@ export default{
             this.$api_v3.post('/LogOnline/currentOfflineStatistic').then((res)=>{
                 if(res.code===0){
                     this.offlineList=res.data.slice(0,7)
+                    this.singleList=res.data
+                    this.liftTarget= res.data[0].lift_id
                     this.currentoff=res.data.length
+                    this.initChart(this.searchDate,['allof_count','allof_time'])
                 }
             })
-            let start=new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-01'
-            let end=new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-31'
-            this.initChart(start,end)
         },
-        initChart(start,end){
-            this.$api_v3.post('LogOnline/offlineStatistic',{start_date:start,end_date:end}).then((res)=>{
+        initChart(date,dom,id){
+            this.$api_v3.post('LogOnline/offlineStatistic',{start_date:date[0],end_date:date[1],lift_id:id}).then((res)=>{
                 if(res.code===0){
                     let xArr=[]
                     let yArr=[]
@@ -447,10 +541,17 @@ export default{
                         xArr.push(i.date)
                         yArr.push(i.number)
                     })
-                    this.$echarts.init(document.getElementById('allof_count')).setOption({xAxis:{data:xArr},series:[{data:yArr}]})
+                    if(id){
+                        this.single_count.xAxis[0].data=xArr
+                        this.single_count.series[0].data=yArr
+                        this.singleCount=res.data.length
+                        this.$echarts.init(document.getElementById(dom[0])).setOption(this.single_count)
+                    }else{
+                        this.$echarts.init(document.getElementById(dom[0])).setOption({xAxis:{data:xArr},series:[{data:yArr}]})
+                    }
                 }
             })
-            this.$api_v3.post('LogOnline/offlineTimeStatistic',{start_date:start,end_date:end}).then((res)=>{
+            this.$api_v3.post('LogOnline/offlineTimeStatistic',{start_date:date[0],end_date:date[1],lift_id:id}).then((res)=>{
                 if(res.code===0){
                     let xArr=[]
                     let yArr=[]
@@ -460,19 +561,47 @@ export default{
                         yArr.push(i.number)
                         addUp.time+=parseInt(i.number)
                     })
-                    this.addUp=this.formatSeconds(addUp)
-                    this.$echarts.init(document.getElementById('allof_time')).setOption({xAxis:{data:xArr},series:[{data:yArr}]})
+                     if(id){
+                        this.single_time.xAxis[0].data=xArr
+                        this.single_time.series[0].data=yArr
+                        this.$echarts.init(document.getElementById(dom[1])).setOption(this.single_time)
+                        this.singleAddup=this.formatSeconds(addUp)
+                    }else{
+                        this.$echarts.init(document.getElementById(dom[1])).setOption({xAxis:{data:xArr},series:[{data:yArr}]})
+                        this.addUp=this.formatSeconds(addUp)
+                    }
                 }
             })
         },
-        handleSearch(){
-            this.initChart(this.searchDate[0],this.searchDate[1])
+        handleSearch(val){
+            if(val===0){
+                this.initChart(this.searchDate,['allof_count','allof_time'])
+            }else{
+                this.initChart(this.searchSingle,['single_count','single_time'],this.liftTarget)
+            }
+        },
+        handleReset(val){
+            if(val===0){
+                this.searchDate=[new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-01',new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-31']
+            }else{
+                this.searchSingle=[new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-01',new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-31']
+                this.liftTarget=this.singleList[0].lift_id
+            }
+        },
+        handleRefresh(val){
+            this.updateTime=new Date().toLocaleDateString()+`  ${new Date().toLocaleTimeString('chinese', { hour12: false })}`
+            if(val===0){
+                this.initData()
+            }else{
+                this.initChart(this.searchSingle,['single_count','single_time'],this.liftTarget)
+            }
+            this.loading=true
+            setTimeout(() => {
+                this.loading=false
+            }, 1000);
         },
         onValChange(data) {
             this.allData = data;
-        },
-        handleSelectDate(value){
-            console.log(this.searchDate)
         },
         formatSeconds(value) {
             if(!value.time) return '--'
@@ -496,20 +625,6 @@ export default{
             }
             return result;
         },
-        placeCode(value){
-            switch (value) {
-                case 'date':
-                    return '选择日期';
-                case 'week':
-                    return '选择周';
-                case 'month':
-                    return '选择月';
-                case 'year':
-                    return '选择年';
-                default:
-                    break;
-            }
-        }
     }
 }
 </script>
