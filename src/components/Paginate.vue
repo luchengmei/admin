@@ -1,6 +1,6 @@
 <!--
 如何使用？
-1.导入并添加components, import ToolBar from '~/components/ToolBar/ToolBar.vue',
+1.导入并添加components,
 2.绑定你的api、参数和数据处理函数，会自动生成分页
 <Paginate
     api="postList"
