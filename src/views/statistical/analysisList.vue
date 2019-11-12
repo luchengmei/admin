@@ -3,52 +3,21 @@
         <el-tabs v-model="activeName" type="card" style="backgroundColor:inherit;">
             <el-tab-pane label="总体情况" name="all" style="backgroundColor:inherit;">
                 <div class="header_l">
-                    <el-select v-model="Selectpicker" placeholder="请选择">
-                        <el-option
-                        v-for="item in dateSelect"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                        </el-option>
-                    </el-select>
                     <el-date-picker
-                        v-show="Selectpicker===1"
-                        v-model="value"
-                        type="date"
-                        style="margin:0 10px"
-                        placeholder="选择日期">
+                            clearable
+                            v-model="searchDate"
+                            type="daterange"
+                            align="right"
+                            unlink-panels
+                            value-format="yyyy-MM-dd"
+                            style="margin:0 10px"
+                            range-separator="至"
+                            start-placeholder="开始日期"
+                            end-placeholder="结束日期"
+                            :picker-options="pickerOptions"
+                            @change="handleSelectDate">
                     </el-date-picker>
-                    <el-date-picker
-                        v-show="Selectpicker===2"
-                        v-model="value"
-                        type="week"
-                        format="yyyy 第 WW 周"
-                        style="margin:0 10px"
-                        placeholder="选择周">
-                    </el-date-picker>
-                    <el-date-picker
-                        v-show="Selectpicker===3"
-                        v-model="value"
-                        type="month"
-                        style="margin:0 10px"
-                        placeholder="选择月">
-                    </el-date-picker>
-                    <el-date-picker
-                        v-show="Selectpicker===4"
-                        v-model="value"
-                        type="year"
-                        style="margin:0 10px"
-                        placeholder="选择年">
-                    </el-date-picker>
-                    <!-- <el-date-picker
-                        v-model="date"
-                        type="daterange"
-                        range-separator="至"
-                        start-placeholder="开始日期"
-                        end-placeholder="结束日期"
-                        style="margin:0 10px">
-                    </el-date-picker> -->
-                    <el-button type="primary" size="medium">查询</el-button>
+                    <el-button type="primary" size="medium" @click="handleSearch">查询</el-button>
                     <el-button type="primary" size="medium">重置</el-button>
                     <el-button type="primary" size="medium">刷新</el-button>
                     <span class="update">更新时间:  {{updateTime}}</span>
@@ -365,25 +334,48 @@ export default{
                     data:[]
                 }]
             },
-            dateSelect:[
-                {
-                    label:'按天统计',
-                    value:1
-                },
-                {
-                    label:'按周统计',
-                    value:2
-                },
-                {
-                    label:'按月统计',
-                    value:3
-                },
-                {
-                    label:'按年统计',
-                    value:4
-                }
-            ],
-            Selectpicker:3,
+            searchDate:'',
+            pickerOptions: {
+                shortcuts: [
+                    {
+                        text: '最近一天',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            console.log(start.getTime())
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 0.5);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, 
+                    {
+                        text: '最近一周',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 6.5);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, 
+                    {
+                        text: '最近一个月',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, 
+                    {
+                        text: '最近一年',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 360);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }
+                ]
+            },
             currentoff:'',
             offlineList: [],
             paginate_api: '/LogOnline/listPage',
@@ -444,6 +436,9 @@ export default{
             })
             let start=new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-01'
             let end=new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-31'
+            this.initChart(start,end)
+        },
+        initChart(start,end){
             this.$api_v3.post('LogOnline/offlineStatistic',{start_date:start,end_date:end}).then((res)=>{
                 if(res.code===0){
                     let xArr=[]
@@ -470,8 +465,14 @@ export default{
                 }
             })
         },
+        handleSearch(){
+            this.initChart(this.searchDate[0],this.searchDate[1])
+        },
         onValChange(data) {
             this.allData = data;
+        },
+        handleSelectDate(value){
+            console.log(this.searchDate)
         },
         formatSeconds(value) {
             if(!value.time) return '--'
@@ -494,6 +495,20 @@ export default{
             result = "" + parseInt(hourTime) + "小时" + result;
             }
             return result;
+        },
+        placeCode(value){
+            switch (value) {
+                case 'date':
+                    return '选择日期';
+                case 'week':
+                    return '选择周';
+                case 'month':
+                    return '选择月';
+                case 'year':
+                    return '选择年';
+                default:
+                    break;
+            }
         }
     }
 }
