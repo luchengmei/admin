@@ -1,134 +1,149 @@
 <template>
-    <div>
-        <el-card style="border-radius: 0">
-            <div slot="header">
-                <span>快捷入口</span>
-            </div>
-            <div class="demo">
-                <el-row :gutter="20">
-                    <el-col :span="6">
-                        <div class="grid-content " @click="toLiftManage">
-                            <div style="padding: 10px;background: #673AB7">
-                                <i class="fa fa-window-restore index-icon"></i>
-                                我的电梯
+    <el-card class="running">
+        <el-row :gutter="30" class="online_data">
+            <el-col :span="6">
+                <el-card shadow="never"  style="padding-left:15px;">
+                    <div class="count">27</div>
+                    <div class="title"><span style="color:#58a3f7;">●</span> 在线用户数</div>
+                </el-card>
+            </el-col>
+            <el-col :span="6">
+                <el-card shadow="never"  style="padding-left:15px;">
+                    <div class="count">62/82</div>
+                    <div class="title"><span style="color:#fec03d;">●</span> 在线设备数</div>
+                </el-card>
+            </el-col>
+            <el-col :span="6">
+                <el-card shadow="never"  style="padding-left:15px;">
+                    <div class="count">1/23</div>
+                    <div class="title"><span style="color:#52c1f5;">●</span> 未处理报警数量</div>
+                </el-card>
+            </el-col>
+            <el-col :span="6">
+                <el-card shadow="never"  style="padding-left:15px;">
+                    <div class="count">7</div>
+                    <div class="title"><span style="color:#4bced0;">●</span> 年审过期（台）</div>
+                </el-card>
+            </el-col>
+        </el-row>
+        <el-row :gutter="30" class="Qnew">
+             <el-col :span="12">
+                <el-card shadow="never">
+                    <div class="title">快速新建</div>
+                    <div class="content">
+                        <div class="grid-content">
+                            <i class="iconfont icon-commpany"></i>
+                            <div style="margin-top:10px;">
+                                新建单位
                             </div>
                         </div>
-                    </el-col>
-                    <el-col :span="6">
-                        <div class="grid-content " @click="toUserCompany">
-                            <div style="padding: 10px;background: #3c8dbc">
-                                <i class="fa fa-building-o index-icon"></i>
-                                单位管理
+                        <div class="grid-content">
+                            <i class="iconfont icon-user-plus"></i>
+                            <div style="margin-top:10px;">
+                                新建用户
                             </div>
                         </div>
-                    </el-col>
-                    <el-col :span="6">
-                        <div class="grid-content " @click="toUserManage">
-                            <div style="padding: 10px;background: #009688">
-                                <i class="fa fa-users index-icon"></i>
-                                用户管理
+                        <div class="grid-content">
+                            <i class="iconfont icon-elevator"></i>
+                            <div style="margin-top:10px;">
+                                新建电梯
                             </div>
                         </div>
-                    </el-col>
-                    <el-col :span="6">
-                        <div class="grid-content " @click="toPersonal">
-                            <div style="padding: 10px;background: #607D8B">
-                                <i class="fa fa-user-circle-o index-icon"></i>
-                                个人中心
-                            </div>
-                        </div>
-                    </el-col>
-                </el-row>
-            </div>
-        </el-card>
-        <br>
-        <!--<el-card style="border-radius: 0">-->
-        <!--<div slot="header">-->
-        <!--<span>设备概括</span>-->
-        <!--</div>-->
-        <!--<div class="demo">-->
-        <!--<el-row :gutter="20">-->
-        <!--<el-col :span="8">-->
-        <!--<div class="grid-content " style="color: #009688;background:#ffffff;text-align: center">-->
-        <!--<div style="padding: 10px">-->
-        <!--<i class="el-icon-loading index-icon" style="color: #009688"></i>-->
-        <!--正常运行-->
-        <!--<span style="font-size: 64px;text-align: center">62</span>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</el-col>-->
-        <!--<el-col :span="8">-->
-        <!--<div class="grid-content " style="color: #d8690b;background:#ffffff;text-align: center">-->
-        <!--<div style="padding: 10px">-->
-        <!--<i class="fa fa-bell-o index-icon"    style="color: #d8690b"></i>-->
-        <!--报警-->
-        <!--<span style="font-size: 64px;text-align: center">3</span>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</el-col>-->
-        <!--<el-col :span="8">-->
-        <!--<div class="grid-content " style="color: #607D8B;background:#ffffff;text-align: center">-->
-        <!--<div style="padding: 10px">-->
-        <!--<i class="fa fa-chain-broken index-icon" style="color: #607D8B"></i>-->
-        <!--离线-->
-        <!--<span style="font-size: 64px;text-align: center">2</span>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</el-col>-->
-        <!--</el-row>-->
-        <!--</div>-->
-        <!--</el-card>-->
-    </div>
+                    </div>
+                </el-card>
+            </el-col>
+             <el-col :span="12">
+                <el-card shadow="never">
+                    <div class="title">服务数据</div>
+                    <div class="server_data">
+                        <el-card shadow="never">
+                            <div class="count">2.3/1.8M</div>
+                            <div class="name"><span style="color:#81d3f8;">●</span> 网络（出网/入网）</div>
+                        </el-card>
+                        <el-card shadow="never">
+                            <div class="count">27</div>
+                            <div class="name"><span style="color:#80ffff;">●</span> CPU使用率（%）</div>
+                        </el-card>
+                        <el-card shadow="never">
+                            <div class="count">3/4</div>
+                            <div class="name"><span style="color:#70b603;">●</span> 内存（GiB）</div>
+                        </el-card>
+                        <el-card shadow="never">
+                            <div class="count">234/400</div>
+                            <div class="name"><span style="color:#caf982;">●</span> 磁盘（GB）</div>
+                        </el-card>
+                    </div>
+                </el-card>
+            </el-col>
+        </el-row>
+    </el-card>
 </template>
-
-<script>
-    export default {
-        data() {
-            return {
-                permissions: JSON.parse(localStorage.getItem('permissions')) || {},
-            }
-        },
-        methods: {
-            toLiftManage() {
-                this.$router.push('/lift_list')
-            },
-            toUserCompany() {
-                this.$router.push('/user_company_list')
-            },
-            toUserManage() {
-                this.$router.push('/user_manage')
-            },
-            toPersonal() {
-                this.$router.push('/personal')
-            },
-        },
-        mounted: function () {
-
+<style lang="less" scoped>
+.running{
+    padding: 15px;
+    .online_data{
+        .count{
+            font-size: 25px;
+        }
+        .title{
+            color: rgba(0,0,0,.5);
+            font-size: 14px;
         }
     }
-</script>
-<style lang="less">
-    .demo {
-        .el-col-6 {
+    .el-row{
+        margin-bottom: 20px;
+    }
+    .el-card{
+        border-radius: unset;
+    }
+    .Qnew{
+        font-size: 14px;
+        /deep/.el-card__body{
+            padding: 0;
         }
-        margin: 10px;
-        .grid-content {
-            border-radius: 4px;
-            overflow: hidden;
-            color: #fff;
-            background: #d3dce6;
-            .index-icon {
-                font-size: 82px;
-                color: #fff;
+        .title{
+            padding: 15px;
+            border-bottom: 1px solid rgba(0,0,0,.1);
+            background-color: #f9f9f9;
+        }
+        .content{
+            background-color: #fff;
+            display: flex;
+            padding: 10px 15px;
+            height: 135px;
+            .iconfont{
+                font-size: 50px;
+                color: rgba(102, 102, 102, 0.767);
             }
-            width: 100%;
-            height: 100%;
-            transition: all 0.2s linear;
-            &:hover {
-                cursor: pointer;
-                transform: scale(1.1, 1.1);
-                filter: contrast(130%);
+            .grid-content{
+                padding: 15px 25px;
+                display: flex;
+                justify-content: center;
+                flex-direction: column;
+                align-items: center;
+                &:hover{
+                    cursor: pointer;
+                    box-shadow: 0px 0px 1px #666;
+                    background-color: #f9f9f9;
+                }
+            }
+        }
+        .server_data{
+            height: 135px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            .count{
+                font-size: 20px;
+            }
+            .el-card{
+                width: 25%;
+                border: unset;
+            }
+            .name{
+                color: #888;
             }
         }
     }
+}
 </style>

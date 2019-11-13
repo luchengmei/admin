@@ -8,6 +8,7 @@ import './theme/index.css' //自定义element-ui主题
  * 原样式文件在 'node_modules/element-ui/lib/theme-chalk/';
  */
 import './assets/css/font-awesome.min.css'
+import './assets/css/iconfont.css'
 import './assets/css/style.css'
 import router from './router/'
 import Config from './config/'
