@@ -31,19 +31,19 @@
                 <el-card shadow="never">
                     <div class="title">快速新建</div>
                     <div class="content">
-                        <div class="grid-content">
+                        <div class="grid-content" @click="toAddCompany()">
                             <i class="iconfont icon-commpany"></i>
                             <div style="margin-top:10px;">
                                 新建单位
                             </div>
                         </div>
-                        <div class="grid-content">
+                        <div class="grid-content" @click="toAddUser()">
                             <i class="iconfont icon-user-plus"></i>
                             <div style="margin-top:10px;">
                                 新建用户
                             </div>
                         </div>
-                        <div class="grid-content">
+                        <div class="grid-content" @click="toAddLift()">
                             <i class="iconfont icon-elevator"></i>
                             <div style="margin-top:10px;">
                                 新建电梯
@@ -76,8 +76,184 @@
                 </el-card>
             </el-col>
         </el-row>
+        <div class="ranking">
+            <div class="head">
+                <div class="title">流量排行</div>
+                <el-date-picker
+                        clearable
+                        v-model="searchDate"
+                        type="daterange"
+                        align="right"
+                        unlink-panels
+                        value-format="yyyy-MM-dd"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        :picker-options="pickerOptions">
+                </el-date-picker>
+            </div>
+            <ul class="lift_list">
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+                <li>
+                    <div class="lift_detail">
+                        <div class="index">1</div>
+                        <span class="lift_name">第四人民医院一号梯</span>
+                    </div>
+                    <span class="quantity">2.3M</span>
+                </li>
+            </ul>
+        </div>
     </el-card>
 </template>
+<script>
+export default{
+    data () {
+        return {
+            searchDate:'',
+            pickerOptions: {
+                shortcuts: [
+                    {
+                        text: '最近一天',
+                        onClick(picker) {
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 0.5);
+                            picker.$emit('pick', [start, start]);
+                        }
+                    }, 
+                    {
+                        text: '最近一周',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 6);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, 
+                    {
+                        text: '最近一个月',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, 
+                    {
+                        text: '最近一年',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 360);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }
+                ]
+            },
+        }
+    },
+    methods: {
+        toAddCompany(id = null) {
+            this.$router.push({path: '/user_company_detail', query: {id: id}})
+        },
+        toAddUser(id = null) {
+            this.$router.push({path: '/user_detail', query: {id: id}})
+        },
+        toAddLift(id = null) {
+            this.$router.push({path: '/lift_detail', query: {lift_id: id}})
+        },
+    }
+}
+</script>
 <style lang="less" scoped>
 .running{
     padding: 15px;
@@ -142,6 +318,45 @@
             }
             .name{
                 color: #888;
+            }
+        }
+    }
+    .ranking{
+        border: 1px solid rgba(0,0,0,.1);
+        // height: 200px;
+        .head{
+            font-size: 14px;
+            padding: 10px 20px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid rgba(0,0,0,.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .lift_list{
+            padding: 10px;
+            display: flex;
+            list-style: none;
+            flex-wrap: wrap;
+            font-size: 14px;
+            li{
+                width: 49%;
+                margin: 0 0.5%;
+                padding: 10px 0px;
+                border-bottom: 1px solid #f2f2f2;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                .quantity{
+                    color: rgba(0, 0, 0, 0.5);
+                }
+                .lift_detail{
+                    display: flex;
+                    align-items: center;
+                    .index{
+                        padding: 0 15px;
+                    }
+                }
             }
         }
     }

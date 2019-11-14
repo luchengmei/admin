@@ -1,0 +1,1 @@
+ scp -r .\dist\ root@www.msddtsw.com:/home/wwwroot/dtsw/AdminWeb/
