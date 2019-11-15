@@ -1,5 +1,5 @@
 <template>
-    <el-card class="running">
+    <el-card class="index">
         <el-row :gutter="30" class="online_data">
             <el-col :span="6">
                 <el-card shadow="never"  style="padding-left:15px;">
@@ -255,7 +255,7 @@ export default{
 }
 </script>
 <style lang="less" scoped>
-.running{
+.index{
     padding: 15px;
     .online_data{
         .count{
@@ -323,7 +323,6 @@ export default{
     }
     .ranking{
         border: 1px solid rgba(0,0,0,.1);
-        // height: 200px;
         .head{
             font-size: 14px;
             padding: 10px 20px;
@@ -334,7 +333,7 @@ export default{
             align-items: center;
         }
         .lift_list{
-            padding: 10px;
+            padding: 20px 10px;
             display: flex;
             list-style: none;
             flex-wrap: wrap;

@@ -73,17 +73,35 @@
                         align="center"
                         label="时间"
                         width="180">
+                        <template slot="header" slot-scope="scope">
+                            时间
+                            <table-sort @ascending="onAscOrDesc('ctime',0)"
+                                        @descending="onAscOrDesc('ctime',1)"
+                                        @reset="onReset('ctime')"></table-sort>
+                        </template>
                     </el-table-column>
                     <el-table-column
                         prop="lift_id"
                         align="center"
                         label="id"
                         width="180">
+                        <template slot="header" slot-scope="scope">
+                            id
+                            <table-sort @ascending="onAscOrDesc('id',0)"
+                                        @descending="onAscOrDesc('id',1)"
+                                        @reset="onReset('id')"></table-sort>
+                        </template>
                     </el-table-column>
                     <el-table-column
                         prop="lift_name"
                         align="center"
                         label="电梯名称">
+                        <template slot="header" slot-scope="scope">
+                            电梯名称
+                            <table-sort @ascending="onAscOrDesc('name',0)"
+                                        @descending="onAscOrDesc('name',1)"
+                                        @reset="onReset('name')"></table-sort>
+                        </template>
                     </el-table-column>
                     <el-table-column
                         prop="online"
@@ -93,12 +111,24 @@
                             <span v-if="scope.row.online">上线</span>
                             <span v-else>下线</span>
                         </div>
+                        <template slot="header" slot-scope="scope">
+                            上线/下线
+                            <table-sort @ascending="onAscOrDesc('id',0)"
+                                        @descending="onAscOrDesc('id',1)"
+                                        @reset="onReset('id')"></table-sort>
+                        </template>
                     </el-table-column>
                     <el-table-column
                         prop="time"
                         align="center"
                         label="持续时间"
                         :formatter="formatSeconds">
+                        <template slot="header" slot-scope="scope">
+                            持续时间
+                            <table-sort @ascending="onAscOrDesc('time',0)"
+                                        @descending="onAscOrDesc('time',1)"
+                                        @reset="onReset('time')"></table-sort>
+                        </template>
                     </el-table-column>
                 </el-table>
                 <paginate :api="paginate_api" :params="paginate_params" @val-change="onValChange" :refresh="refresh"></paginate>
@@ -118,14 +148,15 @@
                             end-placeholder="结束日期"
                             :picker-options="pickerOptions">
                     </el-date-picker>
-                    <el-select v-model="liftTarget" placeholder="请选择" style="margin: 0 10px">
-                        <el-option
-                        v-for="item in singleList"
-                        :key="item.device_id"
-                        :label="item.name"
-                        :value="item.lift_id">
-                        </el-option>
-                    </el-select>
+                    <el-autocomplete
+                    class="inline-input"
+                    v-model="ChooseLift"
+                    :fetch-suggestions="querySearch"
+                    placeholder="请输入内容"
+                    style="margin: 0 10px"
+                    clearable
+                    @select="handleSelect"
+                    ></el-autocomplete>
                     <el-button type="primary" size="medium" @click="handleSearch(1)">查询</el-button>
                     <el-button type="primary" size="medium" @click="handleReset(1)">重置</el-button>
                     <el-button type="primary" size="medium" @click="handleRefresh(1)">刷新</el-button>
@@ -149,12 +180,15 @@
 </template>
 <script>
 import Paginate from "@/components/Paginate";
+import TableSort from '@/components/TableSort.vue';
 export default{
     components: {
-        Paginate
+        Paginate,
+        TableSort
     },
     data () {
         return {
+            status:'',
             loading:false,
             updateTime:new Date().toLocaleDateString()+`  ${new Date().toLocaleTimeString('chinese', { hour12: false })}`,
             activeName:'all',
@@ -241,7 +275,7 @@ export default{
             allof_time:{
                 color: ['#3aa1ff'],
                 title:{
-                    text:'离线时长统计表',
+                    text:'离线时长统计表(小时)',
                     left:'center',
                     textStyle:{
                         fontSize:13,
@@ -311,7 +345,7 @@ export default{
             single_time:{
                 color: ['#3aa1ff'],
                 title:{
-                    text:'离线时长统计表',
+                    text:'离线时长统计表(小时)',
                     left:'center',
                     textStyle:{
                         fontSize:13,
@@ -448,8 +482,8 @@ export default{
                     data:[]
                 }]
             },
-            searchDate:[new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-01',new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-31'],
-            searchSingle:[new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-01',new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-31'],
+            searchDate:'',
+            searchSingle:'',
             pickerOptions: {
                 shortcuts: [
                     {
@@ -491,6 +525,7 @@ export default{
             },
             currentoff:0,
             singleCount:0,
+            ChooseLift:'',
             liftTarget:'',
             offlineList: [],
             singleList: [],
@@ -510,6 +545,7 @@ export default{
       activeName(newVal){
           if(newVal==='single'){
             this.$nextTick(()=>{
+                console.log(this.liftTarget)
                 this.initChart(this.searchSingle,['single_count','single_time'],this.liftTarget)
             })
           }
@@ -519,16 +555,33 @@ export default{
         this.$echarts.init(document.getElementById('allof_count')).setOption(this.allof_count)
         this.$echarts.init(document.getElementById('allof_time')).setOption(this.allof_time)
         this.initData()
+        let start = new Date()
+        let end = new Date()
+        start.setTime(start.getTime()-3600*1000*24*15)
+        this.searchDate=[`${start.getFullYear()}`+'-'+`${start.getMonth()+1}`+'-'+`${start.getDate()}`,`${end.getFullYear()}`+'-'+`${end.getMonth()+1}`+'-'+`${end.getDate()}`]
+        this.searchSingle=[`${start.getFullYear()}`+'-'+`${start.getMonth()+1}`+'-'+`${start.getDate()}`,`${end.getFullYear()}`+'-'+`${end.getMonth()+1}`+'-'+`${end.getDate()}`]
     },
     methods:{
         initData(){
             this.$api_v3.post('/LogOnline/currentOfflineStatistic').then((res)=>{
                 if(res.code===0){
                     this.offlineList=res.data.slice(0,7)
-                    this.singleList=res.data
-                    this.liftTarget= res.data[0].lift_id
+                    // this.singleList=res.data
+                    // this.liftTarget= res.data[0].lift_id
                     this.currentoff=res.data.length
                     this.initChart(this.searchDate,['allof_count','allof_time'])
+                }
+            })
+            this.$api_v3.post('/Lifts/listPage',{list_rows:999999}).then((res)=>{
+                if(res.code===0){
+                   this.singleList=res.data.data.map((item)=>{
+                       return {
+                           value:item.name,
+                           id:item.id
+                       }
+                   })
+                   this.liftTarget=this.singleList[0].id
+                   this.ChooseLift=this.singleList[0].value
                 }
             })
         },
@@ -625,6 +678,30 @@ export default{
             }
             return result;
         },
+        onAscOrDesc(str, num) {
+            this.paginate_params.sort[str] = num;
+            this.refresh = !this.refresh;
+        },
+        onReset(str) {
+            delete this.paginate_params.sort[str];
+            this.refresh = !this.refresh;
+        },
+        querySearch(queryString, cb) {
+            var singleList = this.singleList;
+            var results = queryString ? singleList.filter(this.createFilter(queryString)) : singleList;
+            cb(results);
+        },
+        createFilter(queryString) {
+            return (lift) => {
+            return (lift.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+            };
+        },
+        handleSelect(item) {
+            this.liftTarget=item.id
+                console.log(this.liftTarget)
+                   console.log(this.ChooseLift)
+
+        }
     }
 }
 </script>
