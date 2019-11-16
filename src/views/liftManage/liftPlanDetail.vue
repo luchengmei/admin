@@ -3,7 +3,7 @@
         <el-card class="box-card">
             <div slot="header">
                 <span>{{ $route.meta.title}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="addPlan()">保存</el-button>
+                <!-- <el-button type="primary" icon="el-icon-check" style="float: right" @click="addPlan()">保存</el-button> -->
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
@@ -131,6 +131,14 @@
                             </div>
                         </div>
                     </div>
+                    <div style="text-align:center;">
+                        <el-button type="primary" style="margin:10px;" @click="getBack()">
+                            返回
+                        </el-button>
+                        <el-button type="primary" style="margin:10px 0;" @click="addPlan()">
+                            {{addNew?'提交':'保存'}}
+                        </el-button>
+                    </div>
                 </el-tab-pane>
             </el-tabs>
         </el-card>
@@ -226,6 +234,7 @@
                 this.$api_v3.post('/LiftsPlan/save', params).then((res) => {
                     if (res.code === 0) {
                         this.$message.success('操作成功')
+                        this.edit=false
                     } else {
                         this.$message.error(res.msg)
                     }
@@ -239,6 +248,9 @@
                         this.plan.lift_name = res.data.lift.name;
                     }
                 })
+            },
+            getBack(){
+                this.$router.go(-1)
             }
         },
         mounted: function () {

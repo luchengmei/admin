@@ -3,18 +3,18 @@
         <el-card class="box-card">
             <div slot="header" class="box-card-header">
                 <span class="name">{{ user.name}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateUser()">
+                <!-- <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateUser()">
                     {{addUser?'提交':'保存'}}
-                </el-button>
+                </el-button> -->
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
-                    <div class="panel-heading">
-                        <!--<span class="title"><span class="name">{{user.name}}</span></span>-->
+                    <!-- <div class="panel-heading">
+                        <span class="title"><span class="name">{{user.name}}</span></span>
                         <i :class="edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"
                            @click="toggleEdit"
                            style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>
-                    </div>
+                    </div> -->
                     <div class="panel-body">
                         <ul>
                             <li>
@@ -105,6 +105,14 @@
                             </li>
                         </ul>
                     </div>
+                    <div style="text-align:center;">
+                        <el-button type="primary" style="margin:10px;" @click="getBack()">
+                            返回
+                        </el-button>
+                        <el-button type="primary" style="margin:10px 0;" @click="addOrUpdateUser()">
+                            {{addUser?'提交':'保存'}}
+                        </el-button>
+                    </div>
                 </el-tab-pane>
                 <el-tab-pane label="电梯列表" name="second">
                     <div style="display: flex;align-items: center;margin-top: 15px;justify-content: space-between">
@@ -194,7 +202,7 @@
                 userChangeCount: 0,
                 hasSave: true,
                 userId: null,
-                edit: false,
+                edit: true,
                 addUser: false,
                 company_name: '',
                 user: {},
@@ -320,6 +328,7 @@
                     console.log('/AuUser/save', res);
                     if (res.code === 0) {
                         this.$message.success('操作成功');
+                        this.edit=false
                     } else {
                         this.$message.error(res.msg);
                     }
@@ -367,6 +376,9 @@
                     }
                 })
             },
+            getBack(){
+                this.$router.go(-1)
+            }
         },
         // beforeRouteLeave(to, from, next) {
         //     if (this.hasSave === false) {
@@ -386,11 +398,11 @@
         mounted() {
             this.getAllRoles();
             if (this.$route.query.id !== null) {
-                this.edit = false;
+                // this.edit = true;
                 this.userId = this.$route.query.id;
                 this.findUser(this.$route.query.id);
             } else {
-                this.edit = true;
+                // this.edit = true;
                 this.addUser = true;
             }
         }

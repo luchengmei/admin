@@ -3,18 +3,18 @@
         <el-card class="box-card">
             <div slot="header" class="box-card-header">
                 <span class="name">{{ company.name}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateCompany()">
+                <!-- <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateCompany()">
                     {{addNew?'提交':'保存'}}
-                </el-button>
+                </el-button> -->
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
-                    <div class="panel-heading">
-                        <!--<span class="title"><span class="name">{{company.name}}</span></span>-->
+                    <!-- <div class="panel-heading">
+                        <span class="title"><span class="name">{{company.name}}</span></span>
                         <i :class="edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"
                            @click="toggleEdit"
                            style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>
-                    </div>
+                    </div> -->
                     <div class="panel-body">
                         <ul>
                             <li>
@@ -57,6 +57,14 @@
                                 <div class="right" v-else>{{company.type|formatType}}</div>
                             </li>
                         </ul>
+                    </div>
+                    <div style="text-align:center;">
+                        <el-button type="primary" style="margin:10px;" @click="getBack()">
+                            返回
+                        </el-button>
+                        <el-button type="primary" style="margin:10px 0;" @click="addOrUpdateCompany()">
+                            {{addNew?'提交':'保存'}}
+                        </el-button>
                     </div>
                 </el-tab-pane>
                 <el-tab-pane label="电梯列表" name="second">
@@ -165,7 +173,7 @@
                         label: '维保单位',
                         value: 2
                     }],
-                edit: false,
+                edit: true,
                 addNew: false,
                 activeName: 'index',
                 company: {},
@@ -289,9 +297,9 @@
                     this.users = res.data.data
                 })
             },
-            toggleEdit() {
-                this.edit = !this.edit;
-            },
+            // toggleEdit() {
+            //     this.edit = !this.edit;
+            // },
             addOrUpdateCompany() {
                 let params = this.company;
                 if (params.name === '') return;
@@ -299,6 +307,7 @@
                     console.log(result);
                     if (result.code === 0) {
                         this.$message.success('操作成功')
+                        this.edit=false
                     }else {
                         this.$message.error(result.data)
                     }
@@ -358,6 +367,9 @@
                     })
                 }).catch(() => {
                 });
+            },
+            getBack(){
+                this.$router.go(-1)
             }
         },
         watch: {

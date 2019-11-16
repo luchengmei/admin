@@ -98,9 +98,9 @@
                         label="电梯名称">
                         <template slot="header" slot-scope="scope">
                             电梯名称
-                            <table-sort @ascending="onAscOrDesc('name',0)"
-                                        @descending="onAscOrDesc('name',1)"
-                                        @reset="onReset('name')"></table-sort>
+                            <table-sort @ascending="onAscOrDesc('lift_name',0)"
+                                        @descending="onAscOrDesc('lift_name',1)"
+                                        @reset="onReset('lift_name')"></table-sort>
                         </template>
                     </el-table-column>
                     <el-table-column
@@ -174,6 +174,74 @@
                 </div>
                 <div id="single_time" style="width: 100%;height:350px;"></div>
                 <div id="single_count"  style="width: 100%;height:350px;"></div>
+                <el-table
+                :data="singleData"
+                style="width: 100%"
+                stripe>
+                    <el-table-column
+                        prop="ctime"
+                        align="center"
+                        label="时间"
+                        width="180">
+                        <template slot="header" slot-scope="scope">
+                            时间
+                            <table-sort @ascending="onAscOrDesc('ctime',0)"
+                                        @descending="onAscOrDesc('ctime',1)"
+                                        @reset="onReset('ctime')"></table-sort>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="lift_id"
+                        align="center"
+                        label="id"
+                        width="180">
+                        <template slot="header" slot-scope="scope">
+                            id
+                            <table-sort @ascending="onAscOrDesc('id',0)"
+                                        @descending="onAscOrDesc('id',1)"
+                                        @reset="onReset('id')"></table-sort>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="lift_name"
+                        align="center"
+                        label="电梯名称">
+                        <template slot="header" slot-scope="scope">
+                            电梯名称
+                            <table-sort @ascending="onAscOrDesc('lift_name',0)"
+                                        @descending="onAscOrDesc('lift_name',1)"
+                                        @reset="onReset('lift_name')"></table-sort>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="online"
+                        align="center"
+                        label="上线/下线">
+                        <div slot-scope="scope" style="width: 100%;">
+                            <span v-if="scope.row.online">上线</span>
+                            <span v-else>下线</span>
+                        </div>
+                        <template slot="header" slot-scope="scope">
+                            上线/下线
+                            <table-sort @ascending="onAscOrDesc('id',0)"
+                                        @descending="onAscOrDesc('id',1)"
+                                        @reset="onReset('id')"></table-sort>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="time"
+                        align="center"
+                        label="持续时间"
+                        :formatter="formatSeconds">
+                        <template slot="header" slot-scope="scope">
+                            持续时间
+                            <table-sort @ascending="onAscOrDesc('time',0)"
+                                        @descending="onAscOrDesc('time',1)"
+                                        @reset="onReset('time')"></table-sort>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <paginate :api="paginate_api" :params="params" @val-change="onsingleValChange" :refresh="refresh"></paginate>
             </el-tab-pane>
         </el-tabs>
     </div>
@@ -532,21 +600,24 @@ export default{
             paginate_api: '/LogOnline/listPage',
             paginate_params: {
                 "page": 1,
-                "sort": {ctime:1,status:1,sort:1}
+                "sort": {ctime:1}
             },
             refresh: false,
             params: {
-                name: '',
+                sort: {ctime:1},
+                lift_id: '',
             },
             allData:[],
+            singleData:[],
         }
     },
     watch: {
       activeName(newVal){
           if(newVal==='single'){
             this.$nextTick(()=>{
-                console.log(this.liftTarget)
                 this.initChart(this.searchSingle,['single_count','single_time'],this.liftTarget)
+                this.params.lift_id=this.liftTarget
+                this.refresh=!this.refresh
             })
           }
       }  
@@ -555,19 +626,21 @@ export default{
         this.$echarts.init(document.getElementById('allof_count')).setOption(this.allof_count)
         this.$echarts.init(document.getElementById('allof_time')).setOption(this.allof_time)
         this.initData()
-        let start = new Date()
-        let end = new Date()
-        start.setTime(start.getTime()-3600*1000*24*15)
-        this.searchDate=[`${start.getFullYear()}`+'-'+`${start.getMonth()+1}`+'-'+`${start.getDate()}`,`${end.getFullYear()}`+'-'+`${end.getMonth()+1}`+'-'+`${end.getDate()}`]
-        this.searchSingle=[`${start.getFullYear()}`+'-'+`${start.getMonth()+1}`+'-'+`${start.getDate()}`,`${end.getFullYear()}`+'-'+`${end.getMonth()+1}`+'-'+`${end.getDate()}`]
+        this.searchDate=this.initTime()
+        this.searchSingle=this.initTime()
     },
     methods:{
+        initTime(){
+            let start = new Date()
+            let end = new Date()
+            start.setTime(start.getTime()-3600*1000*24*15)
+            return [`${start.getFullYear()}`+'-'+`${start.getMonth()+1}`+'-'+`${start.getDate()}`,`${end.getFullYear()}`+'-'+`${end.getMonth()+1}`+'-'+`${end.getDate()}`]
+        },
         initData(){
             this.$api_v3.post('/LogOnline/currentOfflineStatistic').then((res)=>{
                 if(res.code===0){
                     this.offlineList=res.data.slice(0,7)
-                    // this.singleList=res.data
-                    // this.liftTarget= res.data[0].lift_id
+                    // this.offlineList=res.data
                     this.currentoff=res.data.length
                     this.initChart(this.searchDate,['allof_count','allof_time'])
                 }
@@ -631,14 +704,17 @@ export default{
                 this.initChart(this.searchDate,['allof_count','allof_time'])
             }else{
                 this.initChart(this.searchSingle,['single_count','single_time'],this.liftTarget)
+                this.params.lift_id=this.liftTarget
+                this.refresh=!this.refresh
             }
         },
         handleReset(val){
             if(val===0){
-                this.searchDate=[new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-01',new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-31']
+                this.searchDate=this.initTime()
             }else{
-                this.searchSingle=[new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-01',new Date().getFullYear()+'-'+parseInt(new Date().getMonth()+1)+'-31']
-                this.liftTarget=this.singleList[0].lift_id
+                this.searchSingle=this.initTime()
+                this.liftTarget=this.singleList[0].id
+                this.ChooseLift=this.singleList[0].value
             }
         },
         handleRefresh(val){
@@ -655,6 +731,9 @@ export default{
         },
         onValChange(data) {
             this.allData = data;
+        },
+        onsingleValChange(data) {
+            this.singleData = data;
         },
         formatSeconds(value) {
             if(!value.time) return '--'
@@ -698,10 +777,9 @@ export default{
         },
         handleSelect(item) {
             this.liftTarget=item.id
-                console.log(this.liftTarget)
-                   console.log(this.ChooseLift)
+            this.params.lift_id=item.id
+        },
 
-        }
     }
 }
 </script>

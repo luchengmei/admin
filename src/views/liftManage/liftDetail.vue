@@ -3,17 +3,17 @@
         <el-card class="box-card">
             <div slot="header" class="box-card-header">
                 <span class="name">{{ lift.name||$route.meta.title}}</span>
-                <el-button v-show="activeName==='index'||activeName==='second'" type="primary" icon="el-icon-check"
+                <!-- <el-button v-show="activeName==='index'||activeName==='second'" type="primary" icon="el-icon-check"
                            style="float: right" @click="addOrUpdateLift()">{{addNew?'提交':'保存'}}
-                </el-button>
+                </el-button> -->
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
-                    <div class="panel-heading">
+                    <!-- <div class="panel-heading">
                         <i :class="edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"
                            @click="toggleEdit"
                            style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>
-                    </div>
+                    </div> -->
                     <div class="panel-body">
                         <ul>
                             <li>
@@ -220,6 +220,14 @@
                                 </div>
                             </el-collapse-item>
                         </el-collapse>
+                    </div>
+                    <div style="text-align:center;">
+                        <el-button type="primary" style="margin:10px;" @click="getBack()">
+                            返回
+                        </el-button>
+                        <el-button type="primary" style="margin:10px 0;" @click="addOrUpdateLift()">
+                            {{addNew?'提交':'保存'}}
+                        </el-button>
                     </div>
                 </el-tab-pane>
                 <el-tab-pane label="选择功能" name="second">
@@ -607,11 +615,11 @@
                     }
                 })
             },
-            toggleEdit() {
-                this.edit = !this.edit;
-                if (this.edit === false) {
-                }
-            },
+            // toggleEdit() {
+            //     this.edit = !this.edit;
+            //     if (this.edit === false) {
+            //     }
+            // },
             changeFloor(val) {
                 //console.log(val);
                 this.collapseNames = ["1"];
@@ -655,10 +663,14 @@
                     console.log(res);
                     if (res.code === 0) {
                         this.$message.success(res.msg);
+                        this.edit=false
                     } else {
                         this.$message.error(res.data);
                     }
                 })
+            },
+            getBack(){
+                this.$router.go(-1)
             }
             //_____________________baseInfo_______________end
         },
@@ -679,10 +691,10 @@
         // },
         mounted: function () {
             if (this.$route.query.lift_id !== null) {
-                this.edit = false;
+                // this.edit = true;
                 this.findLiftById(this.$route.query.lift_id);
             } else {
-                this.edit = true;
+                // this.edit = true;
             }
         }
     }
