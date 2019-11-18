@@ -679,22 +679,23 @@ export default{
             })
             this.$api_v3.post('LogOnline/offlineTimeStatistic',{start_date:date[0],end_date:date[1],lift_id:id}).then((res)=>{
                 if(res.code===0){
+                    console.log(res)
                     let xArr=[]
                     let yArr=[]
-                    let addUp={time:0};
+                    let addUp=0;
                     res.data.forEach((i)=>{
                         xArr.push(i.date)
                         yArr.push(i.number)
-                        addUp.time+=parseInt(i.number)
+                        addUp+=+i.number
                     })
                      if(id){
                         this.single_time.xAxis[0].data=xArr
                         this.single_time.series[0].data=yArr
                         this.$echarts.init(document.getElementById(dom[1])).setOption(this.single_time)
-                        this.singleAddup=this.formatSeconds(addUp)
+                        this.singleAddup=addUp+'小时'
                     }else{
                         this.$echarts.init(document.getElementById(dom[1])).setOption({xAxis:{data:xArr},series:[{data:yArr}]})
-                        this.addUp=this.formatSeconds(addUp)
+                        this.addUp=addUp+'小时'
                     }
                 }
             })
