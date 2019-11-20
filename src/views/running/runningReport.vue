@@ -290,7 +290,9 @@ export default{
     mounted () {
     },
     methods: {
-      
+      ss(s){
+          console.log(s)
+      }
     }
 }
 </script>

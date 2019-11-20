@@ -41,6 +41,7 @@
                         <div id="allof_count" style="width: 70%;height:350px;"></div>
                         <el-table
                         :data="offlineList"
+                        height="350"
                         stripe>
                             <el-table-column
                                 prop="lift_id"
@@ -637,13 +638,9 @@ export default{
             return [`${start.getFullYear()}`+'-'+`${start.getMonth()+1}`+'-'+`${start.getDate()}`,`${end.getFullYear()}`+'-'+`${end.getMonth()+1}`+'-'+`${end.getDate()}`]
         },
         initData(){
-            this.$api_v3.post('/LogOnline/currentOfflineStatistic').then((res)=>{
-                if(res.code===0){
-                    this.offlineList=res.data.slice(0,7)
-                    // this.offlineList=res.data
-                    this.currentoff=res.data.length
-                    this.initChart(this.searchDate,['allof_count','allof_time'])
-                }
+            this.initOfflineList()
+            this.$echarts.init(document.getElementById('allof_count')).on('click',(param)=>{
+                this.initOfflineList(param.name)
             })
             this.$api_v3.post('/Lifts/listPage',{list_rows:999999}).then((res)=>{
                 if(res.code===0){
@@ -655,6 +652,18 @@ export default{
                    })
                    this.liftTarget=this.singleList[0].id
                    this.ChooseLift=this.singleList[0].value
+                }
+            })
+        },
+        initOfflineList(date){
+            this.$api_v3.post('/LogOnline/currentOfflineStatistic',{date:date}).then((res)=>{
+                if(res.code===0){
+                    // this.offlineList=res.data.slice(0,7)
+                    this.offlineList=res.data
+                    if(!date){
+                        this.currentoff=res.data.length
+                        this.initChart(this.searchDate,['allof_count','allof_time'])
+                    } 
                 }
             })
         },
@@ -679,7 +688,6 @@ export default{
             })
             this.$api_v3.post('LogOnline/offlineTimeStatistic',{start_date:date[0],end_date:date[1],lift_id:id}).then((res)=>{
                 if(res.code===0){
-                    console.log(res)
                     let xArr=[]
                     let yArr=[]
                     let addUp=0;
@@ -703,6 +711,9 @@ export default{
         handleSearch(val){
             if(val===0){
                 this.initChart(this.searchDate,['allof_count','allof_time'])
+                let date=new Date()
+                let today=`${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`
+                this.initOfflineList(today)
             }else{
                 this.initChart(this.searchSingle,['single_count','single_time'],this.liftTarget)
                 this.params.lift_id=this.liftTarget
