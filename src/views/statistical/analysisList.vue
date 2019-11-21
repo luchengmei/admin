@@ -64,7 +64,7 @@
                         </el-table>
                     </div>
                 </div>
-                <div id="allof_time"  style="width: 100%;height:350px;"></div>
+                <div id="allof_time"  style="width: 100%;height:400px;"></div>
                 <el-table
                 :data="allData"
                 style="width: 100%"
@@ -88,9 +88,9 @@
                         width="180">
                         <template slot="header" slot-scope="scope">
                             id
-                            <table-sort @ascending="onAscOrDesc('id',0)"
-                                        @descending="onAscOrDesc('id',1)"
-                                        @reset="onReset('id')"></table-sort>
+                            <table-sort @ascending="onAscOrDesc('lift_id',0)"
+                                        @descending="onAscOrDesc('lift_id',1)"
+                                        @reset="onReset('lift_id')"></table-sort>
                         </template>
                     </el-table-column>
                     <el-table-column
@@ -114,9 +114,9 @@
                         </div>
                         <template slot="header" slot-scope="scope">
                             上线/下线
-                            <table-sort @ascending="onAscOrDesc('id',0)"
-                                        @descending="onAscOrDesc('id',1)"
-                                        @reset="onReset('id')"></table-sort>
+                            <table-sort @ascending="onAscOrDesc('online',0)"
+                                        @descending="onAscOrDesc('online',1)"
+                                        @reset="onReset('online')"></table-sort>
                         </template>
                     </el-table-column>
                     <el-table-column
@@ -149,15 +149,14 @@
                             end-placeholder="结束日期"
                             :picker-options="pickerOptions">
                     </el-date-picker>
-                    <el-autocomplete
-                    class="inline-input"
-                    v-model="ChooseLift"
-                    :fetch-suggestions="querySearch"
-                    placeholder="请输入内容"
-                    style="margin: 0 10px"
-                    clearable
-                    @select="handleSelect"
-                    ></el-autocomplete>
+                    <el-select v-model="ChooseLift" filterable placeholder="请选择" style="margin: 0 10px" clearable @change="handleSelect">
+                        <el-option
+                        v-for="item in singleList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                        </el-option>
+                    </el-select>
                     <el-button type="primary" size="medium" @click="handleSearch(1)">查询</el-button>
                     <el-button type="primary" size="medium" @click="handleReset(1)">重置</el-button>
                     <el-button type="primary" size="medium" @click="handleRefresh(1)">刷新</el-button>
@@ -174,7 +173,7 @@
                     </div>
                 </div>
                 <div id="single_time" style="width: 100%;height:350px;"></div>
-                <div id="single_count"  style="width: 100%;height:350px;"></div>
+                <div id="single_count"  style="width: 100%;height:400px;"></div>
                 <el-table
                 :data="singleData"
                 style="width: 100%"
@@ -224,9 +223,9 @@
                         </div>
                         <template slot="header" slot-scope="scope">
                             上线/下线
-                            <table-sort @ascending="onAscOrDesc('id',0)"
-                                        @descending="onAscOrDesc('id',1)"
-                                        @reset="onReset('id')"></table-sort>
+                            <table-sort @ascending="onAscOrDesc('online',0)"
+                                        @descending="onAscOrDesc('online',1)"
+                                        @reset="onReset('online')"></table-sort>
                         </template>
                     </el-table-column>
                     <el-table-column
@@ -262,7 +261,7 @@ export default{
             updateTime:new Date().toLocaleDateString()+`  ${new Date().toLocaleTimeString('chinese', { hour12: false })}`,
             activeName:'all',
             date:'',
-            addUp:'',
+            addUp:0,
             singleAddup:'',
             allof_count:{
                 tooltip: {
@@ -385,9 +384,11 @@ export default{
                         }
                     },
                     axisLabel:{
+                        rotate:-45,
                         interval:0,
-                        color:'#666'
-                    }
+                        fontSize:10,
+                        color:'#666',
+                    },
                 }],
                 yAxis : [{
                     type : 'value',
@@ -629,6 +630,10 @@ export default{
         this.initData()
         this.searchDate=this.initTime()
         this.searchSingle=this.initTime()
+        // window.onresize=()=>{
+        //     console.log(123)
+        //     this.$echarts.init(document.getElementById('allof_count')).setOption(this.allof_count)
+        // }
     },
     methods:{
         initTime(){
@@ -644,14 +649,9 @@ export default{
             })
             this.$api_v3.post('/Lifts/listPage',{list_rows:999999}).then((res)=>{
                 if(res.code===0){
-                   this.singleList=res.data.data.map((item)=>{
-                       return {
-                           value:item.name,
-                           id:item.id
-                       }
-                   })
+                    this.singleList=res.data.data
                    this.liftTarget=this.singleList[0].id
-                   this.ChooseLift=this.singleList[0].value
+                   this.ChooseLift=this.singleList[0].name
                 }
             })
         },
@@ -679,7 +679,7 @@ export default{
                     if(id){
                         this.single_count.xAxis[0].data=xArr
                         this.single_count.series[0].data=yArr
-                        this.singleCount=res.data.length
+                        this.singleCount=this.sum(yArr)
                         this.$echarts.init(document.getElementById(dom[0])).setOption(this.single_count)
                     }else{
                         this.$echarts.init(document.getElementById(dom[0])).setOption({xAxis:{data:xArr},series:[{data:yArr}]})
@@ -688,22 +688,28 @@ export default{
             })
             this.$api_v3.post('LogOnline/offlineTimeStatistic',{start_date:date[0],end_date:date[1],lift_id:id}).then((res)=>{
                 if(res.code===0){
+                    console.log(res)
                     let xArr=[]
                     let yArr=[]
-                    let addUp=0;
                     res.data.forEach((i)=>{
                         xArr.push(i.date)
                         yArr.push(i.number)
-                        addUp+=+i.number
                     })
+                    function toDecimal(x) {
+                        var val = Number(x)
+                        if(!isNaN(parseFloat(val))) {
+                            val = val.toFixed(1);
+                        }
+                        return val;
+                    }
                      if(id){
                         this.single_time.xAxis[0].data=xArr
                         this.single_time.series[0].data=yArr
                         this.$echarts.init(document.getElementById(dom[1])).setOption(this.single_time)
-                        this.singleAddup=addUp+'小时'
+                        this.singleAddup=toDecimal(this.sum(yArr))+'小时'
                     }else{
                         this.$echarts.init(document.getElementById(dom[1])).setOption({xAxis:{data:xArr},series:[{data:yArr}]})
-                        this.addUp=addUp+'小时'
+                        this.addUp=toDecimal(this.sum(yArr))+'小时'
                     }
                 }
             })
@@ -726,7 +732,7 @@ export default{
             }else{
                 this.searchSingle=this.initTime()
                 this.liftTarget=this.singleList[0].id
-                this.ChooseLift=this.singleList[0].value
+                this.ChooseLift=this.singleList[0].name
             }
         },
         handleRefresh(val){
@@ -740,6 +746,9 @@ export default{
             setTimeout(() => {
                 this.loading=false
             }, 1000);
+        },
+        sum(arr) {
+            return eval(arr.join("+"));
         },
         onValChange(data) {
             this.allData = data;
@@ -777,19 +786,9 @@ export default{
             delete this.paginate_params.sort[str];
             this.refresh = !this.refresh;
         },
-        querySearch(queryString, cb) {
-            var singleList = this.singleList;
-            var results = queryString ? singleList.filter(this.createFilter(queryString)) : singleList;
-            cb(results);
-        },
-        createFilter(queryString) {
-            return (lift) => {
-            return (lift.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
-            };
-        },
         handleSelect(item) {
-            this.liftTarget=item.id
-            this.params.lift_id=item.id
+            this.liftTarget=item
+            this.params.lift_id=item
         },
 
     }
@@ -844,6 +843,7 @@ export default{
     #allof_time,#single_count,#single_time{
         background-color: #fff;
         margin: 10px 0;
+        padding-bottom: 10px;
     }
 }
 </style>

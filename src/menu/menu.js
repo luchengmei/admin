@@ -111,9 +111,9 @@ analysis.list = {
     name: '在/离线统计',
     path: '/analysis_list',
 };
-analysis.report = {
-    name: '运行报告',
-    path: '/running_report',
+analysis.alarmStatistical = {
+    name: '报警统计',
+    path: '/alarmStatistical',
 };
 
 

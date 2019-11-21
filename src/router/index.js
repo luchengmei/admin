@@ -130,13 +130,13 @@ let RouteList = [{
                 component: resolve => require(['@/views/statistical/analysisList.vue'], resolve),
             },
             {
-                path: '/running_report',
-                name: 'runningReport',
+                path: '/alarmStatistical',
+                name: 'alarmStatistical',
                 meta: {
-                    title: '运行报告',
+                    title: '报警统计',
                     keepAlive: true
                 },
-                component: resolve => require(['@/views/running/runningReport.vue'], resolve),
+                component: resolve => require(['@/views/statistical/alarmStatistical.vue'], resolve),
             },
             {
                 path: '/alarm_list',
