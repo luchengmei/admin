@@ -19,7 +19,8 @@
                 multiple
                 collapse-tags
                 style="margin-left: 20px;"
-                placeholder="请选择">
+                placeholder="请选择"
+                @change="handleSelect">
                 <el-option
                 v-for="item in liftOptions"
                 :key="item.id"
@@ -32,7 +33,8 @@
                 multiple
                 collapse-tags
                 style="margin: 0 20px;"
-                placeholder="请选择">
+                placeholder="请选择"
+                @change="handleSelect">
                 <el-option
                 v-for="item in typeOptions"
                 :key="item.id"
@@ -309,7 +311,7 @@ export default{
                 },
                 series : [
                     {
-                        name: '访问来源',
+                        name: '报警类型',
                         type: 'pie',
                         radius : '55%',
                         center: ['50%', '50%'],
@@ -329,9 +331,9 @@ export default{
                     }
                 ]
             },
-            chooseLift:'',
-            chooseType:'',
-            chooseStatus:'',
+            chooseLift:[],
+            chooseType:[],
+            chooseStatus:[0],
             liftOptions:[],
             typeOptions:[],
             statusOptions:[
@@ -379,16 +381,28 @@ export default{
     },
     methods: {
         init(){
+            this.faultSearch=this.initTime()
             this.$api_v3.post('/Lifts/listPage',{list_rows:999999}).then((res)=>{
                 if(res.code===0){
                     this.liftOptions=res.data.data
+                    this.chooseLift=[res.data.data[0].id]
                 }
             })
             this.$api_v3.post('/LiftsFaultType/listPage',{status:[1]}).then((res)=>{
                 if(res.code===0){
                     this.typeOptions=res.data.data
+                    this.chooseType=[res.data.data[0].fault_code]
                 }
             })
+        },
+        initTime(){
+            let start = new Date()
+            let end = new Date()
+            start.setTime(start.getTime()-3600*1000*24*15)
+            return [`${start.getFullYear()}`+'-'+`${start.getMonth()+1}`+'-'+`${start.getDate()}`,`${end.getFullYear()}`+'-'+`${end.getMonth()+1}`+'-'+`${end.getDate()}`]
+        },
+        handleSelect(val){
+            console.log(val)
         },
         previewImage(url) {
             //console.log(url);

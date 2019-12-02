@@ -780,6 +780,7 @@ export default{
         },
         onAscOrDesc(str, num) {
             this.paginate_params.sort[str] = num;
+            console.log(this.paginate_params.sort)
             this.refresh = !this.refresh;
         },
         onReset(str) {
