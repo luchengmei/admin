@@ -1,11 +1,13 @@
-FROM node:latest as build-stage
+FROM node
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY ./ .
-RUN npm run build
 
-FROM nginx as production-stage
+COPY package*.json ./
+RUN npm install -g cnpm --registry=https://registry.npm.taobao.org
+RUN cnpm install
+COPY ./ /app
+RUN npm run build:prod
+
+FROM nginx
 RUN mkdir /app
-COPY --from=build-stage /app/dist /app
+COPY --from=0 /app/dist /app
 COPY nginx.conf /etc/nginx/nginx.conf
