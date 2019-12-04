@@ -12,7 +12,7 @@ docker build . -t msd/admin:$image_version;
 # 查看镜像列表
 docker images;
 # 基于msd/admin 镜像 构建一个容器 msd_admin
-docker run -p 9527:80 -d --name msd_admin msd/admin:$image_version;
+docker run -p 49003:443 -d --name msd_admin msd/admin:$image_version;
 # 查看日志
 docker logs msd_admin;
 #删除build过程中产生的镜像    #docker image prune -a -f
