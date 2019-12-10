@@ -15,9 +15,10 @@ import Config from './config/'
 import App from './App.vue'
 import req from './utils/axios'
 import moment from 'moment'
-import { Message } from 'element-ui'
+import {Message} from 'element-ui'
 import api_v3 from './api/api_v3'
 import echarts from 'echarts'
+import VueSocketIO from 'vue-socket.io'
 
 Vue.prototype.$req = req
 Vue.prototype.$Config = Config
@@ -26,14 +27,17 @@ Vue.prototype.$api_v3 = api_v3
 Vue.prototype.$echarts = echarts
 
 //socket.io
-let socket = io('https://www.msddtsw.com:8010/user');
-Vue.prototype.$socket = socket;
-socket.on("connect", function() {
-    console.log("connected");
-});
-socket.on("disconnect", function() {
-    console.log("disconnected");
-});
+Vue.use(new VueSocketIO({
+    debug: false,
+    connection: 'https://www.msddtsw.com:8010/user',
+    vuex: {
+        store,
+        actionPrefix: 'SOCKET_', //为vuex设置的两个前缀
+        mutationPrefix: 'SOCKET_'
+    },
+    options: {} //Optional options
+}));
+
 
 Vue.use(ElementUI, { size: 'small' })
 

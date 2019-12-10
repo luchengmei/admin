@@ -101,51 +101,6 @@
             this.autoLogin();
         },
         methods: {
-            login_old() {
-                let APP = this;
-                APP.loginLoading = true;
-                APP.$req.post('/authentication/signin', {
-                    'password': APP.password,
-                    'username': APP.username
-                }).then((result) => {
-                    localStorage.setItem(APP.$Config.tokenKey, result);
-                    localStorage.setItem('tokenSetTime', new Date());
-                    this.$req.post('/authentication/me').then((result) => {//find current user
-                        console.log(result);
-                        localStorage.setItem('MSDManagement_me', JSON.stringify(result));
-                        APP.$req.post('/privilege/list/user_id', result.id).then((result) => {//user's permissions
-                            //console.log(result);
-                            let permissions = {};
-                            result.forEach((item) => {
-                                permissions[item.object + '_' + item.access] = item.access_value;
-                            });
-                            //console.log(permissions)
-                            localStorage.setItem('permissions', JSON.stringify(permissions));
-                            //console.log(JSON.parse(sessionStorage.getItem('permissions')))
-                        }).then(() => {
-                            APP.$notify({
-                                title: '登录成功',
-                                message: '欢迎使用电梯侍卫设备管理平台！',
-                                type: 'success'
-                            });
-                            APP.$router.push({path: '/'})
-                        }).finally(() => {
-                            APP.loginLoading = false;
-                        });
-                    });
-                    if (this.Remember === true) {
-                        localStorage.setItem('MSDManagement_username', APP.username);
-                        localStorage.setItem('MSDManagement_password', APP.password);
-                    } else {
-                        localStorage.removeItem('MSDManagement_username');
-                        localStorage.removeItem('MSDManagement_password')
-                    }
-                }).catch((error) => {
-                    //console.log(error)
-                }).finally(() => {
-                    this.loginLoading = false;
-                })
-            },
             login() {
                 this.loginLoading = true;
                 this.$api_v3.post('/Identify/login', {
@@ -168,6 +123,9 @@
                         }
                         sessionStorage.setItem('user', JSON.stringify(result.data.user));//保存当前用户信息
                         localStorage.setItem(this.$Config.tokenKey, result.data.token);//保存token
+                        this.$socket.emit("login", {token: result.data.token}, (data) => {
+                            console.log('socket.io--login', data);
+                        });
                         this.$router.push({path: '/home'});//跳转到首页
                     }
                 }).finally(() => {
@@ -183,6 +141,9 @@
                         console.log(result);
                         if(result.code===0){
                             sessionStorage.setItem('user', JSON.stringify(result.data.user));//保存当前用户信息
+                            this.$socket.emit("login", {token: token}, (data) => {
+                                console.log('socket.io--login', data);
+                            });
                             this.$router.push({path: '/home'});//跳转到首页
                         }
                     }).finally(()=>{
