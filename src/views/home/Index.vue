@@ -15,7 +15,7 @@
             </el-col>
             <el-col :span="6">
                 <el-card shadow="never" style="padding-left:15px;">
-                    <div class="count">1/23</div>
+                    <div class="count">{{fault}}</div>
                     <div class="title"><span style="color:#52c1f5;">●</span> 未处理报警数量</div>
                 </el-card>
             </el-col>
@@ -109,7 +109,7 @@
     export default {
         data() {
             return {
-                searchDate: '',
+                searchDate: [new Date(new Date().getTime() - 3600 * 1000 * 24 * 30), new Date()],
                 pickerOptions: {
                     shortcuts: [
                         {
@@ -155,13 +155,14 @@
                     device_online: ''
                 },
                 expired: 0,
+                fault:'',
                 server_info: {
                     totalMemory: '',
                     freeMemory: '',
                     cpuUsageRate: ''
                 },
                 rankList: [],
-                rankLoading:false,
+                rankLoading: false,
             }
         },
         sockets: {
@@ -181,6 +182,7 @@
         mounted() {
             this.emitSocketEvent(true);
             this.getExpired();
+            this.getFault();
             this.getRank();
         },
         beforeDestroy() {
@@ -189,17 +191,17 @@
         methods: {
             getRank() {
                 this.rankLoading = true;
-                let param ={};
-                if(this.searchDate){
+                let param = {};
+                if (this.searchDate) {
                     param.start_date = this.searchDate[0];
                     param.end_date = this.searchDate[1];
                 }
-                this.$api_v3.post('/LogSocketData/rank',param).then((res) => {
+                this.$api_v3.post('/LogSocketData/rank', param).then((res) => {
                     console.log('/LogSocketData/rank', res);
                     if (res.code === 0) {
                         this.rankList = res.data;
                     }
-                }).finally(()=>{
+                }).finally(() => {
                     this.rankLoading = false;
                 })
             },
@@ -215,7 +217,21 @@
                 this.$api_v3.post('/LiftsPlan/checkPlans', {type: 5}).then((res) => {
                     console.log(res);
                     if (res.code === 0) {
-                        this.expired = res.data.expired.length;
+                        if(res.data.expired){
+                            this.expired = res.data.expired.length;
+                        }
+                    }
+                })
+            },
+            getFault() {
+                this.$api_v3.post('/LiftsFault/getFaultCount', {
+                    status: 0,
+                    start_date: this.$moment().format("YYYY-MM-DD"),
+                    end_date: this.$moment().format("YYYY-MM-DD"),
+                }).then((res)=>{
+                    console.log('/LiftsFault/getFaultCount',res);
+                    if(res.code===0){
+                        this.fault = res.data[0].count
                     }
                 })
             },
