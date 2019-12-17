@@ -2,8 +2,8 @@
     <div class="user-list">
         <ToolBar>
             <el-button type="primary" icon="el-icon-plus" size="small" @click="addUser()">添加</el-button>
-            <!--<el-button type="primary" @click="multipleHandle">批量禁用/允许</el-button>-->
-            <!--<el-button type="danger" icon="el-icon-delete" @click="multipleDelete">批量删除</el-button>-->
+            <el-button type="primary" @click="multipleHandle" v-show="selectData.length">批量禁用/允许</el-button>
+            <el-button type="danger" @click="multipleDelete" v-show="selectData.length">批量删除</el-button>
             <div style="float: right">
                 <el-select style="width: 100px" v-model="params.type" placeholder="用户类型" size="small" clearable
                            value="">
@@ -178,6 +178,7 @@
         filters: {},
         methods: {
             onValChange(data) {
+                this.selectData = [];
                 data.forEach((i) => {
                     if (i.roles === null) {
                         i.roles = [];
@@ -192,32 +193,32 @@
                 this.selectData = selection;
             },
             multipleDelete() {
-                if (this.selectData.length === 0) {
-                    this.$message({type: 'info', message: '请先选中需要删除的用户'}
-                    );
-                    return false;
-                } else {
-                    let arr = [];
-                    this.selectData.forEach((item) => {
-                        arr.push(item.cellphone)
-                    });
-                    this.deleteUser(arr);
-                }
+                let ids = [];
+                this.selectData.forEach((i) => {
+                    ids.push(i.id)
+                });
+                this.$api_v3.post('/AuUser/removeList', {ids: ids}).then((res) => {
+                    if (res.code === 0) {
+                        this.$message.success(res.msg)
+                        this.refresh = !this.refresh
+                    } else {
+                        this.$message.error(res.msg)
+                    }
+                })
             },
             multipleHandle() {
-                if (this.selectData.length === 0) {
-                    this.$message({type: 'info', message: '请先选中需要处理的用户'}
-                    );
-                    return false;
-                } else {
-                    this.usersData.forEach((item) => {//Find the item in userData and also in selectData, then change it's status
-                        if (this.selectData.some((item1) => {
-                            return item === item1;
-                        })) {
-                            this.toggleEnabled(item);
-                        }
-                    });
-                }
+                let param = {list: [...this.selectData]};
+                param.list.forEach((i) => {
+                    i.status = i.status ? 0 : 1
+                });
+                this.$api_v3.post('/AuUser/saveList', param).then((res) => {
+                    console.log('/AuUser/saveList', res);
+                    if (res.code === 0) {
+                        this.$message.success(res.msg)
+                    } else {
+                        this.$message.error(res.msg)
+                    }
+                });
             },
             deleteUser(id) {
                 this.$confirm("此操作将删除用户，是否继续？", "提示", {
@@ -229,6 +230,7 @@
                         console.log('/AuUser/remove', res);
                         if (res.code === 0) {
                             this.$message.success('操作成功');
+                            this.refresh = !this.refresh
                         } else {
                             this.$message.error('操作失败');
                         }

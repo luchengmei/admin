@@ -122,7 +122,6 @@
         </el-tree>
     </div>
 </template>
-
 <script>
     import ToolBar from '@/components/ToolBar.vue';
     import HelpHint from '@/components/HelpHint.vue';

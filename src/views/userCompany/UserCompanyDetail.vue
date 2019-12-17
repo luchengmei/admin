@@ -62,6 +62,9 @@
                         <el-button type="primary" style="margin:10px;" @click="getBack()">
                             返回
                         </el-button>
+                        <el-button type="primary" style="margin:10px;" @click="edit= true">
+                            编辑
+                        </el-button>
                         <el-button type="primary" style="margin:10px 0;" @click="addOrUpdateCompany()">
                             {{addNew?'提交':'保存'}}
                         </el-button>
@@ -177,7 +180,7 @@
                 addNew: false,
                 activeName: 'index',
                 company: {},
-                users:[],
+                users: [],
                 //--------------transfer--------------
                 placeholder: '',
                 loading: false,
@@ -291,9 +294,9 @@
                     }
                 });
             },
-            findUserByCompanyId(id){
-                this.$api_v3.post('/AuUser/listPage',{"company_id":id,"list_rows":999}).then((res)=>{
-                    console.log('/AuUser/listPage',res);
+            findUserByCompanyId(id) {
+                this.$api_v3.post('/AuUser/listPage', {"company_id": id, "list_rows": 999}).then((res) => {
+                    console.log('/AuUser/listPage', res);
                     this.users = res.data.data
                 })
             },
@@ -307,8 +310,8 @@
                     console.log(result);
                     if (result.code === 0) {
                         this.$message.success('操作成功')
-                        this.edit=false
-                    }else {
+                        this.edit = false
+                    } else {
                         this.$message.error(result.data)
                     }
                 })
@@ -339,7 +342,7 @@
                 }).catch(() => {
                 });
             },
-            checkUser(row){
+            checkUser(row) {
                 this.$router.push({path: '/user_detail', query: {id: row.id}})
             },
             removeLifts(row) {
@@ -368,7 +371,7 @@
                 }).catch(() => {
                 });
             },
-            getBack(){
+            getBack() {
                 this.$router.go(-1)
             }
         },

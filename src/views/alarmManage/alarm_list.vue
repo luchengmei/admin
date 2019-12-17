@@ -1,6 +1,12 @@
 <template>
     <div class="user-list">
         <ToolBar>
+            <el-select style="width: 100px;margin-right: 4px" v-model="multipleStatus" v-show="selectData.length">
+                <el-option v-for="item in statusOption" :key="item.value"
+                           :label="item.label"
+                           :value="item.value"></el-option>
+            </el-select>
+            <el-button type="primary" @click="multipleHandle" v-show="selectData.length">批量处理</el-button>
             <div style="float: right;">
                 <el-date-picker
                         clearable
@@ -98,9 +104,14 @@
                     prop="status"
                     label="报警处理状态">
                 <template slot-scope="scope">
-                    <el-tag v-show="scope.row.status=='0'" type="danger" size="small">未处理</el-tag>
-                    <el-tag v-show="scope.row.status=='2'" type="success" size="small">已处理</el-tag>
-                    <el-tag v-show="scope.row.status=='3'" type="default" size="small">误报</el-tag>
+                    <!--<el-tag v-show="scope.row.status=='0'" type="danger" size="small">未处理</el-tag>-->
+                    <!--<el-tag v-show="scope.row.status=='2'" type="success" size="small">已处理</el-tag>-->
+                    <!--<el-tag v-show="scope.row.status=='3'" type="default" size="small">误报</el-tag>-->
+                    <el-select v-model="scope.row.status" @change="statusChange($event,scope.row)">
+                        <el-option v-for="item in statusOption" :key="item.value"
+                                   :label="item.label"
+                                   :value="item.value"></el-option>
+                    </el-select>
                 </template>
             </el-table-column>
             <el-table-column
@@ -130,7 +141,6 @@
                 <template slot-scope="scope">
                     <el-button @click="editUser(scope.row.id)" type="primary" icon="el-icon-edit" size="small"
                                circle></el-button>
-                    <!--<el-button @click="" type="danger" icon="el-icon-delete" circle size="small"></el-button>-->
                 </template>
             </el-table-column>
         </el-table>
@@ -154,7 +164,7 @@
                     "size": 10,
                     "sort": {}
                 },
-                srcList:[],
+                srcList: [],
                 params: {
                     name: '',
                     status: '',
@@ -253,6 +263,7 @@
                         label: '误报'
                     }
                 ],
+                multipleStatus: 2,
                 usersData: [],
                 selectData: [],
                 pickerValue: [],
@@ -322,8 +333,19 @@
                 //console.log(url);
                 this.srcList.splice(0, 1, url);
             },
+            statusChange(val, row) {
+                //console.log(val,row);
+                this.$api_v3.post('/LiftsFault/save', row).then((res) => {
+                    if (res.code === 0) {
+                        this.$message.success(res.msg);
+                    } else {
+                        this.$message.error(res.msg)
+                    }
+                })
+            },
             onValChange(data) {
                 this.usersData = data;
+                this.selectData = [];
             },
             onAscOrDesc(str, num) {
                 console.log(str, num);
@@ -351,7 +373,7 @@
             tableAction() {
                 return this.$createElement('HelpHint', {
                     props: {
-                        content: ' 编辑用户 / 禁用或允许登录 / 删除用户'
+                        content: ' 编辑'
                     }
                 }, '操作');
             },
@@ -362,7 +384,18 @@
                 console.log(selection);
                 this.selectData = selection;
             },
-
+            multipleHandle() {
+                this.selectData.forEach((i) => {
+                    i.status = this.multipleStatus;
+                });
+                this.$api_v3.post('/LiftsFault/saveList', {list: this.selectData}).then((res) => {
+                    if (res.code === 0) {
+                        this.$message.success(res.msg);
+                    } else {
+                        this.$message.error(res.msg)
+                    }
+                })
+            }
         },
         components: {
             ToolBar, HelpHint, Paginate, TableSort

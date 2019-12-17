@@ -61,7 +61,7 @@
                             <div class="name"><span style="color:#81d3f8;">●</span> 网络（出网/入网）</div>
                         </el-card>
                         <el-card shadow="never">
-                            <div class="count">{{server_info.cpuUsageRate}}</div>
+                            <div class="count">{{server_info.cpuUsageRate*100}}%</div>
                             <div class="name"><span style="color:#80ffff;">●</span> CPU使用率（%）</div>
                         </el-card>
                         <el-card shadow="never">

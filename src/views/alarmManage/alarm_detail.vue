@@ -3,7 +3,6 @@
         <el-card class="box-card">
             <div slot="header">
                 <span>{{ $route.meta.title}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="save()">提交</el-button>
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
@@ -61,6 +60,14 @@
                         </ul>
                     </div>
                 </el-tab-pane>
+                <div style="text-align:center;">
+                    <el-button type="primary" style="margin:10px;" @click="$router.go(-1)">
+                        返回
+                    </el-button>
+                    <el-button type="primary" style="margin:10px 0;" @click="save()">
+                        {{'保存'}}
+                    </el-button>
+                </div>
             </el-tabs>
         </el-card>
     </div>

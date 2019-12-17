@@ -3,18 +3,15 @@
         <el-card class="box-card">
             <div slot="header" class="box-card-header">
                 <span class="name">{{ device.name}}</span>
-                <el-button type="primary" icon="el-icon-check" style="float: right" @click="addOrUpdateDevice()">
-                    {{this.addNew?'新增':'提交'}}
-                </el-button>
             </div>
             <el-tabs v-model="activeName">
                 <el-tab-pane label="基本信息" name="index">
-                    <div class="panel-heading">
-                        <!--<span class="title"><span class="name">{{device.name}}</span></span>-->
-                        <i :class="edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"
-                           @click="toggleEdit"
-                           style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>
-                    </div>
+                    <!--<div class="panel-heading">-->
+                        <!--&lt;!&ndash;<span class="title"><span class="name">{{device.name}}</span></span>&ndash;&gt;-->
+                        <!--<i :class="edit===true?'fa fa-floppy-o':'el-icon-edit-outline'"-->
+                           <!--@click="toggleEdit"-->
+                           <!--style="font-size: 28px; position: absolute; right: 31px; top: 0; cursor: pointer;"></i>-->
+                    <!--</div>-->
                     <div class="panel-body">
                         <ul>
                             <li>
@@ -107,6 +104,17 @@
                                 <div class="right" v-else="edit">{{device.frequency}}</div>
                             </li>
                         </ul>
+                    </div>
+                    <div style="text-align:center;">
+                        <el-button type="primary" style="margin:10px;" @click="$router.go(-1)">
+                            返回
+                        </el-button>
+                        <el-button type="primary" style="margin:10px;" @click="edit = true">
+                            编辑
+                        </el-button>
+                        <el-button type="primary" style="margin:10px 0;" @click="addOrUpdateDevice()">
+                            {{addNew?'提交':'保存'}}
+                        </el-button>
                     </div>
                 </el-tab-pane>
             </el-tabs>

@@ -225,6 +225,9 @@
                         <el-button type="primary" style="margin:10px;" @click="getBack()">
                             返回
                         </el-button>
+                        <el-button type="primary" style="margin:10px;" @click="edit = true">
+                            编辑
+                        </el-button>
                         <el-button type="primary" style="margin:10px 0;" @click="addOrUpdateLift()">
                             {{addNew?'提交':'保存'}}
                         </el-button>

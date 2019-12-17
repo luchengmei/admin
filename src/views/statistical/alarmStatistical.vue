@@ -355,6 +355,8 @@
                 list_params: {
                     "page": 1,
                     "size": 10,
+                    "start_date": this.$moment(new Date().getTime() - 3600 * 1000 * 24 * 15).format("YYYY-MM-DD"),
+                    "end_date": this.$moment().format("YYYY-MM-DD"),
                     "sort": {}
                 },
                 srcList: [],
@@ -378,19 +380,32 @@
         methods: {
             onClick(action) {
                 if (action === 'search') {
+                    this.list_params.start_date = this.faultSearch[0];
+                    this.list_params.end_date = this.faultSearch[1];
+                    if (this.chooseLift.length) {
+                        this.list_params.lift_ids = this.chooseLift
+                    }
                 }
                 if (action === 'reset') {
                     this.chooseLift = [];
                     this.faultSearch = this.initTime();
+                    this.list_params = {
+                        "page": 1,
+                        "size": 10,
+                        "start_date": this.$moment(new Date().getTime() - 3600 * 1000 * 24 * 15).format("YYYY-MM-DD"),
+                        "end_date": this.$moment().format("YYYY-MM-DD"),
+                        "sort": {}
+                    };
                 }
                 if (action === 'refresh') {
                 }
                 this.getFaultTimes()
                 this.getFaultDistribution()
                 this.getFaultOverview()
+                this.refresh = !this.refresh
             },
             init() {
-                this.faultSearch = this.initTime()
+                this.faultSearch = this.initTime();
                 this.$api_v3.post('/Lifts/listPage', {list_rows: 999999}).then((res) => {
                     if (res.code === 0) {
                         this.liftOptions = res.data.data
