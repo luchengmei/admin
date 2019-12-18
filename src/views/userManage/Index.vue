@@ -285,7 +285,7 @@
             resetPassword(row) {
                 let params = {
                     "id": row.id,
-                    "password": '12345678'
+                    "password": '123456'
                 };
                 this.$confirm('此操作将重置密码, 是否继续?', '提示', {
                     confirmButtonText: '确定',
