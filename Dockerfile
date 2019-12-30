@@ -16,7 +16,7 @@ EXPOSE 80
 # 运行 npm run build
 # 将 dist 目录所有文件拷贝到 nginx  的目录下
 # 删除工作目录的文件，尤其是 node_modules 以减少镜像体积
-RUN npm install && npm run build && cp -f dist/* /var/www/html && rm -rf /app
+RUN npm install && npm run build && cp -f -r dist/* /var/www/html && rm -rf /app
 
 # 启动nginx
 CMD [ "nginx","-g","daemon off;" ]
