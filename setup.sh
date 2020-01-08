@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 已弃用
 # 镜像版本
 image_version=`date +%Y%m%d%H%M`;
 # 关闭msd_admin容器
